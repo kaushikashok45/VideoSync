@@ -15,6 +15,14 @@ export default {
           "Segoe UI Symbol",
           "Noto Color Emoji",
         ],
+        yesteryear: [
+            'Yesteryear',
+            'cursive',
+        ],
+        overpass: [
+          'Overpass',
+          'monospace',
+        ],
       },
     },
   },
