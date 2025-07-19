@@ -1,8 +1,7 @@
 import { vitePlugin as remix } from "@remix-run/dev";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
-import {defineRoutes} from "@remix-run/dev/dist/config/routes";
-import {routes} from "@remix-run/dev/server-build";
+import * as fs from "node:fs";
 
 declare module "@remix-run/node" {
   interface Future {
@@ -23,7 +22,19 @@ export default defineConfig({
     }),
     tsconfigPaths(),
   ],
+  server:{
+    https: {
+      key: fs.readFileSync('./localhost+2-key.pem'),
+      cert: fs.readFileSync('./localhost+2.pem'),
+    },
+    proxy : {}
+  },
   define: {
     // global: {} workaround to make simple-peer work
+  },
+  resolve: {
+    alias: {
+      "simple-peer": "simple-peer/simplepeer.min.js",
+    },
   },
 });
