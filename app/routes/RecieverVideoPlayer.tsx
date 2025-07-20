@@ -12,6 +12,8 @@ export default function RecieverVideoPlayer() {
     const peerRef = useRef<SimplePeer.Instance | null>(null);
     const hostPeerId = useRef<string>('');
 
+
+
     useEffect(() => {
         const SOCKET_SERVER_URL = `${window.location.protocol}//localhost:3001`;
         const newSocket = io(SOCKET_SERVER_URL);
@@ -92,13 +94,37 @@ export default function RecieverVideoPlayer() {
             peer.on('error',(err)=>{
                 console.error('Peer-to-peer connection error : ',err);
             });
+
+            peerRef.current.on('data',(data)=>{
+                const stringData = data.toString('utf-8');
+                console.log('Peer data event fired.Data: ', stringData);
+                if(!videoRef.current?.paused && stringData === 'pause-playback'){
+                    videoRef.current?.pause();
+                }
+                else if(videoRef.current?.paused && stringData === 'resume-playback'){
+                    videoRef.current?.play();
+                }
+            });
         };
+
+        const emitResumePlaybackEvent = () => {
+            peerRef.current?.send('resume-playback');
+        };
+
+        const emitPausePlaybackEvent = () =>{
+            peerRef.current?.send('pause-playback');
+        }
+
+        videoRef.current?.addEventListener('pause',emitPausePlaybackEvent);
+        videoRef.current?.addEventListener('play',emitResumePlaybackEvent);
 
         return () => {
             console.log('Disconnecting from socket IO server');
             newSocket.disconnect();
             console.log('Destroying peer');
             peerRef.current?.destroy();
+            videoRef.current?.removeEventListener('pause',emitPausePlaybackEvent);
+            videoRef.current?.removeEventListener('play',emitResumePlaybackEvent);
         }
 
     },[]);

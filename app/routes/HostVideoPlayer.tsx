@@ -58,16 +58,29 @@ export default function HostVideoPlayer() {
                 }
 
 
-                const peer = createHostPeer(mediaStreamRef.current as MediaStream,socket,peerId);
+                const peer = createHostPeer(mediaStreamRef.current as MediaStream,socket,peerId,videoRef.current);
                 peerMap.set(peerId,peer);
             }
         }
+
+        const pausePlaybackForAllPeers = ()=>{
+            peerMap.forEach(peer=>peer.send('pause-playback'));
+        };
+
+        const resumePlaybackForAllPeers = ()=>{
+            peerMap.forEach(peer=>peer.send('resume-playback'));
+        };
+
+        videoRef.current?.addEventListener('pause',pausePlaybackForAllPeers);
+        videoRef.current?.addEventListener('play',resumePlaybackForAllPeers);
 
         return () => {
             console.log('Disconnecting from socket IO server');
             socket.disconnect();
             console.log('Destroying peers');
             peerMap.forEach(peer=>peer.destroy());
+            videoRef.current?.removeEventListener('pause',pausePlaybackForAllPeers);
+            videoRef.current?.removeEventListener('play',resumePlaybackForAllPeers);
         }
 
     },[]);

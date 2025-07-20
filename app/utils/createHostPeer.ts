@@ -1,7 +1,8 @@
 import SimplePeer from "simple-peer";
 import { Socket } from "socket.io-client";
 
-export default function createHostPeer(mediaStream: MediaStream, socket: Socket,peerId:string):SimplePeer.Instance {
+export default function createHostPeer(mediaStream: MediaStream, socket: Socket,peerId:string,videoElement:HTMLVideoElement):SimplePeer.Instance {
+
     const peer = new SimplePeer({
         initiator: true,
         trickle: false,
@@ -22,6 +23,17 @@ export default function createHostPeer(mediaStream: MediaStream, socket: Socket,
 
     peer.on('connect', () => {
         console.log('Connected to new peer');
+    });
+
+    peer.on('data',(data)=>{
+        const stringData = data.toString('utf-8');
+        console.log('Peer data event fired.Data: ', stringData);
+        if(!videoElement.paused && stringData === 'pause-playback'){
+            videoElement.pause();
+        }
+        else if(videoElement.paused && stringData === 'resume-playback'){
+            videoElement.play();
+        }
     });
 
     peer.on('close', () => {
