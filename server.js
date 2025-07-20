@@ -71,16 +71,28 @@ io.on('connection', socket => {
     socket.on('join-room',(roomId)=>{
         socket.join(roomId);
         console.log(`${socket.id} joined room ${roomId}`);
-        socket.to(roomId).emit('user-joined',`${socket.id} joined the party`);
+        socket.to(roomId).emit('user-joined',socket.id);
     });
 
     socket.on('signal',(data)=>{
         console.log(`Received signal from ${socket.id} : `,data);
-        const room = Array.from(socket.rooms).find(r=>r !== socket.id);
-        if(room){
-            socket.to(room).emit('signal', data);
-            console.log(`signal from socket id : ${socket.id} emitted to room ${room}`);
+        const signalData = {
+            peerId: socket.id,
+            signalData: data.signalData
+        };
+        let logMsg = '';
+        if(data.to){
+            io.to(data.to).emit('signal', signalData);
+            logMsg = `signal from socket id : ${socket.id} emitted to peer: ${socket.id}`;
         }
+        else{
+            const room = Array.from(socket.rooms).find(r=>r !== socket.id);
+            if(room){
+                socket.to(room).emit('signal', signalData);
+                logMsg = `signal from socket id : ${socket.id} emitted to room ${room}`;
+            }
+        }
+        console.log(logMsg);
     });
 
     socket.on('disconnect', () => {
