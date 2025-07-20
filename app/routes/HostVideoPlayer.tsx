@@ -1,18 +1,17 @@
 import { useRef, useEffect } from 'react';
 import {  useLocation } from "@remix-run/react";
-import SimplePeer from 'simple-peer';
+import SimplePeer,{ SignalData } from 'simple-peer';
 import { io } from 'socket.io-client';
 
 import VideoCanvas from './VideoCanvas';
 import createHostPeer from "~/utils/createHostPeer";
-
-// const SOCKET_SERVER_URL = "http://localhost:3001";
+import { peerSignal } from "~/utils/peerSignalContract";
 
 export default function HostVideoPlayer() {
     const location = useLocation();
     const passedState = location.state as {videoURL: string};
     const videoRef = useRef<HTMLVideoElement | null>(null);
-    const peerRef = useRef<SimplePeer.Instance | null>(null);
+    const peerMap = new Map<string,SimplePeer.Instance>();
     const mediaStreamRef = useRef<MediaStream|null>(null);
 
     useEffect(() => {
@@ -24,15 +23,15 @@ export default function HostVideoPlayer() {
             socket.emit('join-room','room142');
         });
 
-        socket.on('user-joined',(msg)=>{
-            console.log(`${msg}.Setting up P2P connection...`);
-            startStreaming();
+        socket.on('user-joined',(peerId:string)=>{
+            console.log(`${peerId} joined the room.Setting up P2P connection...`);
+            startStreaming(peerId);
         });
 
-        socket.on('signal',(data)=>{
+        socket.on('signal',(data:peerSignal)=>{
             console.log('Received signal from socket IO server',data);
-            if(peerRef.current){
-                peerRef.current.signal(data);
+            if(peerMap.has(data.peerId)) {
+                peerMap.get(data.peerId)?.signal(data.signalData);
             }
         });
 
@@ -44,7 +43,7 @@ export default function HostVideoPlayer() {
             console.error('Error connecting to socket IO server',err.message);
         });
 
-        const startStreaming = ()=>{
+        const startStreaming = (peerId:string)=>{
             if(!socket?.connected){
                 console.error('Not connected to socket IO server');
                 return;
@@ -52,21 +51,23 @@ export default function HostVideoPlayer() {
             console.log(`Streaming starts...`);
 
             if(videoRef.current) {
-                // @ts-ignore
+
                 if(mediaStreamRef.current === null){
-                    mediaStreamRef.current = videoRef.current.captureStream();
+                    // @ts-ignore
+                    mediaStreamRef.current = videoRef.current.captureStream(); //TODO:This works only in Chrome.Develop a polyfill for other unsupported browsers.
                 }
 
 
-                const peer = createHostPeer(mediaStreamRef.current as MediaStream,socket)
-                peerRef.current = peer;
+                const peer = createHostPeer(mediaStreamRef.current as MediaStream,socket,peerId);
+                peerMap.set(peerId,peer);
             }
         }
 
         return () => {
             console.log('Disconnecting from socket IO server');
             socket.disconnect();
-            peerRef.current?.destroy();
+            console.log('Destroying peers');
+            peerMap.forEach(peer=>peer.destroy());
         }
 
     },[]);

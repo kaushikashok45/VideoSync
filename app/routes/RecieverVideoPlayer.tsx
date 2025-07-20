@@ -3,13 +3,14 @@ import  SimplePeer from 'simple-peer';
 import { io, Socket } from 'socket.io-client';
 
 import VideoCanvas from './VideoCanvas';
-
+import { peerSignal } from "~/utils/peerSignalContract";
 
 export default function RecieverVideoPlayer() {
 
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const [socket, setSocket] = useState<Socket|null>(null);
     const peerRef = useRef<SimplePeer.Instance | null>(null);
+    const hostPeerId = useRef<string>('');
 
     useEffect(() => {
         const SOCKET_SERVER_URL = `${window.location.protocol}//localhost:3001`;
@@ -26,10 +27,11 @@ export default function RecieverVideoPlayer() {
             console.log('Disconnected from socket IO server');
         });
 
-        newSocket.on('signal',(data)=>{
+        newSocket.on('signal',(data:peerSignal)=>{
             console.log('Received signal from socket IO server',data);
+            hostPeerId.current = data.peerId;
             if(peerRef.current){
-                peerRef.current.signal(data);
+                peerRef.current.signal(data.signalData);
             }
         });
 
@@ -50,9 +52,13 @@ export default function RecieverVideoPlayer() {
             peerRef.current = peer;
 
             peer.on('signal',(data)=>{
+                const signalData = {
+                    signalData: data,
+                    to:hostPeerId.current
+                };
                 if(newSocket?.connected){
                     console.log('Signaling to socket IO server');
-                    newSocket.emit('signal', data);
+                    newSocket.emit('signal', signalData);
                 }
             });
 
@@ -91,6 +97,8 @@ export default function RecieverVideoPlayer() {
         return () => {
             console.log('Disconnecting from socket IO server');
             newSocket.disconnect();
+            console.log('Destroying peer');
+            peerRef.current?.destroy();
         }
 
     },[]);

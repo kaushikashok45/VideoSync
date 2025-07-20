@@ -1,7 +1,7 @@
 import SimplePeer from "simple-peer";
 import { Socket } from "socket.io-client";
 
-export default function createHostPeer(mediaStream: MediaStream, socket: Socket):SimplePeer.Instance {
+export default function createHostPeer(mediaStream: MediaStream, socket: Socket,peerId:string):SimplePeer.Instance {
     const peer = new SimplePeer({
         initiator: true,
         trickle: false,
@@ -9,9 +9,14 @@ export default function createHostPeer(mediaStream: MediaStream, socket: Socket)
     });
 
     peer.on('signal', (data) => {
+        // peer.emit('signal', data);
+        const signalData = {
+            signalData: data,
+            to:peerId
+        };
         if (socket?.connected) {
-            console.log('Signaling to socket IO server');
-            socket.emit('signal', data);
+            console.log('Signaling to socket IO server',signalData);
+            socket.emit('signal', signalData);
         }
     });
 
