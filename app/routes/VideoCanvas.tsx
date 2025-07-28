@@ -94,6 +94,8 @@ const VideoPlayer = forwardRef(({videoURL}: videoURLProps,ref) => {
     }
 
     const setVolumeLevel = (e:React.ChangeEvent<HTMLInputElement>)=>{
+        e.preventDefault();
+        e.stopPropagation();
         const audioLevel = parseFloat(e.target.value)
         setAudioLevel(audioLevel);
         if(videoRef.current){
@@ -357,7 +359,7 @@ const VideoPlayer = forwardRef(({videoURL}: videoURLProps,ref) => {
                         <button className="controlButton mr-auto" onClick={toggleMutedState}>
                             <SpeakerWaveIcon className="h-6 w-6 text-white" />
                         </button>
-                        <input type='range' min="0" max="1" step="0.01" value={audioLevel} className={`volume-slider accent-red-600 transition-all duration-500 overflow-hidden cursor-pointer ${canShowAudioSlider?'opacity-100' : 'opacity-0 pointer-events-none h-0 w-0'}`} id="volumeSlider" onChange={setVolumeLevel}></input>
+                        <input type='range' min="0" max="1" step="0.01" value={audioLevel} className={`volume-slider accent-red-600 transition-all duration-500 overflow-hidden cursor-pointer ${canShowAudioSlider?'opacity-100' : 'opacity-0 pointer-events-none h-0 w-0'}`} id="volumeSlider" onClick={e => e.stopPropagation()} onChange={setVolumeLevel}></input>
                     </div>
                 )}
             </div>
