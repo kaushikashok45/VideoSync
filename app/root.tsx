@@ -9,7 +9,7 @@ import type { LinksFunction } from "@remix-run/node";
 import fontsUrl from './styles/fonts.css?url';
 import styles from "./tailwind.css?url";
 import Header from "./routes/Header";
-
+import { Toaster } from 'sonner'
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet",
@@ -32,6 +32,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body className={`font-overpass`}>
+        <Toaster position="top-right" theme="dark" richColors closeButton></Toaster>
         <Header />
         <div id='content-container' className={`flex items-center justify-center h-screen w-screen`}>
           {children}

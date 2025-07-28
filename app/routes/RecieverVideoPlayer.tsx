@@ -1,9 +1,12 @@
 import { useRef, useState, useEffect } from 'react';
 import  SimplePeer from 'simple-peer';
 import { io, Socket } from 'socket.io-client';
+import {toast} from "sonner";
 
 import VideoCanvas from './VideoCanvas';
-import { peerSignal } from "~/utils/peerSignalContract";
+import {peerDataChannelObject, peerSignal, peerVideoMeta} from "~/utils/peerSignalContract";
+import { deHydrateJSONString } from "~/utils/jsonUtils";
+
 
 export default function RecieverVideoPlayer() {
 
@@ -37,9 +40,8 @@ export default function RecieverVideoPlayer() {
             }
         });
 
-        newSocket.on('video event',(msg:string)=> {
-            console.log('video event message received : ', msg);
-
+        newSocket.on('user-joined',(peerId:string)=>{
+            toast.success(`${peerId} joined the party`);
         });
 
         newSocket.on('connect_error',(err)=>{
@@ -80,7 +82,9 @@ export default function RecieverVideoPlayer() {
                     console.log('Audio tracks:', stream.getAudioTracks());
                     if(videoRef.current){
                         console.log('Setting remote stream to video player');
-                        videoRef.current.srcObject = stream;
+                        videoRef.current.setSrcObject(stream);
+                        videoRef.current?.addEventListener('pause',emitPausePlaybackEvent);
+                        videoRef.current?.addEventListener('play',emitResumePlaybackEvent);
                     }
                     // Now safe to display video
                 });
@@ -98,25 +102,47 @@ export default function RecieverVideoPlayer() {
             peerRef.current.on('data',(data)=>{
                 const stringData = data.toString('utf-8');
                 console.log('Peer data event fired.Data: ', stringData);
-                if(!videoRef.current?.paused && stringData === 'pause-playback'){
+                const dataObject = deHydrateJSONString(stringData) as peerDataChannelObject;
+                if(Object.keys(dataObject).length === 0) return;
+
+                if(dataObject.action === 'pause-playback'){
                     videoRef.current?.pause();
+                    videoRef.current?.pauseRemoteStream();
                 }
-                else if(videoRef.current?.paused && stringData === 'resume-playback'){
-                    videoRef.current?.play();
+                else if(dataObject.action === 'resume-playback'){
+                    if(videoRef.current?.isPaused()){
+                        videoRef.current?.play();
+                    }
+                    videoRef.current?.resumeRemoteStream();
+                    videoRef.current?.setVideoMeta(dataObject.data);
+                }
+                else if(dataObject.action === 'set-video-meta'){
+                    const videoMeta:peerVideoMeta = dataObject.data;
+                    videoRef.current?.setVideoMeta(videoMeta);
                 }
             });
         };
 
         const emitResumePlaybackEvent = () => {
-            peerRef.current?.send('resume-playback');
+            const dataObject:peerDataChannelObject = {
+                action:'resume-playback',
+                peerId:'Will be worked on',
+                data:{}
+            };
+            const dataString = JSON.stringify(dataObject);
+            peerRef.current?.send(dataString);
         };
 
         const emitPausePlaybackEvent = () =>{
-            peerRef.current?.send('pause-playback');
+            const dataObject:peerDataChannelObject = {
+                action:'pause-playback',
+                peerId:'Will be worked on',
+                data:{}
+            };
+            const dataString = JSON.stringify(dataObject);
+            peerRef.current?.send(dataString);
         }
 
-        videoRef.current?.addEventListener('pause',emitPausePlaybackEvent);
-        videoRef.current?.addEventListener('play',emitResumePlaybackEvent);
 
         return () => {
             console.log('Disconnecting from socket IO server');
@@ -133,7 +159,7 @@ export default function RecieverVideoPlayer() {
 
     return (
         <>
-            <VideoCanvas videoURL={''} ref={videoRef}/>
+            <VideoCanvas videoURL={''}  ref={videoRef}/>
         </>
     );
 }

@@ -1,8 +1,6 @@
 import SimplePeer from "simple-peer";
 import { Socket } from "socket.io-client";
-import  { toast } from 'sonner';
-import {peerDataChannelObject, peerVideoMeta} from "~/utils/peerSignalContract";
-import {deHydrateJSONString} from "~/utils/jsonUtils";
+
 export default function createHostPeer(mediaStream: MediaStream, socket: Socket,peerId:string,videoElement:HTMLVideoElement):SimplePeer.Instance {
 
     const peer = new SimplePeer({
@@ -25,36 +23,13 @@ export default function createHostPeer(mediaStream: MediaStream, socket: Socket,
 
     peer.on('connect', () => {
         console.log('Connected to new peer');
-        const videoMeta:peerVideoMeta = {
-            duration: videoElement.duration,
-            currentTime: videoElement.currentTime,
-        };
-        const dataObject:peerDataChannelObject = {
-            action: 'set-video-meta',
-            peerId: 'Will be worked on',
-            data: videoMeta
-        };
-        setTimeout(()=>{
-            peer.send(JSON.stringify(dataObject))
-        },1000);
     });
 
     peer.on('data',(data)=>{
         const stringData = data.toString('utf-8');
-        const dataObject = deHydrateJSONString(stringData) as peerDataChannelObject;
-        if(Object.keys(dataObject).length === 0) return;
         console.log('Peer data event fired.Data: ', stringData);
-        let toastMsg = '';
-        if(!videoElement.paused && dataObject.action === 'pause-playback'){
+        if(stringData === 'pause-playback'){
             videoElement.pause();
-            toastMsg = 'paused playback';
-        }
-        else if(videoElement.paused && dataObject.action === 'resume-playback'){
-            videoElement.play();
-            toastMsg = 'resumed playback';
-        }
-        if(toastMsg !== ''){
-            toast(toastMsg);
         }
     });
 

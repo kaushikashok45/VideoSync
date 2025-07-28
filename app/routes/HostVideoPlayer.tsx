@@ -2,10 +2,12 @@ import { useRef, useEffect } from 'react';
 import {  useLocation } from "@remix-run/react";
 import SimplePeer,{ SignalData } from 'simple-peer';
 import { io } from 'socket.io-client';
+import {peerDataChannelObject, peerSignal} from "~/utils/peerSignalContract";
+import  { toast } from 'sonner';
 
 import VideoCanvas from './VideoCanvas';
 import createHostPeer from "~/utils/createHostPeer";
-import { peerSignal } from "~/utils/peerSignalContract";
+
 
 export default function HostVideoPlayer() {
     const location = useLocation();
@@ -25,6 +27,7 @@ export default function HostVideoPlayer() {
 
         socket.on('user-joined',(peerId:string)=>{
             console.log(`${peerId} joined the room.Setting up P2P connection...`);
+            toast.success(`${peerId} joined the party`);
             startStreaming(peerId);
         });
 
@@ -58,17 +61,32 @@ export default function HostVideoPlayer() {
                 }
 
 
-                const peer = createHostPeer(mediaStreamRef.current as MediaStream,socket,peerId,videoRef.current);
+                const peer = createHostPeer(mediaStreamRef.current as MediaStream,socket,peerId,videoRef.current.getHTMLElement(),videoRef);
                 peerMap.set(peerId,peer);
             }
         }
 
         const pausePlaybackForAllPeers = ()=>{
-            peerMap.forEach(peer=>peer.send('pause-playback'));
+            const dataObject:peerDataChannelObject = {
+                action:'pause-playback',
+                peerId:'Will be worked on',
+                data:{}
+            };
+            const dataString = JSON.stringify(dataObject);
+            peerMap.forEach(peer=>peer.send(dataString));
         };
 
         const resumePlaybackForAllPeers = ()=>{
-            peerMap.forEach(peer=>peer.send('resume-playback'));
+            const dataObject:peerDataChannelObject = {
+                action:'resume-playback',
+                peerId:'Will be worked on',
+                data:{
+                    duration:videoRef.current?.getDuration(),
+                    currentTime:videoRef.current?.getCurrentTime()
+                }
+            };
+            const dataString = JSON.stringify(dataObject);
+            peerMap.forEach(peer=>peer.send(dataString));
         };
 
         videoRef.current?.addEventListener('pause',pausePlaybackForAllPeers);
