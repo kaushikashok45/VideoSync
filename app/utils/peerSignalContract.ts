@@ -13,5 +13,12 @@ export type peerVideoMeta = {
 export type peerDataChannelObject = {
     action: string;
     peerId: string;
+    userName: string;
     data: any;
 }
+
+export type videoPlaybackControlMeta = {
+    userName: string;
+    peerId: string;
+    target:HTMLVideoElement;
+};

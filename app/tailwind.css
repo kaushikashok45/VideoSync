@@ -9,4 +9,12 @@ body {
   @media (prefers-color-scheme: dark) {
     color-scheme: dark;
   }
+
+  ::selection {
+    background:red
+  }
+
+  :focus {
+    background:red
+  }
 }

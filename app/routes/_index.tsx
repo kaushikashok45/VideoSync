@@ -1,19 +1,40 @@
-import { Link } from 'react-router-dom';
+import TextField from "~/routes/TextField";
+import { useNavigate } from "@remix-run/react";
+import { useContext } from "react";
+import UserNameContext from "~/routes/UserNameContext";
+import { useLocation } from "react-router-dom";
 
-import Button from './Button';
+export default function _Index() {
+  const navigate = useNavigate();
+  const { updateUserName } = useContext(UserNameContext);
+  const location = useLocation();
 
-export default function Index() {
-    return (
-        <div id='setup-screen' className={`flex flex-col gap-5`}>
-            <h2>What would you like to do?</h2>
-            <div id='party-options' className={`flex flex-col gap-8 items-center md:flex-row md:justify-between`}>
-                <Link to={`/UploadFile`}>
-                    <Button buttonLabel={'Host party'} buttonClass={'primary'}></Button>
-                </Link>
-                <Link to={`/RecieverVideoPlayer`}>
-                    <Button buttonLabel={'Join party'} buttonClass={'secondary'}></Button>
-                </Link>
-            </div>
-        </div>
-    );
+  const params = new URLSearchParams(location.search);
+  let inferredRoomId = params.get("roomId");
+  if (!inferredRoomId) inferredRoomId = "videoSync";
+
+  const handleSubmit = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    event.stopPropagation();
+    const eventTarget = event.target as HTMLInputElement;
+    updateUserName(eventTarget.value);
+    navigate(`/${inferredRoomId}/SetupScreen`);
+  };
+
+  return (
+    <div className={`flex flex-col justify-center gap-3 h-full`}>
+      <h2 className={`text-3xl`}>
+        Welcome to{" "}
+        <span className={`font-yesteryear text-4xl text-red-600`}>
+          VideoSync
+        </span>
+        .How should we call you?
+      </h2>
+      <TextField
+        id={"username-field"}
+        placeholder="Type your preferred username here...."
+        isMandatory={true}
+        onSubmit={handleSubmit}
+      ></TextField>
+    </div>
+  );
 }

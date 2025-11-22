@@ -1,18 +1,17 @@
 import SimplePeer from "simple-peer";
 import { Socket } from "socket.io-client";
-import  { toast } from 'sonner';
-import {peerDataChannelObject, peerVideoMeta} from "~/utils/peerSignalContract";
+import {peerDataChannelObject, peerVideoMeta, videoPlaybackControlMeta} from "~/utils/peerSignalContract";
 import {deHydrateJSONString} from "~/utils/jsonUtils";
-export default function createHostPeer(mediaStream: MediaStream, socket: Socket,peerId:string,videoElement:HTMLVideoElement):SimplePeer.Instance {
+import {MutableRefObject} from "react";
+export default function createHostPeer(mediaStream: MediaStream, socket: Socket,peerId:string,videoRef:MutableRefObject<any>,hostUserName:string,hostPeerId:string):SimplePeer.Instance {
 
     const peer = new SimplePeer({
         initiator: true,
         trickle: false,
         stream: mediaStream
     });
-
+    const videoElement = videoRef.current.getHTMLElement();
     peer.on('signal', (data) => {
-        // peer.emit('signal', data);
         const signalData = {
             signalData: data,
             to:peerId
@@ -31,7 +30,8 @@ export default function createHostPeer(mediaStream: MediaStream, socket: Socket,
         };
         const dataObject:peerDataChannelObject = {
             action: 'set-video-meta',
-            peerId: 'Will be worked on',
+            peerId: hostPeerId,
+            userName:hostUserName,
             data: videoMeta
         };
         setTimeout(()=>{
@@ -43,19 +43,25 @@ export default function createHostPeer(mediaStream: MediaStream, socket: Socket,
         const stringData = data.toString('utf-8');
         const dataObject = deHydrateJSONString(stringData) as peerDataChannelObject;
         if(Object.keys(dataObject).length === 0) return;
+        let eventName = '';
+        let controlEventName = '';
+        const payload:videoPlaybackControlMeta = {
+            userName: dataObject.userName,
+            peerId: dataObject.peerId,
+            target:videoElement
+        };
         console.log('Peer data event fired.Data: ', stringData);
-        let toastMsg = '';
         if(!videoElement.paused && dataObject.action === 'pause-playback'){
-            videoElement.pause();
-            toastMsg = 'paused playback';
+            eventName = 'pause-video';
+            controlEventName = 'pause-video-for-all-peers';
         }
         else if(videoElement.paused && dataObject.action === 'resume-playback'){
-            videoElement.play();
-            toastMsg = 'resumed playback';
+            eventName = 'play-video';
+            controlEventName = 'play-video-for-all-peers';
         }
-        if(toastMsg !== ''){
-            toast(toastMsg);
-        }
+        // @ts-ignore
+        videoRef.current.triggerEvent(eventName,payload);
+        videoRef.current.triggerEvent(controlEventName,payload);
     });
 
     peer.on('close', () => {
