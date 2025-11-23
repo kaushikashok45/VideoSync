@@ -17,7 +17,10 @@ type socketParams = {
 };
 
 export function createSocket(params: socketParams): Socket {
-  const SOCKET_SERVER_URL = `${window.location.protocol}//localhost:3001`;
+  const SOCKET_SERVER_URL =
+    window.location.hostname === "localhost"
+      ? `${window.location.protocol}//localhost:3001`
+      : window.location.origin;
   const socket = io(SOCKET_SERVER_URL);
 
   socket.on("connect", () => {
