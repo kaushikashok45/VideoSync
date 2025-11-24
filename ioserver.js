@@ -9,8 +9,8 @@ const IOSERVERPORT = process.env.PORT || 3001;
 const app = express();
 let IOServer;
 if (process.env.NODE_ENV === "production") {
-  const key = readFileSync("./localhost+2-key.pem");
-  const cert = readFileSync("./localhost+2.pem");
+  const key = readFileSync("./localhost.key");
+  const cert = readFileSync("./localhost.pem");
   IOServer = https.createServer({ key, cert }, app);
 } else {
   IOServer = http.createServer(app);
@@ -28,7 +28,7 @@ const io = new Server(IOServer, {
 app.use(
   cors({
     origin: origin,
-  })
+  }),
 );
 
 app.get("/", (req, res) => {

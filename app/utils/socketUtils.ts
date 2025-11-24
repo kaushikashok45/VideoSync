@@ -21,7 +21,14 @@ export function createSocket(params: socketParams): Socket {
     window.location.hostname === "localhost"
       ? `${window.location.protocol}//localhost:3001`
       : window.location.origin;
-  const socket = io(SOCKET_SERVER_URL);
+  const socket = io(SOCKET_SERVER_URL, {
+    path: "/socket.io",
+    transports: ["websocket", "polling"],
+    autoConnect: true,
+    reconnection: true,
+    reconnectionDelay: 1000,
+    reconnectionAttempts: 5,
+  });
 
   socket.on("connect", () => {
     console.log("Connected to socket server");

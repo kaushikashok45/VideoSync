@@ -33,9 +33,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <RoomIdContextProvider>
             <Toaster
               position="top-right"
-              theme="dark"
               richColors
               closeButton
+              theme="system"
             ></Toaster>
             <Header />
             <div

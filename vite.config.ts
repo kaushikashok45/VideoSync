@@ -22,12 +22,12 @@ export default defineConfig({
     }),
     tsconfigPaths(),
   ],
-  server:{
+  server: {
     https: {
-      key: fs.readFileSync('./localhost+2-key.pem'),
-      cert: fs.readFileSync('./localhost+2.pem'),
+      key: fs.readFileSync("./localhost.key"),
+      cert: fs.readFileSync("./localhost.pem"),
     },
-    proxy : {}
+    proxy: {},
   },
   define: {
     // global: {} workaround to make simple-peer work

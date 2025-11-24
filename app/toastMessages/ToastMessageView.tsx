@@ -10,7 +10,7 @@ export default function ToastMessageView({
   icon,
 }: toastMessageMeta) {
   return (
-    <div className={`font-overpass`}>
+    <div className={`font-overpass `}>
       <span
         className={
           "text-2xl p-2 border rounded-full border-gray-600 bg-white text-black inline-flex justify-center items-center"

@@ -15,16 +15,16 @@ const APPSERVERPORT = process.env.PORT || 5173;
 app.use(express.static("./build/client"));
 
 app.all(
-  "*",
+  "/{*splat}",
   createRequestHandler({
     build: build,
     mode,
-  })
+  }),
 );
 let server;
 if (process.env.NODE_ENV === "production") {
-  const key = readFileSync("./localhost+2-key.pem");
-  const cert = readFileSync("./localhost+2.pem");
+  const key = readFileSync("./localhost.key");
+  const cert = readFileSync("./localhost.pem");
   server = https.createServer({ key, cert }, app);
 } else {
   server = http.createServer(app);
@@ -34,7 +34,7 @@ server.listen(APPSERVERPORT, () => {
   console.log(
     `Remix HTTPS server listening on ${
       process.env.NODE_ENV === "production" ? "https" : "http"
-    }://localhost:${APPSERVERPORT}...`
+    }://localhost:${APPSERVERPORT}...`,
   );
 });
 
@@ -43,8 +43,8 @@ server.listen(APPSERVERPORT, () => {
 const IOSERVERPORT = process.env.PORT || 3001;
 let IOServer;
 if (process.env.NODE_ENV === "production") {
-  const key = readFileSync("./localhost+2-key.pem");
-  const cert = readFileSync("./localhost+2.pem");
+  const key = readFileSync("./localhost.key");
+  const cert = readFileSync("./localhost.pem");
   IOServer = https.createServer({ key, cert }, app);
 } else {
   IOServer = http.createServer(app);
@@ -66,7 +66,7 @@ const io = new Server(IOServer, {
 app.use(
   cors({
     origin: allowedOrigins,
-  })
+  }),
 );
 
 app.get("/", (req, res) => {

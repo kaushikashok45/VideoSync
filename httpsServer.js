@@ -2,7 +2,7 @@ import * as fs from "node:fs"; // Use import * as fs for consistency
 import * as https from "node:https"; // Use import * as https for consistency
 import express from "express";
 import { createRequestHandler } from "@remix-run/express"; // Import the Remix request handler
-import {Server} from 'socket.io';
+import { Server } from "socket.io";
 import * as http from "node:http";
 
 const app = express();
@@ -40,80 +40,85 @@ const port = process.env.PORT || 5174;
 app.use(express.static("public/build", { maxAge: "1h" })); // Serve public assets
 
 app.all(
-    "*",
-    IS_DEVELOPMENT
-        ? (req, res, next) => {
-            // In development, Remix usually handles its own server and build refresh.
-            // If you're explicitly using this `server.js` for development with `remix.config.js`
-            // pointing to it, you'd usually pass a dynamic `build` function.
-            // For simplicity and to fix the 404, we'll assume `build` is ready.
-            // However, for hot reloading, Remix's built-in dev server is better.
+  "*",
+  IS_DEVELOPMENT
+    ? (req, res, next) => {
+        // In development, Remix usually handles its own server and build refresh.
+        // If you're explicitly using this `server.js` for development with `remix.config.js`
+        // pointing to it, you'd usually pass a dynamic `build` function.
+        // For simplicity and to fix the 404, we'll assume `build` is ready.
+        // However, for hot reloading, Remix's built-in dev server is better.
 
-            // For a custom dev server using Remix's dev features, you'd typically do:
-            // import { createDevRequestHandler } from "@remix-run/dev/server"; // pseudo code, check Remix docs
-            // createDevRequestHandler({ build, mode: "development" })(req, res, next);
-            // BUT THE `build` IS NOT STATIC IN DEV!
+        // For a custom dev server using Remix's dev features, you'd typically do:
+        // import { createDevRequestHandler } from "@remix-run/dev/server"; // pseudo code, check Remix docs
+        // createDevRequestHandler({ build, mode: "development" })(req, res, next);
+        // BUT THE `build` IS NOT STATIC IN DEV!
 
-            // For now, let's assume `remix build` has run, or you're connecting to Remix's internal dev logic
-            // This setup is usually for *production* where `build` is static.
-            // If you're using this for DEV, you might need a different approach entirely for HMR.
+        // For now, let's assume `remix build` has run, or you're connecting to Remix's internal dev logic
+        // This setup is usually for *production* where `build` is static.
+        // If you're using this for DEV, you might need a different approach entirely for HMR.
 
-            // *************** CRITICAL FIX ***************
-            // This is the core Remix integration.
-            // It imports the server-side build of your Remix app.
-            import("./build/server/index.js").then((build) => { // Dynamically import build
-                createRequestHandler({
-                    build: build,
-                    mode: process.env.NODE_ENV,
-                })(req, res, next);
-            }).catch(next); // Catch import errors
-        }
-        : createRequestHandler({
-            // In production, the build is static
-            build: await import("./build/server/index.js"), // Synchronous import for prod (only runs once)
-            mode: process.env.NODE_ENV,
-        })
+        // *************** CRITICAL FIX ***************
+        // This is the core Remix integration.
+        // It imports the server-side build of your Remix app.
+        import("./build/server/index.js")
+          .then((build) => {
+            // Dynamically import build
+            createRequestHandler({
+              build: build,
+              mode: process.env.NODE_ENV,
+            })(req, res, next);
+          })
+          .catch(next); // Catch import errors
+      }
+    : createRequestHandler({
+        // In production, the build is static
+        build: await import("./build/server/index.js"), // Synchronous import for prod (only runs once)
+        mode: process.env.NODE_ENV,
+      }),
 );
 
 // Error handling (optional, but good practice)
 app.use((err, req, res, next) => {
-    console.error(err);
-    res.status(500).send("Something broke!");
+  console.error(err);
+  res.status(500).send("Something broke!");
 });
 
 const httpsServer = https.createServer(
-    {
-        key: fs.readFileSync("./localhost+2-key.pem"),
-        cert: fs.readFileSync("./localhost+2.pem"),
-    },
-    app
+  {
+    key: fs.readFileSync("./localhost.key"),
+    cert: fs.readFileSync("./localhost.pem"),
+  },
+  app,
 );
 
 httpsServer.listen(port, () => {
-    console.log(`✅ Express server listening on ${IS_DEVELOPMENT ? 'https' : 'http'}://localhost:${port}`);
-    console.log(`Remix App Mode: ${process.env.NODE_ENV}`);
+  console.log(
+    `✅ Express server listening on ${IS_DEVELOPMENT ? "https" : "http"}://localhost:${port}`,
+  );
+  console.log(`Remix App Mode: ${process.env.NODE_ENV}`);
 });
 
 const socketIoHttpServer = http.createServer();
-const ioServer = new Server(socketIoHttpServer,{
-    cors:{
-        origin:"https://localhost:5174",
-        methods: ["GET", "POST"]
-    }
+const ioServer = new Server(socketIoHttpServer, {
+  cors: {
+    origin: "https://localhost:5174",
+    methods: ["GET", "POST"],
+  },
 });
 
 const SOCKET_PORT = 3001;
 ioServer.on("connection", (socket) => {
-    console.log(`A user connected on ${socket.id}`);
-    socket.on('signal',(message) => {
-        console.log(`signal from client: ${message}`);
-        ioServer.to(message.to).emit('signal', { signal: message.signal });
-    });
-    socket.on('disconnect', () => {
-        console.log(`User Disconnected from ${socket.id}`);
-    })
+  console.log(`A user connected on ${socket.id}`);
+  socket.on("signal", (message) => {
+    console.log(`signal from client: ${message}`);
+    ioServer.to(message.to).emit("signal", { signal: message.signal });
+  });
+  socket.on("disconnect", () => {
+    console.log(`User Disconnected from ${socket.id}`);
+  });
 });
 
 socketIoHttpServer.listen(SOCKET_PORT, () => {
-    console.log(`Socket.IO server listening on port ${SOCKET_PORT}`);
-})
+  console.log(`Socket.IO server listening on port ${SOCKET_PORT}`);
+});

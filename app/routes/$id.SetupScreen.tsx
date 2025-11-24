@@ -1,10 +1,10 @@
-import { Link } from "react-router-dom";
+import { Link } from "@remix-run/react";
 
 import Button from "./Button";
 import UserNameContext from "~/routes/UserNameContext";
 import { useContext } from "react";
 import { nanoid } from "nanoid";
-import { useLocation } from "react-router-dom";
+import { useLocation } from "@remix-run/react";
 import RoomIdContext from "./RoomIdContext";
 
 const roomId = nanoid();

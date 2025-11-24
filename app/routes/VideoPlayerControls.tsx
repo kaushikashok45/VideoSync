@@ -17,11 +17,14 @@ type VideoPlayerControlsProps = {
 
 const formatTime = (seconds: number): string => {
   const hours = Math.floor(seconds / 3600);
+  const formattedHours = hours.toString().padStart(2, "0");
   const mins = Math.floor((seconds % 3600) / 60);
+  const formattedMins = mins.toString().padStart(2, "0");
   const secs = Math.floor(seconds % 60);
-  return `${hours > 0 ? hours + ":" : ""}${mins}:${secs
-    .toString()
-    .padStart(2, "0")}`;
+  const formattedSecs = secs.toString().padStart(2, "0");
+  return `${
+    hours > 0 ? formattedHours + ":" : ""
+  }${formattedMins}:${formattedSecs.toString().padStart(2, "0")}`;
 };
 
 export function VideoPlayerControls({
@@ -129,13 +132,13 @@ export function VideoPlayerControls({
   return (
     <div
       id="controls"
-      className={`flex max-w-full absolute w-full bottom-9 px-2 flex-col gap-7 ${
+      className={`flex max-w-full relative w-full bottom-[6em] px-2 flex-col gap-7 ${
         isControlsVisible ? "opacity-100" : "opacity-0"
       }`}
     >
       <div id="progress-seeker-wrapper">
         <div
-          className={`h-2 w-full bg-gray-100 focus:bg-gray-100  rounded cursor-pointer relative`}
+          className={`h-2 w-full bg-slate-200 dark:bg-gray-100 dark:focus:bg-gray-100  rounded cursor-pointer relative`}
           onClick={handleProgressClick}
           role="progressbar"
           tabIndex={0}
@@ -162,7 +165,7 @@ export function VideoPlayerControls({
           <button className="h-10 w-10 text-white rounded-full bg-red-600 p-2 flex justify-center items-center">
             <ForwardIcon></ForwardIcon>
           </button>
-          <div className="self-center font-extrabold">
+          <div className="self-center font-extrabold text-white">
             <p>
               {formatTime(currentTime)} / {formatTime(duration)}
             </p>

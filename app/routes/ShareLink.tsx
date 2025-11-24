@@ -58,7 +58,7 @@ function Link() {
 
   return (
     <div className="flex w-full items-center justify-center">
-      <p className="bg-black p-1 max-w-72 text-nowrap text-ellipsis overflow-hidden">
+      <p className="bg-white dark:bg-black p-1 max-w-72 text-nowrap text-ellipsis overflow-hidden">
         {shareLink}
       </p>
       <button className="p-1 h-full" onClick={handleCopyToClipBoard}>

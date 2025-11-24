@@ -84,7 +84,7 @@ export default function Popover({
 
   return (
     <div
-      className={`absolute bg-gray-800 p-3 rounded-lg shadow-lg bottom-full left-1/2 -translate-x-1/2 mb-2 transition-opacity duration-200 ${
+      className={`absolute bg-slate-200 dark:bg-gray-800 p-3 rounded-lg shadow-lg bottom-full left-1/2 -translate-x-1/2 mb-2 transition-opacity duration-200 ${
         isPopoverVisible ? "opacity-100 visible" : "opacity-0 invisible"
       } ${classList ? classList : ""}`}
       ref={popoverRef}

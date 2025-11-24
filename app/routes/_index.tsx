@@ -2,7 +2,7 @@ import TextField from "~/routes/TextField";
 import { useNavigate } from "@remix-run/react";
 import { useContext } from "react";
 import UserNameContext from "~/routes/UserNameContext";
-import { useLocation } from "react-router-dom";
+import { useLocation } from "@remix-run/react";
 
 export default function _Index() {
   const navigate = useNavigate();
