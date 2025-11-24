@@ -19,6 +19,7 @@ import {
   pausedPlaybackMessage,
   resumedPlaybackMessage,
 } from "~/toastMessages/toastMessageLibrary";
+import { isFirefox } from "~/utils/videoPlayerUtils";
 
 export default function HostVideoPlayerNew() {
   const location = useLocation();
@@ -45,7 +46,9 @@ export default function HostVideoPlayerNew() {
           return;
         }
         if (videoRef.current && !mediaStreamRef.current) {
-          mediaStreamRef.current = videoRef.current.captureStream();
+          mediaStreamRef.current = isFirefox()
+            ? videoRef.current.mozCaptureStream()
+            : videoRef.current.captureStream();
         }
         const peer = createPeer({
           isInitiator: true,
