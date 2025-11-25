@@ -4,6 +4,7 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
+    "setuphttps": "openssl req -x509 -newkey rsa:2048 -nodes -keyout localhost.key -out localhost.pem -days 365 -config localhost.conf -extensions v3_req",
     "build": "remix vite:build",
     "dev": "remix vite:dev",
     "development": "yarn dev;NODE_ENV=production node server.js",
