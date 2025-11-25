@@ -49,7 +49,7 @@ export default function PausePlayControls({
   return (
     <>
       <button
-        className="h-10 w-10 text-white rounded-full bg-red-600 p-2"
+        className="h-5 w-5 p-1 md:h-10 md:w-10 text-white rounded-full bg-red-600 md:p-2"
         onClick={handlePlayPauseClick}
       >
         {isPlaying ? <PauseIcon></PauseIcon> : <PlayIcon></PlayIcon>}

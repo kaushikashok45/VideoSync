@@ -38,7 +38,7 @@ export function VideoPlayer({
   }, []);
   return (
     <div
-      className="video-player relative flex flex-col justify-center align-middle h-full w-fit max-h-full max-w-full"
+      className="video-player relative h-fit w-fit max-h-full max-w-full"
       ref={videoWrapperRef}
     >
       <video
@@ -47,7 +47,7 @@ export function VideoPlayer({
         autoPlay
         controls={false}
         playsInline
-        className="rounded-lg max-h-full max-w-full"
+        className="rounded-lg h-full w-full max-h-full max-w-full"
       ></video>
       <VideoPlayerControls
         videoRef={videoRef}

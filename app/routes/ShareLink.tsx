@@ -9,7 +9,7 @@ import Popover from "./Popover";
 function ShareIcon() {
   return (
     <>
-      <button className="h-10 w-10 text-white text-sm rounded-full bg-red-600 p-2 flex items-center justify-center">
+      <button className="h-5 w-5 p-1 md:h-10 md:w-10 text-white text-sm rounded-full bg-red-600 md:p-2 flex items-center justify-center">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"

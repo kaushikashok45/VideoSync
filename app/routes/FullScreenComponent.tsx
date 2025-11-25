@@ -25,7 +25,7 @@ export default function FullScreenToggleComponent({
   return (
     <>
       <button
-        className="h-10 w-10 text-white text-sm rounded-full bg-red-600 p-2 flex items-center justify-center"
+        className="h-5 w-5 p-1 md:h-10 md:w-10 text-white text-sm rounded-full bg-red-600 md:p-2 flex items-center justify-center"
         onClick={handleScreenResize}
       >
         {isFullScreen ? (

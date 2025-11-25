@@ -14,7 +14,7 @@ function SpeakerWithSoundBar({ videoRef }: volumeControlProps) {
 
   return (
     <div className="relative" ref={audioIconRef}>
-      <button className="h-10 w-10 text-white text-sm rounded-full bg-red-600 p-2 flex items-center justify-center">
+      <button className="h-5 w-5 p-1 md:h-10 md:w-10 text-white text-sm rounded-full bg-red-600 md:p-2 flex items-center justify-center">
         <SpeakerWaveIcon></SpeakerWaveIcon>
       </button>
       <Popover
@@ -50,7 +50,7 @@ function SpeakerWithSoundBar({ videoRef }: volumeControlProps) {
 function VolumeMutedIcon() {
   return (
     <>
-      <button className="h-10 w-10 text-white text-sm rounded-full bg-red-600 p-2 flex items-center justify-center">
+      <button className="h-5 w-5 p-1 md:h-10 md:w-10 text-white text-sm rounded-full bg-red-600 md:p-2 flex items-center justify-center">
         <SpeakerXMarkIcon></SpeakerXMarkIcon>
       </button>
     </>

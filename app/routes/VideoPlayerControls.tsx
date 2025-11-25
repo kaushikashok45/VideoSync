@@ -132,7 +132,7 @@ export function VideoPlayerControls({
   return (
     <div
       id="controls"
-      className={`flex max-w-full relative w-full bottom-[6em] px-2 flex-col gap-7 ${
+      className={`flex max-w-full relative w-full bottom-[4em] md:bottom-[6em] px-2 flex-col gap-4 md:gap-7 ${
         isControlsVisible ? "opacity-100" : "opacity-0"
       }`}
     >
@@ -159,13 +159,13 @@ export function VideoPlayerControls({
             onManualPause={onManualPause}
             onManualResume={onManualResume}
           ></PausePlayControls>
-          <button className="h-10 w-10 text-white rounded-full bg-red-600 p-2 flex justify-center items-center">
+          <button className="h-5 w-5 p-1 md:h-10 md:w-10 text-white rounded-full bg-red-600 md:p-2 flex justify-center items-center">
             <RewindIcon></RewindIcon>
           </button>
-          <button className="h-10 w-10 text-white rounded-full bg-red-600 p-2 flex justify-center items-center">
+          <button className="h-5 w-5 p-1 md:h-10 md:w-10 text-white rounded-full bg-red-600 md:p-2 flex justify-center items-center">
             <ForwardIcon></ForwardIcon>
           </button>
-          <div className="self-center font-extrabold text-white">
+          <div className="self-center font-extrabold text-white text-[0.5rem] md:text-[1rem]">
             <p>
               {formatTime(currentTime)} / {formatTime(duration)}
             </p>
