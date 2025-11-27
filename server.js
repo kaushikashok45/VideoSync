@@ -23,6 +23,8 @@ app.all(
 );
 let server;
 if (process.env.NODE_ENV === "production") {
+  server = https.createServer(app);
+} else if (process.env.NODE_ENV === "dev-https") {
   const key = readFileSync("./localhost.key");
   const cert = readFileSync("./localhost.pem");
   server = https.createServer({ key, cert }, app);
@@ -43,6 +45,8 @@ server.listen(APPSERVERPORT, () => {
 const IOSERVERPORT = process.env.PORT || 3001;
 let IOServer;
 if (process.env.NODE_ENV === "production") {
+  server = https.createServer(app);
+} else if (process.env.NODE_ENV === "dev-https") {
   const key = readFileSync("./localhost.key");
   const cert = readFileSync("./localhost.pem");
   IOServer = https.createServer({ key, cert }, app);
