@@ -3,11 +3,7 @@ import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import * as fs from "node:fs";
 
-declare module "@remix-run/node" {
-  interface Future {
-    v3_singleFetch: true;
-  }
-}
+const isDev = process.env.NODE_ENV === "development";
 
 export default defineConfig({
   plugins: [
@@ -22,16 +18,15 @@ export default defineConfig({
     }),
     tsconfigPaths(),
   ],
-  server: {
-    https: {
-      key: fs.readFileSync("./localhost.key"),
-      cert: fs.readFileSync("./localhost.pem"),
-    },
-    proxy: {},
-  },
-  define: {
-    // global: {} workaround to make simple-peer work
-  },
+  server: isDev
+    ? {
+        https: {
+          key: fs.readFileSync("./localhost.key"),
+          cert: fs.readFileSync("./localhost.pem"),
+        },
+      }
+    : undefined,
+
   resolve: {
     alias: {
       "simple-peer": "simple-peer/simplepeer.min.js",
