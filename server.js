@@ -125,3 +125,5 @@ io.on("connection", (socket) => {
 IOServer.listen(IOSERVERPORT, () => {
   console.log("IO Server listening on port " + IOSERVERPORT);
 });
+
+module.exports = app;
