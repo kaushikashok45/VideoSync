@@ -13,7 +13,7 @@ import { Toaster } from "sonner";
 import UserNameContextProvider from "~/routes/UserNameContextProvider";
 import RoomIdContextProvider from "~/routes/RoomIdContextProvider";
 import { APP_NAME } from "~/Constants";
-import Footer from "./routes/Footer";
+import Footer from "~/routes/Footer";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: fontsUrl },
