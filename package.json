@@ -8,7 +8,7 @@
     "build": "remix vite:build",
     "development": "remix vite:dev",
     "dev": "yarn development;NODE_ENV=dev node server.js",
-    "prod": "npm run build;NODE_ENV=production node server.js",
+    "prod": "yarn run build;NODE_ENV=production node server.js",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
     "start": "remix-serve ./build/server/index.js",
     "typecheck": "tsc"
