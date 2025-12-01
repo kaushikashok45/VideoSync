@@ -3,6 +3,7 @@ import { useNavigate } from "@remix-run/react";
 import { useContext } from "react";
 import UserNameContext from "~/routes/UserNameContext";
 import { useLocation } from "@remix-run/react";
+import { APP_NAME } from "../Constants";
 
 export default function _Index() {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ export default function _Index() {
       <h2 className={`text-3xl`}>
         Welcome to{" "}
         <span className={`font-yesteryear text-4xl text-red-600`}>
-          VideoSync
+          { APP_NAME}
         </span>
         .How should we call you?
       </h2>
