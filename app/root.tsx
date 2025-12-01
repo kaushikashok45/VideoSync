@@ -12,7 +12,7 @@ import Header from "./routes/Header";
 import { Toaster } from "sonner";
 import UserNameContextProvider from "~/routes/UserNameContextProvider";
 import RoomIdContextProvider from "~/routes/RoomIdContextProvider";
-import { APP_NAME } from "./Constants";
+import { APP_NAME } from "~/Constants";
 import Footer from "./routes/Footer";
 
 export const links: LinksFunction = () => [
@@ -26,7 +26,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title className={`font-yesteryear`}>{ APP_NAME }</title>
+        <title className={`font-yesteryear`}>{APP_NAME}</title>
         <Meta />
         <Links />
       </head>
