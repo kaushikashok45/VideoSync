@@ -32,7 +32,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className={`font-overpass h-dvh w-dvh flex flex-col`}>
+      <body
+        className={`font-overpass h-dvh w-dvh flex flex-col dark:bg-gradient-to-b dark:from-gray-800 dark:via-gray-900 dark:to-black`}
+      >
         <UserNameContextProvider>
           <RoomIdContextProvider>
             <Toaster
