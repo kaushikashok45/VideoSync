@@ -15,34 +15,53 @@ export default function PausePlayControls({
   const [isPlaying, setIsPlaying] = useState(true);
 
   function pausePlayback() {
+    setIsPlaying(false);
     if (!videoRef.current || videoRef.current.paused) return;
     videoRef.current.pause();
-    setIsPlaying(false);
   }
 
   function resumePlayback() {
+    setIsPlaying(true);
     if (!videoRef.current || !videoRef.current.paused) return;
     videoRef.current.play();
-    setIsPlaying(true);
   }
 
-  function handlePlayPauseClick() {
-    if (isPlaying) {
+  function handlePlayPauseClick(e) {
+    if (!videoRef.current?.paused) {
       pausePlayback();
-      onManualPause && onManualPause();
+      onManualPause && onManualPause(e);
     } else {
       resumePlayback();
-      onManualResume && onManualResume();
+      onManualResume && onManualResume(e);
+    }
+  }
+
+  function handlePlayPausePress(e) {
+    if (
+      e.key == " " ||
+      e.code == "Space" ||
+      e.keyCode == 32 ||
+      e.key === "MediaPlayPause"
+    ) {
+      e.preventDefault();
+      e.stopPropagation();
+      handlePlayPauseClick(e);
     }
   }
 
   useEffect(() => {
     videoRef.current?.addEventListener("pause-playback", pausePlayback);
     videoRef.current?.addEventListener("resume-playback", resumePlayback);
+    document.addEventListener("keypress", handlePlayPausePress);
+    navigator.mediaSession.setActionHandler("play", () => {});
+    navigator.mediaSession.setActionHandler("pause", () => {});
 
     return () => {
       videoRef.current?.removeEventListener("pause-playback", pausePlayback);
       videoRef.current?.removeEventListener("resume-playback", resumePlayback);
+      document.removeEventListener("keypress", handlePlayPausePress);
+      navigator.mediaSession.setActionHandler("play", null);
+      navigator.mediaSession.setActionHandler("pause", null);
     };
   }, []);
 
