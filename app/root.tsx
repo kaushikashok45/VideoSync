@@ -14,6 +14,7 @@ import UserNameContextProvider from "~/routes/UserNameContextProvider";
 import RoomIdContextProvider from "~/routes/RoomIdContextProvider";
 import { APP_NAME } from "~/Constants";
 import Footer from "~/routes/Footer";
+import favicon from "../public/thesyncpartyfavicon.png";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: fontsUrl },
@@ -27,6 +28,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title className={`font-yesteryear`}>{APP_NAME}</title>
+        <link rel="icon" href={favicon} />
         <Meta />
         <Links />
       </head>
