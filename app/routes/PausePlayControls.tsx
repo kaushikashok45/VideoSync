@@ -69,7 +69,11 @@ export default function PausePlayControls({
   return (
     <>
       <ButtonComponent onClick={handlePlayPauseClick} allowSpacebarPress={true}>
-        {isPlaying ? <PauseIcon></PauseIcon> : <PlayIcon></PlayIcon>}
+        {isPlaying ? (
+          <PauseIcon class={"size-6"}></PauseIcon>
+        ) : (
+          <PlayIcon class={"size-6"}></PlayIcon>
+        )}
       </ButtonComponent>
     </>
   );
