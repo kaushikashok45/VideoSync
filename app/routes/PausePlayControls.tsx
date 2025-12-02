@@ -1,5 +1,6 @@
 import { PauseIcon, PlayIcon } from "@heroicons/react/24/solid";
 import { useEffect, useState } from "react";
+import ButtonComponent from "./ButtonComponent";
 
 type pausePlayControlsProps = {
   videoRef: React.RefObject<HTMLVideoElement>;
@@ -67,12 +68,9 @@ export default function PausePlayControls({
 
   return (
     <>
-      <button
-        className="h-5 w-5 p-1 md:h-10 md:w-10 text-white rounded-full bg-red-600 md:p-2"
-        onClick={handlePlayPauseClick}
-      >
+      <ButtonComponent onClick={handlePlayPauseClick} allowSpacebarPress={true}>
         {isPlaying ? <PauseIcon></PauseIcon> : <PlayIcon></PlayIcon>}
-      </button>
+      </ButtonComponent>
     </>
   );
 }

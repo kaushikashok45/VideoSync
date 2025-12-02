@@ -6,6 +6,7 @@ import FullScreenToggleComponent from "./FullScreenComponent";
 import PausePlayControls from "./PausePlayControls";
 import ShareLink from "./ShareLink";
 import { VideoMeta } from "./VideoCanvas";
+import ButtonComponent from "./ButtonComponent";
 
 type VideoPlayerControlsProps = {
   videoRef: React.RefObject<HTMLVideoElement>;
@@ -159,12 +160,12 @@ export function VideoPlayerControls({
             onManualPause={onManualPause}
             onManualResume={onManualResume}
           ></PausePlayControls>
-          <button className="h-5 w-5 p-1 md:h-10 md:w-10 text-white rounded-full bg-red-600 md:p-2 flex justify-center items-center">
+          <ButtonComponent>
             <RewindIcon></RewindIcon>
-          </button>
-          <button className="h-5 w-5 p-1 md:h-10 md:w-10 text-white rounded-full bg-red-600 md:p-2 flex justify-center items-center">
+          </ButtonComponent>
+          <ButtonComponent>
             <ForwardIcon></ForwardIcon>
-          </button>
+          </ButtonComponent>
           <div className="self-center font-extrabold text-white text-[0.5rem] md:text-[1rem]">
             <p>
               {formatTime(currentTime)} / {formatTime(duration)}

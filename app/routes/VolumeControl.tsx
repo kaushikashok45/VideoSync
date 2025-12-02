@@ -2,6 +2,7 @@ import { SpeakerWaveIcon, SpeakerXMarkIcon } from "@heroicons/react/24/solid";
 import { MutableRefObject, useEffect, useRef, useState } from "react";
 import { closeAllOpenPopovers } from "~/utils/videoPlayerUtils";
 import Popover from "./Popover";
+import ButtonComponent from "./ButtonComponent";
 
 type volumeControlProps = {
   videoRef: React.RefObject<HTMLVideoElement>;
@@ -14,9 +15,9 @@ function SpeakerWithSoundBar({ videoRef }: volumeControlProps) {
 
   return (
     <div className="relative" ref={audioIconRef}>
-      <button className="h-5 w-5 p-1 md:h-10 md:w-10 text-white text-sm rounded-full bg-red-600 md:p-2 flex items-center justify-center">
+      <ButtonComponent>
         <SpeakerWaveIcon></SpeakerWaveIcon>
-      </button>
+      </ButtonComponent>
       <Popover
         triggerElementRef={audioIconRef}
         classList="-rotate-90 flex justify-center left-1/2 -translate-x-1/2 mb-[3.7em]"
@@ -50,9 +51,9 @@ function SpeakerWithSoundBar({ videoRef }: volumeControlProps) {
 function VolumeMutedIcon() {
   return (
     <>
-      <button className="h-5 w-5 p-1 md:h-10 md:w-10 text-white text-sm rounded-full bg-red-600 md:p-2 flex items-center justify-center">
+      <ButtonComponent>
         <SpeakerXMarkIcon></SpeakerXMarkIcon>
-      </button>
+      </ButtonComponent>
     </>
   );
 }
