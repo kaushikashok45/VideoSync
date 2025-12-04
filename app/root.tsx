@@ -44,10 +44,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               theme="system"
             ></Toaster>
             <Header />
-            <div
-              id="content-container"
-              className={`flex items-center justify-center h-full w-full`}
-            >
+            <div id="content-container" className={`h-full w-full`}>
               {children}
             </div>
             <Footer></Footer>

@@ -175,7 +175,7 @@ export default function HostVideoPlayerNew() {
   }, []);
 
   return (
-    <div className="h-3/4 w-3/4 min-h-3/4 min-w-3/4 rounded-md flex justify-center">
+    <div className="h-[90%] w-[90%] md:h-3/4 md:w-3/4 min-h-3/4 min-w-3/4 rounded-md flex justify-center items-center md:p-[2em] m-auto">
       <VideoPlayer
         videoURL={passedState.videoURL}
         getRef={videoRef}
