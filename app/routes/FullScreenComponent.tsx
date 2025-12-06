@@ -1,37 +1,37 @@
 import {
-  ArrowsPointingInIcon,
-  ArrowsPointingOutIcon,
+    ArrowsPointingInIcon,
+    ArrowsPointingOutIcon,
 } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import ButtonComponent from "./ButtonComponent";
 
 type fullScreenToggleProps = {
-  videoWrapperRef: React.RefObject<HTMLDivElement>;
+    videoWrapperRef: React.RefObject<HTMLDivElement>;
 };
 
 export default function FullScreenToggleComponent({
-  videoWrapperRef,
+    videoWrapperRef,
 }: fullScreenToggleProps) {
-  const [isFullScreen, setIsFullScreen] = useState(false);
+    const [isFullScreen, setIsFullScreen] = useState(false);
 
-  function handleScreenResize() {
-    if (isFullScreen) {
-      document.exitFullscreen();
-    } else {
-      videoWrapperRef.current?.requestFullscreen();
+    function handleScreenResize() {
+        if (isFullScreen) {
+            document.exitFullscreen();
+        } else {
+            videoWrapperRef.current?.requestFullscreen();
+        }
+        setIsFullScreen(!isFullScreen);
     }
-    setIsFullScreen(!isFullScreen);
-  }
 
-  return (
-    <>
-      <ButtonComponent onClick={handleScreenResize}>
-        {isFullScreen ? (
-          <ArrowsPointingInIcon class="size-6"></ArrowsPointingInIcon>
-        ) : (
-          <ArrowsPointingOutIcon class="size-6"></ArrowsPointingOutIcon>
-        )}
-      </ButtonComponent>
-    </>
-  );
+    return (
+        <>
+            <ButtonComponent onClick={handleScreenResize}>
+                {isFullScreen ? (
+                    <ArrowsPointingInIcon className="size-6"></ArrowsPointingInIcon>
+                ) : (
+                    <ArrowsPointingOutIcon className="size-6"></ArrowsPointingOutIcon>
+                )}
+            </ButtonComponent>
+        </>
+    );
 }

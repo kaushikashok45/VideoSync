@@ -29,7 +29,7 @@ export default function ButtonComponent({
     return (
         <>
             <button
-                className="h-5 w-5 p-1 md:h-10 md:w-10 text-white rounded-full bg-black/40 backdrop-blur-md border border-white/10 rounded-full p-3 hover:bg-black/50 transition md:p-2 flex items-center justify-center"
+                className="h-8 w-8 p-1 md:h-10 md:w-10 text-white rounded-full bg-black/40 backdrop-blur-md border border-white/10 rounded-full hover:bg-black/50 transition md:p-2 flex items-center justify-center"
                 onClick={handleClick}
                 onKeyDown={handleKeyPress}
             >

@@ -172,7 +172,7 @@ export function VideoPlayerControls({
                     <ButtonComponent>
                         <ForwardIcon></ForwardIcon>
                     </ButtonComponent>
-                    <div className="self-center font-extrabold text-white text-[0.5rem] md:text-[1rem] bg-black/30 backdrop-blur-lg border-t border-white/10 rounded-lg p-2">
+                    <div className="self-center font-extrabold text-white text-[0.75rem] md:text-[1rem] bg-black/30 backdrop-blur-lg border-t border-white/10 rounded-lg p-2 md:p-2">
                         <p>
                             {formatTime(currentTime)} / {formatTime(duration)}
                         </p>
