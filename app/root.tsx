@@ -54,7 +54,7 @@ export function ErrorBoundary() {
                     It isn't you, it's us ! Something went wrong on our end
                 </h1>
                 <p className="font-overpass text-sm px-2">
-                    Click the below button to get back to the home page.
+                    Click the button below to return to home page.
                 </p>
                 <Link to="/">
                     <UnifiedButton buttonLabel="Home"></UnifiedButton>
