@@ -1,20 +1,6 @@
-import { useEffect, useRef, Ref } from "react";
+import { useEffect, useRef } from "react";
 import { VideoPlayerControls } from "./VideoPlayerControls";
-
-export type VideoMeta = {
-  duration: number;
-  currentTime: number;
-};
-
-type videoURLProps = {
-  videoURL: string;
-  videoMeta?: VideoMeta;
-  shareLink?: string;
-  stream?: MediaStream;
-  getRef?: Ref<HTMLVideoElement>;
-  onManualPause?: (e: any) => void;
-  onManualResume?: (e: any) => void;
-};
+import VideoPlayerProps from "../types/VideoPlayerProps";
 
 export function VideoPlayer({
   videoURL,
@@ -23,7 +9,7 @@ export function VideoPlayer({
   videoMeta,
   onManualPause,
   onManualResume,
-}: videoURLProps) {
+}: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoWrapperRef = useRef<HTMLDivElement>(null);
 

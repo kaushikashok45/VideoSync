@@ -1,4 +1,4 @@
-import RoomIdContext from "~/routes/RoomIdContext";
+import RoomIdContext from "./RoomIdContext";
 import { useState } from "react";
 
 export default function RoomIdContextProvider({ children }: any) {

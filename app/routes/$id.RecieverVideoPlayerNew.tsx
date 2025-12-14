@@ -6,10 +6,10 @@ import {
   useEffect,
   RefObject,
 } from "react";
-import { VideoPlayer } from "./VideoCanvas";
+import { VideoPlayer } from "../features/videoPlayback/components/VideoPlayer";
 import { createPeer } from "~/utils/peerUtils";
-import UserNameContext from "./UserNameContext";
-import RoomIdContext from "./RoomIdContext";
+import UserNameContext from "../context/UserName/UserNameContext";
+import RoomIdContext from "../context/RoomId/RoomIdContext";
 import SimplePeer from "simple-peer";
 import { createSocket } from "~/utils/socketUtils";
 import { Socket } from "socket.io-client";
