@@ -1,11 +1,11 @@
-import { useContext, useRef, useState, useEffect } from "react";
-import RoomIdContext from "./RoomIdContext";
+import { useContext, useRef, useState } from "react";
+import RoomIdContext from "../../../context/RoomId/RoomIdContext";
 import {
   ClipboardIcon,
   ClipboardDocumentCheckIcon,
 } from "@heroicons/react/24/solid";
-import Popover from "./Popover";
-import ButtonComponent from "./ButtonComponent";
+import Popover from "../../../components/Popover";
+import ButtonComponent from "./VideoPlayerButtonComponent";
 
 function ShareIcon() {
   return (
@@ -42,7 +42,7 @@ function Link() {
   const shareLink = getLink(roomId);
   const [isCopiedToClipBoard, setIsCopiedToClipBoard] = useState(false);
 
-  async function handleCopyToClipBoard(e) {
+  async function handleCopyToClipBoard() {
     try {
       await navigator.clipboard.writeText(shareLink);
       console.log("Text successfully copied to clipboard");

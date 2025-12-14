@@ -1,12 +1,11 @@
 import { createContext } from "react";
+import RoomContext from "./types/RoomContext";
 
-export type RoomContext = {
-  roomId: string;
-  updateRoomId: (roomId: string) => void;
-};
 const RoomIdContext = createContext<RoomContext>({
   roomId: "room142",
-  updateRoomId: (roomId: string) => {},
+  updateRoomId: (roomId: string) => {
+    console.log(roomId);
+  },
 });
 
 export default RoomIdContext;

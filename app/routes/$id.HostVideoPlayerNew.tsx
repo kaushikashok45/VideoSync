@@ -6,10 +6,10 @@ import {
   useMemo,
 } from "react";
 import { useLocation } from "@remix-run/react";
-import { VideoPlayer } from "./VideoCanvas";
+import { VideoPlayer } from "../features/videoPlayback/components/VideoPlayer";
 import { createSocket } from "../utils/socketUtils";
-import UserNameContext from "~/routes/UserNameContext";
-import RoomIdContext from "./RoomIdContext";
+import UserNameContext from "../context/UserName/UserNameContext";
+import RoomIdContext from "../context/RoomId/RoomIdContext";
 import { peerSetupMeta, peerMeta } from "~/utils/peerRegistryContract";
 import { createPeer } from "~/utils/peerUtils";
 import { Socket } from "socket.io-client";
@@ -19,7 +19,7 @@ import {
   pausedPlaybackMessage,
   resumedPlaybackMessage,
 } from "~/toastMessages/toastMessageLibrary";
-import { isFirefox } from "~/utils/videoPlayerUtils";
+import { captureStream } from "~/utils/videoPlayerUtils";
 
 export default function HostVideoPlayerNew() {
   const location = useLocation();
@@ -46,73 +46,73 @@ export default function HostVideoPlayerNew() {
           return;
         }
         if (videoRef.current && !mediaStreamRef.current) {
-          mediaStreamRef.current = isFirefox()
-            ? videoRef.current.mozCaptureStream()
-            : videoRef.current.captureStream();
-        }
-        const peer = createPeer({
-          isInitiator: true,
-          receiverId: peerId,
-          mediaStream: mediaStreamRef.current,
-          socket: socketRef,
-          onDataReceived: (channelData) => {
-            const data = channelData ? JSON.parse(channelData) : null;
-            if (!data || !data.type || !videoRef.current) return;
-            switch (data.type) {
-              case "pause-playback":
-                pausedPlaybackMessage(data.userName);
-                if (!videoRef.current.paused) {
-                  const pausePayload = {
-                    detail: {
-                      userName: data.userName,
-                    },
-                  };
-                  const pausePlaybackEvent = new CustomEvent(
-                    data.type,
-                    pausePayload
-                  );
-                  videoRef.current.dispatchEvent(pausePlaybackEvent);
+          captureStream(videoRef.current).then((mediaStream) => {
+            mediaStreamRef.current = mediaStream;
+            const peer = createPeer({
+              isInitiator: true,
+              receiverId: peerId,
+              mediaStream: mediaStreamRef.current,
+              socket: socketRef,
+              onDataReceived: (channelData) => {
+                const data = channelData ? JSON.parse(channelData) : null;
+                if (!data || !data.type || !videoRef.current) return;
+                switch (data.type) {
+                  case "pause-playback":
+                    pausedPlaybackMessage(data.userName);
+                    if (!videoRef.current.paused) {
+                      const pausePayload = {
+                        detail: {
+                          userName: data.userName,
+                        },
+                      };
+                      const pausePlaybackEvent = new CustomEvent(
+                        data.type,
+                        pausePayload
+                      );
+                      videoRef.current.dispatchEvent(pausePlaybackEvent);
+                    }
+                    break;
+                  case "resume-playback":
+                    resumedPlaybackMessage(data.userName);
+                    if (videoRef.current.paused) {
+                      const resumePlaybackEvent = new CustomEvent(data.type, {
+                        detail: {
+                          userName: data.userName,
+                        },
+                      });
+                      videoRef.current.dispatchEvent(resumePlaybackEvent);
+                    }
+                    break;
                 }
-                break;
-              case "resume-playback":
-                resumedPlaybackMessage(data.userName);
-                if (videoRef.current.paused) {
-                  const resumePlaybackEvent = new CustomEvent(data.type, {
-                    detail: {
-                      userName: data.userName,
-                    },
-                  });
-                  videoRef.current.dispatchEvent(resumePlaybackEvent);
-                }
-                break;
-            }
-          },
-        });
-        peer?.on("connect", () => {
-          peerDataChannelUtilRef.current = new PeerDataChannelUtil(
-            videoRef.current as HTMLVideoElement,
-            peer
-          );
-          const storedPeer = peerMap.current.get(peerId);
-          if (storedPeer) {
+              },
+            });
+            peer?.on("connect", () => {
+              peerDataChannelUtilRef.current = new PeerDataChannelUtil(
+                videoRef.current as HTMLVideoElement,
+                peer
+              );
+              const storedPeer = peerMap.current.get(peerId);
+              if (storedPeer) {
+                peerMap.current.set(peerId, {
+                  ...storedPeer,
+                  peerDataChannel:
+                    peerDataChannelUtilRef.current as PeerDataChannelUtil,
+                });
+              }
+              peerDataChannelUtilRef.current.sendVideoDuration();
+              setInterval(() => {
+                if (videoRef.current?.paused) return;
+                peerDataChannelUtilRef.current?.sendVideoCurrentTime();
+              }, 1000);
+            });
             peerMap.current.set(peerId, {
-              ...storedPeer,
+              userName,
+              peerInstance: peer,
               peerDataChannel:
                 peerDataChannelUtilRef.current as PeerDataChannelUtil,
             });
-          }
-          peerDataChannelUtilRef.current.sendVideoDuration();
-          setInterval(() => {
-            if (videoRef.current?.paused) return;
-            peerDataChannelUtilRef.current?.sendVideoCurrentTime();
-          }, 1000);
-        });
-        peerMap.current.set(peerId, {
-          userName,
-          peerInstance: peer,
-          peerDataChannel:
-            peerDataChannelUtilRef.current as PeerDataChannelUtil,
-        });
+          });
+        }
       },
       onReceivingSocketMetaCallback: (data) => {
         peerId.current = data.peerId;

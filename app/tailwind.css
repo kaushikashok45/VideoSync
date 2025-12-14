@@ -4,17 +4,17 @@
 
 html,
 body {
-  @apply bg-white dark:bg-gray-950;
+    @apply bg-white dark:bg-gray-950;
 
-  @media (prefers-color-scheme: dark) {
-    color-scheme: dark;
-  }
+    @media (prefers-color-scheme: dark) {
+        color-scheme: dark;
+    }
 
-  ::selection {
-    background:red
-  }
+    ::selection {
+        background: #ffb7c5;
+    }
 
-  :focus {
-    background:red
-  }
+    :focus {
+        background: #ffb7c5;
+    }
 }
