@@ -46,6 +46,7 @@ export default function _Index() {
         ></TextField>
         <UnifiedButton
           buttonLabel="Let's go ->"
+          classList={"bg-gray-100"}
           onClick={handleSubmit}
         ></UnifiedButton>
       </div>

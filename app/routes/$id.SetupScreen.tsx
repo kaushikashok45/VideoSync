@@ -1,11 +1,9 @@
-import { Link } from "@remix-run/react";
-
-import Button from "./Button";
+import { Link, useLocation } from "@remix-run/react";
 import { useContext } from "react";
 import { nanoid } from "nanoid";
-import { useLocation } from "@remix-run/react";
 import UserNameContext from "../context/UserName/UserNameContext";
 import RoomIdContext from "../context/RoomId/RoomIdContext";
+import UnifiedButton from "~/components/UnifiedButton";
 
 const roomId = nanoid();
 
@@ -37,7 +35,10 @@ export default function SetupScreen() {
             updateRoomId(roomId);
           }}
         >
-          <Button buttonLabel={"Host party"} buttonClass={"primary"}></Button>
+          <UnifiedButton
+            buttonLabel={"Host party"}
+            classList={"bg-red-700 shadow-red-700 text-white"}
+          ></UnifiedButton>
         </Link>
         <Link
           to={`/${inferredRoomId}/RecieverVideoPlayerNew`}
@@ -45,7 +46,10 @@ export default function SetupScreen() {
             updateRoomId(inferredRoomId);
           }}
         >
-          <Button buttonLabel={"Join party"} buttonClass={"secondary"}></Button>
+          <UnifiedButton
+            buttonLabel={"Join party"}
+            classList={"bg-blue-700 shadow-blue-700 text-white"}
+          ></UnifiedButton>
         </Link>
       </div>
     </div>
