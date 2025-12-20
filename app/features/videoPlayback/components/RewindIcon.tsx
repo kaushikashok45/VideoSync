@@ -1,18 +1,32 @@
 import ForwardIconProps from "../types/ForwardIconProps";
 import VideoPlayerButtonComponent from "./VideoPlayerButtonComponent";
+import { useEffect } from "react";
 
 export default function RewindIcon({
   videoRef,
   setCurrentTime,
   onManualAction,
 }: ForwardIconProps) {
-  function handleRewindClick(event) {
-    event.preventDefault();
+  useEffect(() => {
+    videoRef.current?.addEventListener("rewind-playback", rewindPlayback);
+
+    return () => {
+      videoRef.current?.removeEventListener("rewind-playback", rewindPlayback);
+    };
+  }, []);
+
+  function rewindPlayback() {
     if (!videoRef.current) return;
     const currentTime = videoRef.current.currentTime;
     const newTime = currentTime - 10;
     videoRef.current.currentTime = newTime;
     setCurrentTime(newTime);
+  }
+
+  function handleRewindClick(event) {
+    event.preventDefault();
+    onManualAction && onManualAction(event);
+    rewindPlayback();
   }
 
   return (
