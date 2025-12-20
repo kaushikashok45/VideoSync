@@ -8,6 +8,7 @@ import { createRequestHandler } from "@remix-run/express";
 import * as build from "./build/server/index.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import { createServer } from "vite";
 
 const mode = process.env.NODE_ENV || "development";
 const isDev = mode !== "production";
@@ -16,8 +17,6 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 // ---- Common middleware (runs in both dev & prod) ----
-
-app.use(express.static("./build/client"));
 
 // CORS origins
 const APPSERVERPORT = process.env.PORT || 5173;
@@ -36,37 +35,58 @@ app.use(
   })
 );
 
-// Remix catch-all route (correct Express syntax)
-app.all(
-  "*",
-  createRequestHandler({
-    build,
-    mode,
-  })
-);
 // ---- Create the server & Socket.IO ----
 
 let server;
+let viteServer;
 
 if (isDev) {
   // Local dev: use self-signed HTTPS (your current style)
   const key = readFileSync("./localhost.key");
   const cert = readFileSync("./localhost.pem");
-
   server = https.createServer({ key, cert }, app);
 
-  server.listen(APPSERVERPORT, () => {
-    console.log(`Dev server listening on https://localhost:${APPSERVERPORT}`);
+  viteServer = await createServer({
+    server: {
+      middlewareMode: {
+        server: server,
+      },
+      hmr: true,
+    },
   });
+  app.use(viteServer.middlewares);
 } else {
   // Production on Render:
   // Render already terminates HTTPS, so **plain HTTP** here.
-  const port = process.env.PORT || 3000;
-
+  app.use(express.static("./build/client"));
+  app.use(
+    "/assets",
+    express.static(path.join(__dirname, "build/client/assets"), {
+      immutable: true,
+      maxAge: "1y",
+    })
+  );
   server = http.createServer(app);
+}
 
+app.all(
+  "*",
+  createRequestHandler({
+    build: isDev
+      ? () => viteServer.ssrLoadModule("virtual:remix/server-build")
+      : build,
+    mode,
+  })
+);
+
+if (process.env.NODE_ENV === "production") {
+  const port = process.env.PORT || 3000;
   server.listen(port, () => {
     console.log(`Server listening on port ${port} (production)`);
+  });
+} else {
+  server.listen(APPSERVERPORT, () => {
+    console.log(`Dev server listening on https://localhost:${APPSERVERPORT}`);
   });
 }
 

@@ -7,7 +7,7 @@
     "setuphttps": "openssl req -x509 -newkey rsa:2048 -nodes -keyout localhost.key -out localhost.pem -days 365 -config localhost.conf -extensions v3_req",
     "build": "remix vite:build",
     "development": "remix vite:dev",
-    "dev": "yarn development;NODE_ENV=dev node server.js",
+    "dev": "yarn build;NODE_ENV=dev node server.js",
     "prod": "yarn run build;NODE_ENV=production node server.js",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
     "start": "remix-serve ./build/server/index.js",
