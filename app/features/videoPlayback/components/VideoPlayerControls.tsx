@@ -160,12 +160,11 @@ export function VideoPlayerControls({
             onManualPause={onManualPause}
             onManualResume={onManualResume}
           ></PausePlayControls>
-          <ButtonComponent>
-            <RewindIcon></RewindIcon>
-          </ButtonComponent>
-          <ButtonComponent>
-            <ForwardIcon></ForwardIcon>
-          </ButtonComponent>
+          <RewindIcon videoRef={videoRef}></RewindIcon>
+          <ForwardIcon
+            videoRef={videoRef}
+            setCurrentTime={setCurrentTime}
+          ></ForwardIcon>
           <div className="self-center font-extrabold text-white text-[0.75rem] md:text-[1rem] bg-black/30 backdrop-blur-lg border-t border-white/10 rounded-lg p-2 md:p-2">
             <p>
               {formatTime(currentTime)} / {formatTime(duration)}
