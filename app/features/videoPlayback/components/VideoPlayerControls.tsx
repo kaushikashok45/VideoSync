@@ -160,7 +160,10 @@ export function VideoPlayerControls({
             onManualPause={onManualPause}
             onManualResume={onManualResume}
           ></PausePlayControls>
-          <RewindIcon videoRef={videoRef}></RewindIcon>
+          <RewindIcon
+            videoRef={videoRef}
+            setCurrentTime={setCurrentTime}
+          ></RewindIcon>
           <ForwardIcon
             videoRef={videoRef}
             setCurrentTime={setCurrentTime}

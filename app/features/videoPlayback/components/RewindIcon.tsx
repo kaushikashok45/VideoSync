@@ -1,8 +1,21 @@
+import ForwardIconProps from "../types/ForwardIconProps";
 import VideoPlayerButtonComponent from "./VideoPlayerButtonComponent";
 
-export default function RewindIcon() {
+export default function RewindIcon({
+  videoRef,
+  setCurrentTime,
+}: ForwardIconProps) {
+  function handleRewindClick(event) {
+    event.preventDefault();
+    if (!videoRef.current) return;
+    const currentTime = videoRef.current.currentTime;
+    const newTime = currentTime - 10;
+    videoRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
+  }
+
   return (
-    <VideoPlayerButtonComponent>
+    <VideoPlayerButtonComponent onClick={handleRewindClick}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
