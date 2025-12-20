@@ -42,4 +42,22 @@ export default class PeerDataChannelUtil {
     });
     this.peer?.send(resumeSignalMeta);
   }
+
+  sendForwardSignal(initiator: string) {
+    const userName = initiator ? initiator : "Unknown user";
+    const forwardSignalMeta = JSON.stringify({
+      type: "forward-playback",
+      userName,
+    });
+    this.peer?.send(forwardSignalMeta);
+  }
+
+  sendRewindSignal(initiator: string) {
+    const userName = initiator ? initiator : "Unknown user";
+    const rewindSignalMeta = JSON.stringify({
+      type: "rewind-playback",
+      userName,
+    });
+    this.peer?.send(rewindSignalMeta);
+  }
 }

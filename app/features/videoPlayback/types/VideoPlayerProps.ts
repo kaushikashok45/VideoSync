@@ -9,6 +9,8 @@ type VideoPlayerProps = {
   getRef?: Ref<HTMLVideoElement>;
   onManualPause?: (e: any) => void;
   onManualResume?: (e: any) => void;
+  onManualForward?: (e: any) => void;
+  onManualRewind?: (e: any) => void;
 };
 
 export default VideoPlayerProps;

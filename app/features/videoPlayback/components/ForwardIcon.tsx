@@ -1,17 +1,36 @@
+import { useEffect } from "react";
 import ForwardIconProps from "../types/ForwardIconProps";
 import VideoPlayerButtonComponent from "./VideoPlayerButtonComponent";
 
 export default function ForwardIcon({
   videoRef,
   setCurrentTime,
+  onManualAction,
 }: ForwardIconProps) {
-  function handleForwardClick(event) {
-    event.preventDefault();
+  useEffect(() => {
+    videoRef.current?.addEventListener("forward-playback", forwardPlayback);
+
+    return () => {
+      videoRef.current?.removeEventListener(
+        "forward-playback",
+        forwardPlayback
+      );
+    };
+  }, []);
+
+  function forwardPlayback() {
     if (!videoRef.current) return;
     const currentTime = videoRef.current.currentTime;
     const newTime = currentTime + 10;
     videoRef.current.currentTime = newTime;
     setCurrentTime(newTime);
+  }
+
+  function handleForwardClick(event) {
+    event.preventDefault();
+    onManualAction && onManualAction(event);
+    if (!videoRef.current) return;
+    forwardPlayback();
   }
 
   return (

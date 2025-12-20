@@ -16,6 +16,8 @@ import { Socket } from "socket.io-client";
 import {
   pausedPlaybackMessage,
   resumedPlaybackMessage,
+  forwardedPlaybackMessage,
+  rewindedPlaybackMessage,
 } from "~/toastMessages/toastMessageLibrary";
 import PeerDataChannelUtil from "~/utils/peerDataChannelUtil";
 export default function RecieverVideoPlayerNew() {
@@ -53,6 +55,28 @@ export default function RecieverVideoPlayerNew() {
       );
     }
     peerDataChannelRef.current.sendResumeSignal(userName);
+  }
+
+  function sendForwardSignal() {
+    if (!peerRef.current || !videoRef.current) return;
+    if (!peerDataChannelRef.current) {
+      peerDataChannelRef.current = new PeerDataChannelUtil(
+        videoRef.current as HTMLVideoElement,
+        peerRef.current
+      );
+    }
+    peerDataChannelRef.current.sendForwardSignal(userName);
+  }
+
+  function sendRewindSignal() {
+    if (!peerRef.current || !videoRef.current) return;
+    if (!peerDataChannelRef.current) {
+      peerDataChannelRef.current = new PeerDataChannelUtil(
+        videoRef.current as HTMLVideoElement,
+        peerRef.current
+      );
+    }
+    peerDataChannelRef.current.sendRewindSignal(userName);
   }
 
   useEffect(() => {
@@ -104,6 +128,18 @@ export default function RecieverVideoPlayerNew() {
                   videoRef.current.dispatchEvent(new Event(data.type));
                 }
                 break;
+              case "forward-playback":
+                forwardedPlaybackMessage(data.userName);
+                if (videoRef.current) {
+                  videoRef.current.dispatchEvent(new Event(data.type));
+                }
+                break;
+              case "rewind-playback":
+                rewindedPlaybackMessage(data.userName);
+                if (videoRef.current) {
+                  videoRef.current.dispatchEvent(new Event(data.type));
+                }
+                break;
             }
           },
         });
@@ -130,6 +166,8 @@ export default function RecieverVideoPlayerNew() {
         videoMeta={videoMeta}
         onManualPause={sendPauseSignal}
         onManualResume={sendResumeSignal}
+        onManualForward={sendForwardSignal}
+        onManualRewind={sendRewindSignal}
       />
     </div>
   );

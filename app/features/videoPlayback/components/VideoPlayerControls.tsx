@@ -14,6 +14,8 @@ type VideoPlayerControlsProps = {
   videoMeta?: VideoMeta;
   onManualPause?: (e: any) => void;
   onManualResume?: (e: any) => void;
+  onManualForward?: (e: any) => void;
+  onManualRewind?: (e: any) => void;
 };
 
 const formatTime = (seconds: number): string => {
@@ -34,6 +36,8 @@ export function VideoPlayerControls({
   videoMeta,
   onManualPause,
   onManualResume,
+  onManualForward,
+  onManualRewind,
 }: VideoPlayerControlsProps) {
   const [isControlsVisible, setIsControlsVisible] = useState(true);
   const controlsTimerId = useRef<NodeJS.Timeout | null>(null);
@@ -163,10 +167,12 @@ export function VideoPlayerControls({
           <RewindIcon
             videoRef={videoRef}
             setCurrentTime={setCurrentTime}
+            onManualAction={onManualRewind}
           ></RewindIcon>
           <ForwardIcon
             videoRef={videoRef}
             setCurrentTime={setCurrentTime}
+            onManualAction={onManualForward}
           ></ForwardIcon>
           <div className="self-center font-extrabold text-white text-[0.75rem] md:text-[1rem] bg-black/30 backdrop-blur-lg border-t border-white/10 rounded-lg p-2 md:p-2">
             <p>

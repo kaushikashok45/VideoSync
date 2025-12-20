@@ -18,6 +18,8 @@ import PeerDataChannelUtil from "~/utils/peerDataChannelUtil";
 import {
   pausedPlaybackMessage,
   resumedPlaybackMessage,
+  forwardedPlaybackMessage,
+  rewindedPlaybackMessage,
 } from "~/toastMessages/toastMessageLibrary";
 import { captureStream } from "~/utils/videoPlayerUtils";
 
@@ -56,18 +58,18 @@ export default function HostVideoPlayerNew() {
               onDataReceived: (channelData) => {
                 const data = channelData ? JSON.parse(channelData) : null;
                 if (!data || !data.type || !videoRef.current) return;
+                const payload = {
+                  detail: {
+                    userName: data.userName,
+                  },
+                };
                 switch (data.type) {
                   case "pause-playback":
                     pausedPlaybackMessage(data.userName);
                     if (!videoRef.current.paused) {
-                      const pausePayload = {
-                        detail: {
-                          userName: data.userName,
-                        },
-                      };
                       const pausePlaybackEvent = new CustomEvent(
                         data.type,
-                        pausePayload
+                        payload
                       );
                       videoRef.current.dispatchEvent(pausePlaybackEvent);
                     }
@@ -75,12 +77,31 @@ export default function HostVideoPlayerNew() {
                   case "resume-playback":
                     resumedPlaybackMessage(data.userName);
                     if (videoRef.current.paused) {
-                      const resumePlaybackEvent = new CustomEvent(data.type, {
-                        detail: {
-                          userName: data.userName,
-                        },
-                      });
+                      const resumePlaybackEvent = new CustomEvent(
+                        data.type,
+                        payload
+                      );
                       videoRef.current.dispatchEvent(resumePlaybackEvent);
+                    }
+                    break;
+                  case "forward-playback":
+                    forwardedPlaybackMessage(data.userName);
+                    if (videoRef.current) {
+                      const forwardPlaybackEvent = new CustomEvent(
+                        data.type,
+                        payload
+                      );
+                      videoRef.current.dispatchEvent(forwardPlaybackEvent);
+                    }
+                    break;
+                  case "rewind-playback":
+                    rewindedPlaybackMessage(data.userName);
+                    if (videoRef.current) {
+                      const rewindPlaybackEvent = new CustomEvent(
+                        data.type,
+                        payload
+                      );
+                      videoRef.current.dispatchEvent(rewindPlaybackEvent);
                     }
                     break;
                 }
@@ -151,6 +172,26 @@ export default function HostVideoPlayerNew() {
     });
   }
 
+  function forwardPlaybackForAllPeers(e) {
+    const initiator = e && e.detail.userName ? e.detail.userName : userName;
+    peerMap.current.forEach((peer) => {
+      if (initiator !== peer.userName) {
+        const { peerDataChannel } = peer;
+        peerDataChannel.sendForwardSignal(initiator);
+      }
+    });
+  }
+
+  function rewindPlaybackForAllPeers(e) {
+    const initiator = e && e.detail.userName ? e.detail.userName : userName;
+    peerMap.current.forEach((peer) => {
+      if (initiator !== peer.userName) {
+        const { peerDataChannel } = peer;
+        peerDataChannel.sendRewindSignal(initiator);
+      }
+    });
+  }
+
   useEffect(() => {
     socketRef.current = createSocket(socketParams);
     videoRef.current?.addEventListener(
@@ -161,6 +202,15 @@ export default function HostVideoPlayerNew() {
       "resume-playback",
       resumePlaybackForAllPeers
     );
+    videoRef.current?.addEventListener(
+      "forward-playback",
+      forwardPlaybackForAllPeers
+    );
+    videoRef.current?.addEventListener(
+      "rewind-playback",
+      rewindPlaybackForAllPeers
+    );
+
     return () => {
       socketRef.current?.disconnect();
       videoRef.current?.removeEventListener(
@@ -170,6 +220,14 @@ export default function HostVideoPlayerNew() {
       videoRef.current?.removeEventListener(
         "resume-playback",
         resumePlaybackForAllPeers
+      );
+      videoRef.current?.removeEventListener(
+        "forward-playback",
+        forwardPlaybackForAllPeers
+      );
+      videoRef.current?.removeEventListener(
+        "rewind-playback",
+        rewindPlaybackForAllPeers
       );
     };
   }, []);
@@ -181,6 +239,8 @@ export default function HostVideoPlayerNew() {
         getRef={videoRef}
         onManualPause={pausePlaybackForAllPeers}
         onManualResume={resumePlaybackForAllPeers}
+        onManualForward={forwardPlaybackForAllPeers}
+        onManualRewind={rewindPlaybackForAllPeers}
       ></VideoPlayer>
     </div>
   );

@@ -4,6 +4,7 @@ import VideoPlayerButtonComponent from "./VideoPlayerButtonComponent";
 export default function RewindIcon({
   videoRef,
   setCurrentTime,
+  onManualAction,
 }: ForwardIconProps) {
   function handleRewindClick(event) {
     event.preventDefault();
