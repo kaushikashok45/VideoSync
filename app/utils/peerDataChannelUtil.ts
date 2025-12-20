@@ -60,4 +60,14 @@ export default class PeerDataChannelUtil {
     });
     this.peer?.send(rewindSignalMeta);
   }
+
+  sendSeekSignal(initiator: string, time: number) {
+    const userName = initiator ? initiator : "Unknown user";
+    const seekSignalMeta = JSON.stringify({
+      type: "seek-playback",
+      userName,
+      time,
+    });
+    this.peer?.send(seekSignalMeta);
+  }
 }

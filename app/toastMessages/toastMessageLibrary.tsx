@@ -61,3 +61,15 @@ export function rewindedPlaybackMessage(userName: string) {
     ></ToastMessageView>
   );
 }
+
+export function seekPlaybackMessage(userName: string) {
+  const message = "seeked playback";
+  const icon = `🏃`;
+  toast(
+    <ToastMessageView
+      message={message}
+      userName={userName}
+      icon={icon}
+    ></ToastMessageView>
+  );
+}

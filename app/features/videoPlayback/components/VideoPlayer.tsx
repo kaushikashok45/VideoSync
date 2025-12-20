@@ -11,6 +11,7 @@ export function VideoPlayer({
   onManualResume,
   onManualForward,
   onManualRewind,
+  onManualSeek,
 }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoWrapperRef = useRef<HTMLDivElement>(null);
@@ -45,6 +46,7 @@ export function VideoPlayer({
         onManualResume={onManualResume}
         onManualForward={onManualForward}
         onManualRewind={onManualRewind}
+        onManualSeek={onManualSeek}
       ></VideoPlayerControls>
     </div>
   );

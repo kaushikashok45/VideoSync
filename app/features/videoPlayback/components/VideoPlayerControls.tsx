@@ -6,7 +6,7 @@ import FullScreenToggleComponent from "./FullScreenComponent";
 import PausePlayControls from "./PausePlayControls";
 import ShareLink from "./ShareLink";
 import VideoMeta from "../types/VideoMeta";
-import ButtonComponent from "./VideoPlayerButtonComponent";
+import ProgressSeeker from "./ProgressSeeker";
 
 type VideoPlayerControlsProps = {
   videoRef: React.RefObject<HTMLVideoElement>;
@@ -16,6 +16,7 @@ type VideoPlayerControlsProps = {
   onManualResume?: (e: any) => void;
   onManualForward?: (e: any) => void;
   onManualRewind?: (e: any) => void;
+  onManualSeek?: (e: any) => void;
 };
 
 const formatTime = (seconds: number): string => {
@@ -38,6 +39,7 @@ export function VideoPlayerControls({
   onManualResume,
   onManualForward,
   onManualRewind,
+  onManualSeek,
 }: VideoPlayerControlsProps) {
   const [isControlsVisible, setIsControlsVisible] = useState(true);
   const controlsTimerId = useRef<NodeJS.Timeout | null>(null);
@@ -141,9 +143,9 @@ export function VideoPlayerControls({
         isControlsVisible ? "opacity-100" : "opacity-0"
       }`}
     >
-      <div id="progress-seeker-wrapper">
+      {/*<div id="progress-seeker-wrapper">
         <div
-          className={`h-2 w-full bg-slate-200 dark:bg-gray-100 dark:focus:bg-gray-100  rounded cursor-pointer relative`}
+          className={`h-2 w-full bg-black/30 backdrop-blur-lg border-t border-white/10  rounded cursor-pointer relative`}
           onClick={handleProgressClick}
           role="progressbar"
           tabIndex={0}
@@ -153,7 +155,15 @@ export function VideoPlayerControls({
             style={{ width: `${progressPercent}%` }}
           ></div>
         </div>
-      </div>
+      </div>*/}
+      <ProgressSeeker
+        duration={duration}
+        progressPercent={progressPercent}
+        videoRef={videoRef}
+        setCurrentTime={setCurrentTime}
+        onManualSeek={onManualSeek}
+        key="progress-seeker"
+      />
       <div
         id="playback-controls"
         className="flex w-full justify-between items-center"

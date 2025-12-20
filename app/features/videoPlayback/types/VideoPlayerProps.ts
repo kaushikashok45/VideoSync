@@ -11,6 +11,7 @@ type VideoPlayerProps = {
   onManualResume?: (e: any) => void;
   onManualForward?: (e: any) => void;
   onManualRewind?: (e: any) => void;
+  onManualSeek?: (e: any) => void;
 };
 
 export default VideoPlayerProps;

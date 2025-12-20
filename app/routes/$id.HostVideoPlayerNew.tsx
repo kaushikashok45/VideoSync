@@ -20,6 +20,7 @@ import {
   resumedPlaybackMessage,
   forwardedPlaybackMessage,
   rewindedPlaybackMessage,
+  seekPlaybackMessage,
 } from "~/toastMessages/toastMessageLibrary";
 import { captureStream } from "~/utils/videoPlayerUtils";
 
@@ -102,6 +103,17 @@ export default function HostVideoPlayerNew() {
                         payload
                       );
                       videoRef.current.dispatchEvent(rewindPlaybackEvent);
+                    }
+                    break;
+                  case "seek-playback":
+                    seekPlaybackMessage(data.userName);
+                    payload.detail.time = data.time;
+                    if (videoRef.current) {
+                      const seekPlaybackEvent = new CustomEvent(
+                        data.type,
+                        payload
+                      );
+                      videoRef.current.dispatchEvent(seekPlaybackEvent);
                     }
                     break;
                 }
@@ -192,6 +204,18 @@ export default function HostVideoPlayerNew() {
     });
   }
 
+  function seekPlaybackForAllPeers(e) {
+    const initiator =
+      e && isNaN(e) && e.detail.userName ? e.detail.userName : userName;
+    const currentTime = e && isNaN(e) && e.detail.time ? e.detail.time : 0;
+    peerMap.current.forEach((peer) => {
+      if (initiator !== peer.userName) {
+        const { peerDataChannel } = peer;
+        peerDataChannel.sendSeekSignal(initiator, currentTime);
+      }
+    });
+  }
+
   useEffect(() => {
     socketRef.current = createSocket(socketParams);
     videoRef.current?.addEventListener(
@@ -209,6 +233,10 @@ export default function HostVideoPlayerNew() {
     videoRef.current?.addEventListener(
       "rewind-playback",
       rewindPlaybackForAllPeers
+    );
+    videoRef.current?.addEventListener(
+      "seek-playback",
+      seekPlaybackForAllPeers
     );
 
     return () => {
@@ -229,6 +257,10 @@ export default function HostVideoPlayerNew() {
         "rewind-playback",
         rewindPlaybackForAllPeers
       );
+      videoRef.current?.removeEventListener(
+        "seek-playback",
+        seekPlaybackForAllPeers
+      );
     };
   }, []);
 
@@ -241,6 +273,7 @@ export default function HostVideoPlayerNew() {
         onManualResume={resumePlaybackForAllPeers}
         onManualForward={forwardPlaybackForAllPeers}
         onManualRewind={rewindPlaybackForAllPeers}
+        onManualSeek={seekPlaybackForAllPeers}
       ></VideoPlayer>
     </div>
   );

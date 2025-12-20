@@ -18,6 +18,7 @@ import {
   resumedPlaybackMessage,
   forwardedPlaybackMessage,
   rewindedPlaybackMessage,
+  seekPlaybackMessage,
 } from "~/toastMessages/toastMessageLibrary";
 import PeerDataChannelUtil from "~/utils/peerDataChannelUtil";
 export default function RecieverVideoPlayerNew() {
@@ -77,6 +78,17 @@ export default function RecieverVideoPlayerNew() {
       );
     }
     peerDataChannelRef.current.sendRewindSignal(userName);
+  }
+
+  function sendManualSeek(time) {
+    if (!peerRef.current || !videoRef.current) return;
+    if (!peerDataChannelRef.current) {
+      peerDataChannelRef.current = new PeerDataChannelUtil(
+        videoRef.current as HTMLVideoElement,
+        peerRef.current
+      );
+    }
+    peerDataChannelRef.current.sendSeekSignal(userName, time);
   }
 
   useEffect(() => {
@@ -140,6 +152,12 @@ export default function RecieverVideoPlayerNew() {
                   videoRef.current.dispatchEvent(new Event(data.type));
                 }
                 break;
+              case "seek-playback":
+                seekPlaybackMessage(data.userName);
+                if (videoRef.current) {
+                  videoRef.current.dispatchEvent(new Event(data.type));
+                }
+                break;
             }
           },
         });
@@ -168,6 +186,7 @@ export default function RecieverVideoPlayerNew() {
         onManualResume={sendResumeSignal}
         onManualForward={sendForwardSignal}
         onManualRewind={sendRewindSignal}
+        onManualSeek={sendManualSeek}
       />
     </div>
   );
