@@ -1,6 +1,6 @@
 import useFormSubmission from "../logic/useFormSubmission";
-import TextField from "../../../components/TextField";
-import UnifiedButton from "~/components/UnifiedButton";
+import TextField from "../../../common/components/TextField";
+import UnifiedButton from "~/common/components/UnifiedButton";
 import HomePageGreeting from "./HomePageGreeting";
 
 export default function Homepage() {

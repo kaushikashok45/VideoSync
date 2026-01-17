@@ -1,7 +1,7 @@
 import { useNavigate, useLocation } from "@remix-run/react";
-import { useContext } from "react";
+import { SyntheticEvent, useContext } from "react";
 import UserNameContext from "../../../context/UserName/UserNameContext";
-import type { formSubmissionHookResult } from "~/contracts/routes/_index/logic/formSubmission";
+import type { formSubmissionHookResult } from "~/routes/_index/contracts/formSubmission";
 
 function useFormSubmission (): formSubmissionHookResult {
     const navigate = useNavigate();
@@ -12,7 +12,7 @@ function useFormSubmission (): formSubmissionHookResult {
   let inferredRoomId = params.get("roomId");
   if (!inferredRoomId) inferredRoomId = "videoSync";
 
-  const handleSubmit = (event: Event) => {
+  const handleSubmit = (event: SyntheticEvent<HTMLInputElement>) => {
     event.stopPropagation();
     const eventTarget = event.target as HTMLInputElement;
     updateUserName(eventTarget.value);

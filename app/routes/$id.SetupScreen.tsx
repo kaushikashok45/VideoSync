@@ -3,7 +3,7 @@ import { useContext } from "react";
 import { nanoid } from "nanoid";
 import UserNameContext from "../context/UserName/UserNameContext";
 import RoomIdContext from "../context/RoomId/RoomIdContext";
-import UnifiedButton from "~/components/UnifiedButton";
+import UnifiedButton from "~/common/components/UnifiedButton";
 
 const roomId = nanoid();
 

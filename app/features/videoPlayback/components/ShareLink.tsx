@@ -4,7 +4,7 @@ import {
   ClipboardIcon,
   ClipboardDocumentCheckIcon,
 } from "@heroicons/react/24/solid";
-import Popover from "../../../components/Popover";
+import Popover from "../../../common/components/Popover";
 import ButtonComponent from "./VideoPlayerButtonComponent";
 
 function ShareIcon() {
