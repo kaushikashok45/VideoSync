@@ -1,7 +1,7 @@
 import BaseSocketManager from "./BaseSocketManager";
-import { socketParams } from "~/contracts/features/webSocket/socket";
+import { socketParams } from "~/features/webSocket/contracts/socket";
 import RecieverPeerManager from "~/features/webRTC/logic/RecieverPeerManager";
-import { SOCKET_EVENTS } from "~/contracts/features/webSocket/constants";
+import { SOCKET_EVENTS } from "~/features/webSocket/contracts/constants";
 import { SignalData } from "simple-peer";
 import { WebRTCPeer } from "~/contracts/features/webRTC/peer";
 

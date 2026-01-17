@@ -3,7 +3,7 @@ import type {
     WebRTCPeer,
     peerConfig,
 } from "../../../contracts/features/webRTC/peer";
-import { PEER_CONNECTION_EVENTS } from "../../../contracts/features/webRTC/constants";
+import { PEER_CONNECTION_EVENTS } from "../contracts/constants";
 import SimplePeer from "simple-peer";
 import PeerDataChannelUtil from "./peerDataChannelUtil";
 import { Socket } from "socket.io-client";

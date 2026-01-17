@@ -2,12 +2,12 @@ import HostPeerManager from "~/features/webRTC/logic/HostPeerManager";
 import type {
     SocketManager,
     socketParams,
-} from "../../../contracts/features/webSocket/socket";
+} from "../contracts/socket";
 import { peerSetupMeta, peerMeta } from "../../../utils/peerRegistryContract";
 import { captureStream } from "../../../utils/videoPlayerUtils";
 import BaseSocketManager from "./BaseSocketManager";
 import { SignalData } from "simple-peer";
-import { SOCKET_EVENTS } from "~/contracts/features/webSocket/constants";
+import { SOCKET_EVENTS } from "~/features/webSocket/contracts/constants";
 
 class HostSocketManager extends BaseSocketManager implements SocketManager {
     private peerMap: Map<string, peerMeta>;
