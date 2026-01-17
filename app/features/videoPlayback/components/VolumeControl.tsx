@@ -1,6 +1,6 @@
 import { SpeakerWaveIcon, SpeakerXMarkIcon } from "@heroicons/react/24/solid";
 import { useEffect, useRef, useState } from "react";
-import Popover from "../../../components/Popover";
+import Popover from "../../../common/components/Popover";
 import ButtonComponent from "./VideoPlayerButtonComponent";
 import VolumeControlProps from "../types/VolumeControlProps";
 

@@ -1,5 +1,5 @@
 import BasePeerManager from "./BasePeerManager";
-import { PEER_CONNECTION_EVENTS } from "../../../contracts/features/webRTC/constants";
+import { PEER_CONNECTION_EVENTS } from "../contracts/constants";
 import { Socket } from "socket.io-client";
 
 class RecieverPeerManager extends BasePeerManager {

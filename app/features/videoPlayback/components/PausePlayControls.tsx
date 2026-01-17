@@ -5,7 +5,7 @@ import PausePlayControlProps from "../types/PausePlayControlProps";
 import {
     pausedPlaybackMessage,
     resumedPlaybackMessage,
-} from "~/toastMessages/toastMessageLibrary";
+} from "~/features/toastMessages/logic/toastMessageLibrary";
 
 export default function PausePlayControls({
     videoRef,

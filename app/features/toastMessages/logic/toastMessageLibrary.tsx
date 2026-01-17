@@ -1,6 +1,6 @@
 import { toast } from "sonner";
-import ToastMessageView from "~/toastMessages/ToastMessageView";
-import { VIDEO_CHANGE_DURATION } from "~/Constants";
+import ToastMessageView from "~/features/toastMessages/components/ToastMessageView";
+import { VIDEO_CHANGE_DURATION } from "~/common/contracts/constants";
 
 export function joinedPartySuccessMessage(userName: string) {
   const message = "joined the party";

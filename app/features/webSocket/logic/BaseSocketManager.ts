@@ -2,10 +2,10 @@ import { peerSetupMeta } from "../../../utils/peerRegistryContract";
 import type {
     SocketManager,
     socketParams,
-} from "../../../contracts/features/webSocket/socket";
+} from "../contracts/socket";
 import { io, Socket } from "socket.io-client";
-import { joinedPartySuccessMessage } from "../../../toastMessages/toastMessageLibrary";
-import { SOCKET_EVENTS } from "~/contracts/features/webSocket/constants";
+import { joinedPartySuccessMessage } from "../../toastMessages/logic/toastMessageLibrary";
+import { SOCKET_EVENTS } from "~/features/webSocket/contracts/constants";
 
 abstract class BaseSocketManager implements SocketManager {
     protected socket: Socket;

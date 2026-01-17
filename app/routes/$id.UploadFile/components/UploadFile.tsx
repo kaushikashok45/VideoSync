@@ -1,27 +1,10 @@
-import { useContext, useEffect } from "react";
-import { useNavigate } from "@remix-run/react";
-import RoomIdContext from "../context/RoomId/RoomIdContext";
+import useFileUploadBehaviour from "../logic/useFileUploadBehaviour";
 
-export default function UploadFile() {
-  const { roomId } = useContext(RoomIdContext);
-  const navigate = useNavigate();
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    console.log(file);
-    event.target.value = "";
-    if (file) {
-      const videoURL = URL.createObjectURL(file);
-      navigate(`/${roomId}/HostVideoPlayerNew`, {
-        state: { videoURL: videoURL },
-      });
-    }
-  };
+export default function UploadFile(){
 
-  useEffect(() => {
-    console.log("Component hydrated");
-  }, []);
+    const { handleFileUpload: handleChange } = useFileUploadBehaviour();
 
-  return (
+    return (
     <div className="flex flex-col h-full w-full md:w-1/2 justify-center items-center p-[2em] mx-auto my-auto">
       <label
         htmlFor="file-upload"
