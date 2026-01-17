@@ -1,5 +1,5 @@
 import { Link } from "@remix-run/react";
-import { APP_NAME } from "~/Constants";
+import { APP_NAME } from "~/common/contracts/constants";
 
 export default function Header() {
     return (

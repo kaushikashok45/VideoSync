@@ -14,7 +14,7 @@ import Header from "~/common/components/Header";
 import { Toaster } from "sonner";
 import UserNameContextProvider from "~/context/UserName/UserNameContextProvider";
 import RoomIdContextProvider from "~/context/RoomId/RoomIdContextProvider";
-import { APP_NAME } from "~/Constants";
+import { APP_NAME } from "./common/contracts/constants";
 import Footer from "~/common/components/Footer";
 import favicon from "../public/thesyncpartyfavicon.png";
 import errorImg from "../public/errorImg.png";

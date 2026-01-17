@@ -4,7 +4,7 @@ import type {
     socketParams,
 } from "../contracts/socket";
 import { io, Socket } from "socket.io-client";
-import { joinedPartySuccessMessage } from "../../../toastMessages/toastMessageLibrary";
+import { joinedPartySuccessMessage } from "../../toastMessages/logic/toastMessageLibrary";
 import { SOCKET_EVENTS } from "~/features/webSocket/contracts/constants";
 
 abstract class BaseSocketManager implements SocketManager {

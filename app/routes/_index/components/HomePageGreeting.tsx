@@ -1,4 +1,4 @@
-import { APP_NAME } from "~/Constants";
+import { APP_NAME } from "../../../common/contracts/constants";
 
 export default function HomePageGreeting() {
     return(
