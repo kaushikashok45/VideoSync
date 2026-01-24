@@ -1,8 +1,7 @@
 import { useRef, useContext, useEffect, MutableRefObject } from "react";
 import { useLocation } from "@remix-run/react";
 import { VideoPlayer } from "../features/videoPlayback/components/VideoPlayer";
-import UserNameContext from "../context/UserName/UserNameContext";
-import RoomIdContext from "../context/RoomId/RoomIdContext";
+import SessionContext from "../context/Session/logic/SessionContext";
 import HostSocketManager from "~/features/webSocket/logic/HostSocketManager";
 
 export default function HostVideoPlayerNew() {
@@ -11,8 +10,7 @@ export default function HostVideoPlayerNew() {
     const videoRef = useRef<HTMLVideoElement>(null);
     const socketManagerRef: MutableRefObject<HostSocketManager | null> =
         useRef(null);
-    const { userName } = useContext(UserNameContext);
-    const { roomId } = useContext(RoomIdContext);
+    const { userName, roomId } = useContext(SessionContext);
 
     function pausePlaybackForAllPeers(e) {
         const initiator =
