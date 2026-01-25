@@ -1,4 +1,4 @@
-import { Link } from "@remix-run/react";
+import { Link } from "react-router";
 import { useContext } from "react";
 import UnifiedButton from "~/common/components/UnifiedButton";
 import generateRoomID from "~/common/logic/generateRoomID";

@@ -1,5 +1,5 @@
 import { useRef, useContext, useEffect, MutableRefObject } from "react";
-import { useLocation } from "@remix-run/react";
+import { useLocation } from "react-router";
 import { VideoPlayer } from "../features/videoPlayback/components/VideoPlayer";
 import SessionContext from "../context/Session/logic/SessionContext";
 import HostSocketManager from "~/features/webSocket/logic/HostSocketManager";

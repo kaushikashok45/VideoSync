@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { useNavigate } from "@remix-run/react";
+import { useNavigate } from "react-router";
 import SessionContext from "../../../context/Session/logic/SessionContext";
 import type { useFileUploadBehaviorResult } from "../contracts/UploadFile";
 

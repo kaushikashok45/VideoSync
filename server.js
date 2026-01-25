@@ -1,106 +1,175 @@
-import express from "express";
-import http from "http";
+// import express from "express";
+// import http from "http";
+// import https from "https";
+// import cors from "cors";
+// import { readFileSync } from "fs";
+// import { Server as SocketIOServer } from "socket.io";
+// import { createRequestHandler } from "react-router";
+// import * as build from "./build/server/index.js";
+// import path from "path";
+// import { fileURLToPath } from "url";
+// import { createServer } from "vite";
+
+// const mode = process.env.NODE_ENV || "development";
+// const isDev = mode !== "production";
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
+// const app = express();
+
+// // ---- Common middleware (runs in both dev & prod) ----
+
+// // CORS origins
+// const APPSERVERPORT = process.env.PORT || 5173;
+// const devOrigin = `https://localhost:${APPSERVERPORT}`;
+
+// const allowedOrigins = isDev
+//   ? [devOrigin, "https://deane-margaritaceous-jacqueline.ngrok-free.dev"]
+//   : [
+//       // In prod, use your Render URL(s) here:
+//       "https://your-render-service.onrender.com",
+//     ];
+
+// app.use(
+//   cors({
+//     origin: allowedOrigins,
+//   })
+// );
+
+// // ---- Create the server & Socket.IO ----
+
+// let server;
+// let viteServer;
+
+// if (isDev) {
+//   // Local dev: use self-signed HTTPS (your current style)
+//   const key = readFileSync("./localhost.key");
+//   const cert = readFileSync("./localhost.pem");
+//   server = https.createServer({ key, cert }, app);
+
+//   viteServer = await createServer({
+//     server: {
+//       middlewareMode: {
+//         server: server,
+//       },
+//       hmr: true,
+//     },
+//   });
+//   app.use(viteServer.middlewares);
+// } else {
+//   // Production on Render:
+//   // Render already terminates HTTPS, so **plain HTTP** here.
+//   app.use(express.static("./build/client"));
+//   app.use(
+//     "/assets",
+//     express.static(path.join(__dirname, "build/client/assets"), {
+//       immutable: true,
+//       maxAge: "1y",
+//     })
+//   );
+//   server = http.createServer(app);
+// }
+
+// app.all(
+//   "*",
+//   createRequestHandler({
+//     build: isDev
+//       ? () => viteServer.ssrLoadModule("virtual:react-router/server-build")
+//       : build,
+//     mode,
+//   })
+// );
+
+// if (process.env.NODE_ENV === "production") {
+//   const port = process.env.PORT || 3000;
+//   server.listen(port, () => {
+//     console.log(`Server listening on port ${port} (production)`);
+//   });
+// } else {
+//   server.listen(APPSERVERPORT, () => {
+//     console.log(`Dev server listening on https://localhost:${APPSERVERPORT}`);
+//   });
+// }
+
+// // Attach Socket.IO to the SAME server in both envs
+// const io = new SocketIOServer(server, {
+//   cors: {
+//     origin: allowedOrigins,
+//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//   },
+// });
+
+// // ---- Socket.IO handlers ----
+
+// io.on("connection", (socket) => {
+//   console.log("A user connected on socket id : ", socket.id);
+
+//   socket.on("video event", (msg) => {
+//     console.log(`Received video event from ${socket.id} with message : `, msg);
+//   });
+
+//   socket.on("join-room", (data) => {
+//     const { roomId, userName } = data;
+//     socket.join(roomId);
+//     console.log(`${socket.id} joined room ${roomId}`);
+//     socket.to(roomId).emit("user-joined", {
+//       peerId: socket.id,
+//       userName,
+//     });
+//     io.to(socket.id).emit("socket-id-meta", {
+//       peerId: socket.id,
+//     });
+//   });
+
+//   socket.on("signal", (data) => {
+//     console.log(`Received signal from ${socket.id} : `, data);
+//     const signalData = {
+//       peerId: socket.id,
+//       signalData: data.signalData,
+//     };
+//     let logMsg = "";
+//     if (data.to) {
+//       io.to(data.to).emit("signal", signalData);
+//       logMsg = `signal from socket id : ${socket.id} emitted to peer: ${data.to}`;
+//     } else {
+//       const room = Array.from(socket.rooms).find((r) => r !== socket.id);
+//       if (room) {
+//         socket.to(room).emit("signal", signalData);
+//         logMsg = `signal from socket id : ${socket.id} emitted to room ${room}`;
+//       }
+//     }
+//     console.log(logMsg);
+//   });
+
+//   socket.on("disconnect", () => {
+//     console.log("User disconnected from socket id : ", socket.id);
+//     const room = Array.from(socket.rooms).find((r) => r !== socket.id);
+//     if (room) {
+//       socket.to(room).emit("user-left", `${socket.id} has left the room`);
+//     }
+//   });
+// });
+
 import https from "https";
-import cors from "cors";
-import { readFileSync } from "fs";
+import fs from "fs";
+import express from "express";
+import { createRequestHandler } from "@react-router/express";
+import process from "process";
 import { Server as SocketIOServer } from "socket.io";
-import { createRequestHandler } from "@remix-run/express";
-import * as build from "./build/server/index.js";
 import path from "path";
-import { fileURLToPath } from "url";
 import { createServer } from "vite";
 
-const mode = process.env.NODE_ENV || "development";
-const isDev = mode !== "production";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const app = express();
 
-// ---- Common middleware (runs in both dev & prod) ----
+const port = process.env.PORT || 5173;
 
-// CORS origins
-const APPSERVERPORT = process.env.PORT || 5173;
-const devOrigin = `https://localhost:${APPSERVERPORT}`;
+function attachSocketIOServer(server) {
+    const io = new SocketIOServer(server, {
+                cors: {
+                 origin: `https://localhost:${port}`,
+                 credentials: true,
+        },
+    });
 
-const allowedOrigins = isDev
-  ? [devOrigin, "https://deane-margaritaceous-jacqueline.ngrok-free.dev"]
-  : [
-      // In prod, use your Render URL(s) here:
-      "https://your-render-service.onrender.com",
-    ];
-
-app.use(
-  cors({
-    origin: allowedOrigins,
-  })
-);
-
-// ---- Create the server & Socket.IO ----
-
-let server;
-let viteServer;
-
-if (isDev) {
-  // Local dev: use self-signed HTTPS (your current style)
-  const key = readFileSync("./localhost.key");
-  const cert = readFileSync("./localhost.pem");
-  server = https.createServer({ key, cert }, app);
-
-  viteServer = await createServer({
-    server: {
-      middlewareMode: {
-        server: server,
-      },
-      hmr: true,
-    },
-  });
-  app.use(viteServer.middlewares);
-} else {
-  // Production on Render:
-  // Render already terminates HTTPS, so **plain HTTP** here.
-  app.use(express.static("./build/client"));
-  app.use(
-    "/assets",
-    express.static(path.join(__dirname, "build/client/assets"), {
-      immutable: true,
-      maxAge: "1y",
-    })
-  );
-  server = http.createServer(app);
-}
-
-app.all(
-  "*",
-  createRequestHandler({
-    build: isDev
-      ? () => viteServer.ssrLoadModule("virtual:remix/server-build")
-      : build,
-    mode,
-  })
-);
-
-if (process.env.NODE_ENV === "production") {
-  const port = process.env.PORT || 3000;
-  server.listen(port, () => {
-    console.log(`Server listening on port ${port} (production)`);
-  });
-} else {
-  server.listen(APPSERVERPORT, () => {
-    console.log(`Dev server listening on https://localhost:${APPSERVERPORT}`);
-  });
-}
-
-// Attach Socket.IO to the SAME server in both envs
-const io = new SocketIOServer(server, {
-  cors: {
-    origin: allowedOrigins,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  },
-});
-
-// ---- Socket.IO handlers ----
-
-io.on("connection", (socket) => {
+    io.on("connection", (socket) => {
   console.log("A user connected on socket id : ", socket.id);
 
   socket.on("video event", (msg) => {
@@ -147,4 +216,48 @@ io.on("connection", (socket) => {
       socket.to(room).emit("user-left", `${socket.id} has left the room`);
     }
   });
+});
+}
+
+const app = express();
+
+
+const IS_DEVELOPMENT = process.env.NODE_ENV !== "production";
+let server;
+let viteServer;
+ if (IS_DEVELOPMENT) {
+  const key = fs.readFileSync("./localhost.key");
+  const cert = fs.readFileSync("./localhost.pem");
+  server = https.createServer({ key, cert }, app);
+
+  viteServer = await createServer({
+    server: {
+      middlewareMode: {
+        server: server,
+      },
+      hmr: true,
+    },
+    mode: "development",
+  });
+  app.use(viteServer.middlewares);
+}
+else{
+  server = https.createServer(app);
+}
+
+
+attachSocketIOServer(server);
+app.use(express.static("./build/client"));
+
+app.use(
+  createRequestHandler({
+    build: IS_DEVELOPMENT
+      ? () => viteServer.ssrLoadModule("virtual:react-router/server-build")
+      : await import("./build/server/index.js"),
+    assetsBuildDirectory: path.resolve("~/build/client")
+  })
+);
+
+server.listen(port, () => {
+  console.log(`HTTPS + React Router + Socket.IO on https://localhost:${port}`);
 });
