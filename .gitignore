@@ -3,3 +3,13 @@ node_modules
 /.cache
 /build
 .env
+.DS_Store
+*.pem
+*.key
+*.cnf
+/.react-router
+vite.config.ts.timestamp*
+*.csr
+.DS_Store
+*.gz
+
