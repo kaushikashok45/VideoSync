@@ -6,8 +6,7 @@ import {
     useEffect,
 } from "react";
 import { VideoPlayer } from "../features/videoPlayback/components/VideoPlayer";
-import UserNameContext from "../context/UserName/UserNameContext";
-import RoomIdContext from "../context/RoomId/RoomIdContext";
+import SessionContext from "../context/Session/logic/SessionContext";
 import RecieverSocketManager from "~/features/webSocket/logic/RecieverSocketManager";
 export default function RecieverVideoPlayerNew() {
     const videoRef: MutableRefObject<HTMLVideoElement | null> = useRef(null);
@@ -17,8 +16,7 @@ export default function RecieverVideoPlayerNew() {
         currentTime: 0,
         duration: 0,
     });
-    const { userName } = useContext(UserNameContext);
-    const { roomId } = useContext(RoomIdContext);
+    const { roomId, userName } = useContext(SessionContext);
 
     function sendPauseSignal() {
         if (!socketManagerRef.current || !videoRef.current) return;
