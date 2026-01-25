@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from "@remix-run/react";
+import { useNavigate, useLocation } from "react-router";
 import { SyntheticEvent, useContext } from "react";
 import SessionContext from "../../../context/Session/logic/SessionContext";
 import type { formSubmissionHookResult } from "~/routes/_index/contracts/formSubmission";

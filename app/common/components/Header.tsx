@@ -1,4 +1,4 @@
-import { Link } from "@remix-run/react";
+import { Link } from "react-router";
 import { APP_NAME } from "~/common/contracts/constants";
 
 export default function Header() {
