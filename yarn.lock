@@ -6908,13 +6908,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"remix@npm:^2.17.2":
-  version: 2.17.2
-  resolution: "remix@npm:2.17.2"
-  checksum: 10c0/cb10e9ce4a0663c81547f34f5dc25e8a236fa7a7807b1f78d21a6c74c52fd88396c50e41f4cc5ee8f0a41a16f9878166af1571d20886660e655dacef4d32cf00
-  languageName: node
-  linkType: hard
-
 "resolve-from@npm:^4.0.0":
   version: 4.0.0
   resolution: "resolve-from@npm:4.0.0"
@@ -8403,7 +8396,6 @@ __metadata:
     react-icons: "npm:^5.5.0"
     react-router: "npm:^7.0.0"
     react-router-dom: "npm:^7.13.0"
-    remix: "npm:^2.17.2"
     simple-peer: "npm:^9.11.1"
     socket.io: "npm:^4.8.1"
     socket.io-client: "npm:^4.8.1"
