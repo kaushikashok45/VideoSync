@@ -24,6 +24,11 @@ module.exports = {
   // Base config
   extends: ["eslint:recommended"],
 
+  plugins: ['react-compiler'],
+  rules: {
+    'react-compiler/react-compiler': 'error',
+  },
+
   overrides: [
     // React
     {

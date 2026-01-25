@@ -7,8 +7,8 @@ import {
     ScrollRestoration,
     isRouteErrorResponse,
     useRouteError,
+    LinksFunction
 } from "react-router";
-import type { LinksFunction } from "react-router";
 import fontsUrl from "./styles/fonts.css?url";
 import styles from "./tailwind.css?url";
 import Header from "~/common/components/Header";
