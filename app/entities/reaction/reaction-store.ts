@@ -20,18 +20,23 @@ export type ReactionStore = StoreApi<ReactionState>;
 type SetFn = ReactionStore["setState"];
 type GetFn = ReactionStore["getState"];
 
+interface ReactionActionCtx {
+  set: SetFn;
+  get: GetFn;
+  maxConcurrent: number;
+}
+
 function capped(list: Reaction[], max: number): Reaction[] {
   if (list.length <= max) return list;
   return list.slice(list.length - max);
 }
 
 function sendAction(
-  set: SetFn,
-  get: GetFn,
-  maxConcurrent: number,
+  ctx: ReactionActionCtx,
   emoji: string,
   senderName: string,
 ): Reaction | undefined {
+  const { set, get, maxConcurrent } = ctx;
   if (emoji.trim() === "") return undefined;
   const reaction: Reaction = {
     senderId: LOCAL_SENDER_ID,
@@ -70,7 +75,7 @@ export function createReactionStore(
   return createStore<ReactionState>()((set, get) => ({
     active: [],
     send: (emoji, senderName) =>
-      sendAction(set, get, maxConcurrent, emoji, senderName),
+      sendAction({ set, get, maxConcurrent }, emoji, senderName),
     burst: (r) => burstAction(set, get, maxConcurrent, r),
     expireSender: (senderId) => expireSenderAction(set, get, senderId),
     expireAll: () => expireAllAction(set),

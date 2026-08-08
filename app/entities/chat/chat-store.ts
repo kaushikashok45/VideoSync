@@ -18,18 +18,23 @@ export type ChatStore = StoreApi<ChatState>;
 type SetFn = ChatStore["setState"];
 type GetFn = ChatStore["getState"];
 
+interface ChatActionCtx {
+  set: SetFn;
+  get: GetFn;
+  maxMessages: number;
+}
+
 function capped(list: ChatMessage[], max: number): ChatMessage[] {
   if (list.length <= max) return list;
   return list.slice(list.length - max);
 }
 
 function sendAction(
-  set: SetFn,
-  get: GetFn,
-  maxMessages: number,
+  ctx: ChatActionCtx,
   text: string,
   senderName: string,
 ): ChatMessage | undefined {
+  const { set, get, maxMessages } = ctx;
   if (text.trim() === "") return undefined;
   const message: ChatMessage = {
     id: crypto.randomUUID(),
@@ -58,7 +63,7 @@ export function createChatStore(deps: ChatStoreDeps = {}): ChatStore {
   return createStore<ChatState>()((set, get) => ({
     messages: [],
     send: (text, senderName) =>
-      sendAction(set, get, maxMessages, text, senderName),
+      sendAction({ set, get, maxMessages }, text, senderName),
     append: (m) => appendAction(set, get, maxMessages, m),
   }));
 }
