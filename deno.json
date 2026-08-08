@@ -1,0 +1,79 @@
+{
+  "nodeModulesDir": "manual",
+  "sloppyImports": true,
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "deno.ns"
+    ],
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "tasks": {
+    "setuphttps": "openssl req -x509 -newkey rsa:2048 -nodes -keyout localhost.key -out localhost.pem -days 365 -config localhost.conf -extensions v3_req",
+    "dev": "deno run -A server.js --NODE_ENV=dev",
+    "build": "deno run -A node_modules/.bin/react-router build",
+    "start": "NODE_ENV=production deno run -A server.js",
+    "lint": "deno lint",
+    "fmt": "deno fmt",
+    "check": "deno check --sloppy-imports app server.js",
+    "test": "deno test -A --sloppy-imports",
+    "verify": "deno fmt --check && deno lint && deno check --sloppy-imports app server.js && deno test -A --sloppy-imports"
+  },
+  "fmt": {
+    "exclude": [
+      "node_modules",
+      "build",
+      ".react-router",
+      "docs"
+    ]
+  },
+  "lint": {
+    "exclude": [
+      "node_modules",
+      "build",
+      ".react-router"
+    ],
+    "rules": {
+      "tags": [
+        "recommended"
+      ]
+    }
+  },
+  "imports": {
+    "@std/assert": "jsr:@std/assert@^1.0.19",
+    "~/": "./app/",
+    "react": "npm:react@^19.0.0",
+    "react-dom": "npm:react-dom@^19.0.0",
+    "react-router": "npm:react-router@^7.13.0",
+    "react-router-dom": "npm:react-router-dom@^7.13.0",
+    "@react-router/express": "npm:@react-router/express@^7.13.0",
+    "@react-router/node": "npm:@react-router/node@^7.13.0",
+    "@react-router/fs-routes": "npm:@react-router/fs-routes@^7.13.0",
+    "@react-router/dev": "npm:@react-router/dev@^7.13.0",
+    "@react-router/dev/config": "npm:@react-router/dev@^7.13.0/config",
+    "@react-router/dev/vite": "npm:@react-router/dev@^7.13.0/vite",
+    "@react-router/dev/routes": "npm:@react-router/dev@^7.13.0/routes",
+    "express": "npm:express@4.20.0",
+    "socket.io": "npm:socket.io@^4.8.1",
+    "socket.io-client": "npm:socket.io-client@^4.8.1",
+    "simple-peer": "npm:simple-peer@^9.11.1",
+    "nanoid": "npm:nanoid@^5.1.6",
+    "sonner": "npm:sonner@^2.0.6",
+    "isbot": "npm:isbot@^4.1.0",
+    "@heroicons/react": "npm:@heroicons/react@^2.2.0",
+    "vite": "npm:vite@^6.0.0",
+    "vite-tsconfig-paths": "npm:vite-tsconfig-paths@^6.0.5",
+    "tailwindcss": "npm:tailwindcss@^3.4.4",
+    "autoprefixer": "npm:autoprefixer@^10.4.19",
+    "postcss": "npm:postcss@^8.4.38",
+    "babel-plugin-react-compiler": "npm:babel-plugin-react-compiler@^1.0.0",
+    "@types/react": "npm:@types/react@^19.0.0",
+    "@types/react-dom": "npm:@types/react-dom@^19.0.0",
+    "@types/express": "npm:@types/express@^5.0.3",
+    "@types/simple-peer": "npm:@types/simple-peer@^9.11.8"
+  }
+}

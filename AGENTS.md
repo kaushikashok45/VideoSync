@@ -110,10 +110,10 @@ and functions into a single file.
 - **Entities get their own file** (`member.ts` for the `Member` entity, not a
   grab-bag of `member`, `room`, and `message`).
 - A contract module is a directory of these small files, not one big
-  `contracts/types.ts`. Do not create `utils.ts`/`types.ts`/`helpers.ts`
-  dumping grounds.
-- Exception: a tiny private helper used only by one module may live beside it;
-  a cohesive enum + its consumer type may share a file only when they are one
+  `contracts/types.ts`. Do not create `utils.ts`/`types.ts`/`helpers.ts` dumping
+  grounds.
+- Exception: a tiny private helper used only by one module may live beside it; a
+  cohesive enum + its consumer type may share a file only when they are one
   concept (e.g. `MemberRole` inside `member.ts`). When in doubt, split.
 
 ### Naming
@@ -165,6 +165,25 @@ and functions into a single file.
 - Fonts: `yesteryear`, `overpass`, `sans` are configured in
   `tailwind.config.ts`.
 
+### Coding standards & review
+
+- **`docs/CODING_STANDARDS.md` is authoritative.** It defines size/structure
+  limits (function body ≤ 20 lines, file ≤ 150 lines, ≤ 2 indentation levels
+  past the body, cyclomatic complexity ≤ 8, ≤ 4 params) and a list of code
+  smells.
+- `deno lint` uses the recommended tag as errors. `no-undef` is deliberately off
+  (noise on browser/Node globals); the reviewer catches undefined identifiers
+  instead.
+- **Every completed task is reviewed by a secondary reviewer agent** before it
+  is accepted: a fresh, independent pass that checks size limits, smells, FSD
+  layer rules, Tell-Don't-Ask, SOLID, error-model compliance, and test coverage
+  depth (all five categories). Blocking findings must be fixed; non-blocking
+  ones are logged.
+- **PRs are feature-sized and small enough to review in one sitting.** A PR is
+  rejected if it exceeds ~300 changed lines or ~6 files, or mixes unrelated
+  concerns. Oversized work must be split before review.
+- Every PR must pass `deno task verify` before review.
+
 ## Testing
 
 - Deno's built-in test runner (`deno test`). No Jest/Vitest.
@@ -177,18 +196,19 @@ and functions into a single file.
 
 ### Test coverage depth (mandatory)
 
-Every module's tests must cover **all five categories** — not just the happy path:
+Every module's tests must cover **all five categories** — not just the happy
+path:
 
 1. **Happy path** — the intended success flow.
 2. **Sad path** — expected failures (validation rejected, not found, permission
    denied, rate-limited, etc.).
 3. **Edge cases** — empty/null input, zero values, boundary values, first/last
    items, concurrent/repeated calls.
-4. **Mutation cases** — tests that would FAIL if the implementation were
-   subtly changed in a way that breaks the contract (e.g. swapping `>`/`>=`,
-   dropping a guard, off-by-one, wrong clamp direction, dropping a field from a
-   payload). Each critical branch of the code should have a test that pins its
-   exact behavior.
+4. **Mutation cases** — tests that would FAIL if the implementation were subtly
+   changed in a way that breaks the contract (e.g. swapping `>`/`>=`, dropping a
+   guard, off-by-one, wrong clamp direction, dropping a field from a payload).
+   Each critical branch of the code should have a test that pins its exact
+   behavior.
 5. **Logical limits** — the boundaries of the code's behavior: capacity limits,
    rate-limit windows, drift thresholds, clamp ranges, maximum message lengths,
    reconnect attempts. Test exactly-at-limit and just-beyond-limit.
