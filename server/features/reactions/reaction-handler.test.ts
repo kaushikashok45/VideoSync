@@ -16,7 +16,11 @@ function silentLogger() {
 async function makeHarness() {
   const httpServer: Server = createServer();
   const io = new SocketIOServer(httpServer, { cors: { origin: "*" } });
-  const rooms = new RoomStore({ maxMembers: 15, now: () => Date.now(), codeLength: 5 });
+  const rooms = new RoomStore({
+    maxMembers: 15,
+    now: () => Date.now(),
+    codeLength: 5,
+  });
   new RoomHandler({ io, rooms, logger: silentLogger() }).attach();
   new ReactionHandler({ io, logger: silentLogger() }).attach();
   await new Promise<void>((resolve) => httpServer.listen(0, resolve));
@@ -25,7 +29,9 @@ async function makeHarness() {
 
   function connect(): Promise<Socket> {
     return new Promise((resolve) => {
-      const client: Socket = ClientIO(url, { transports: ["websocket", "polling"] });
+      const client: Socket = ClientIO(url, {
+        transports: ["websocket", "polling"],
+      });
       client.on("connect", () => resolve(client));
     });
   }
@@ -36,11 +42,17 @@ async function makeHarness() {
 
   async function joinPair() {
     const host = await connect();
-    const createdP = waitFor<{ room: { code: string } }>(host, SOCKET_EVENTS.ROOM_CREATED);
+    const createdP = waitFor<{ room: { code: string } }>(
+      host,
+      SOCKET_EVENTS.ROOM_CREATED,
+    );
     host.emit(SOCKET_EVENTS.ROOM_CREATE, { name: "Alice" });
     const { room } = await createdP;
     const viewer = await connect();
-    const joinedP = waitFor<Record<string, unknown>>(viewer, SOCKET_EVENTS.ROOM_JOINED);
+    const joinedP = waitFor<Record<string, unknown>>(
+      viewer,
+      SOCKET_EVENTS.ROOM_JOINED,
+    );
     viewer.emit(SOCKET_EVENTS.ROOM_JOIN, { code: room.code, name: "Bob" });
     await joinedP;
     return { host, viewer };
@@ -54,12 +66,19 @@ Deno.test("reaction is relayed to the room", async () => {
   const h = await makeHarness();
   try {
     const { host, viewer } = await h.joinPair();
-    const reactionP = h.waitFor<{ emoji: string; senderName: string }>(host, SOCKET_EVENTS.REACTION);
-    viewer.emit(SOCKET_EVENTS.REACTION_SEND, { emoji: "🔥", senderName: "Bob" });
+    const reactionP = h.waitFor<{ emoji: string; senderName: string }>(
+      host,
+      SOCKET_EVENTS.REACTION,
+    );
+    viewer.emit(SOCKET_EVENTS.REACTION_SEND, {
+      emoji: "🔥",
+      senderName: "Bob",
+    });
     const reaction = await reactionP;
     assertEquals(reaction.emoji, "🔥");
     assertEquals(reaction.senderName, "Bob");
-    host.disconnect(); viewer.disconnect();
+    host.disconnect();
+    viewer.disconnect();
   } finally {
     h.io.close();
     await new Promise<void>((r) => h.httpServer.close(() => r()));
@@ -72,11 +91,17 @@ Deno.test("disallowed emoji is ignored", async () => {
   try {
     const { host, viewer } = await h.joinPair();
     let emitted = false;
-    host.on(SOCKET_EVENTS.REACTION, () => { emitted = true; });
-    viewer.emit(SOCKET_EVENTS.REACTION_SEND, { emoji: "🦄", senderName: "Bob" });
+    host.on(SOCKET_EVENTS.REACTION, () => {
+      emitted = true;
+    });
+    viewer.emit(SOCKET_EVENTS.REACTION_SEND, {
+      emoji: "🦄",
+      senderName: "Bob",
+    });
     await new Promise((r) => setTimeout(r, 200));
     assertEquals(emitted, false);
-    host.disconnect(); viewer.disconnect();
+    host.disconnect();
+    viewer.disconnect();
   } finally {
     h.io.close();
     await new Promise<void>((r) => h.httpServer.close(() => r()));
@@ -89,11 +114,17 @@ Deno.test("missing emoji is ignored", async () => {
   try {
     const { host, viewer } = await h.joinPair();
     let emitted = false;
-    host.on(SOCKET_EVENTS.REACTION, () => { emitted = true; });
-    viewer.emit(SOCKET_EVENTS.REACTION_SEND, { emoji: undefined, senderName: "Bob" });
+    host.on(SOCKET_EVENTS.REACTION, () => {
+      emitted = true;
+    });
+    viewer.emit(SOCKET_EVENTS.REACTION_SEND, {
+      emoji: undefined,
+      senderName: "Bob",
+    });
     await new Promise((r) => setTimeout(r, 200));
     assertEquals(emitted, false);
-    host.disconnect(); viewer.disconnect();
+    host.disconnect();
+    viewer.disconnect();
   } finally {
     h.io.close();
     await new Promise<void>((r) => h.httpServer.close(() => r()));
@@ -107,11 +138,14 @@ Deno.test("reaction before joining is dropped", async () => {
     const { host } = await h.joinPair();
     const stray = await h.connect();
     let emitted = false;
-    host.on(SOCKET_EVENTS.REACTION, () => { emitted = true; });
+    host.on(SOCKET_EVENTS.REACTION, () => {
+      emitted = true;
+    });
     stray.emit(SOCKET_EVENTS.REACTION_SEND, { emoji: "🔥", senderName: "L" });
     await new Promise((r) => setTimeout(r, 200));
     assertEquals(emitted, false);
-    host.disconnect(); stray.disconnect();
+    host.disconnect();
+    stray.disconnect();
   } finally {
     h.io.close();
     await new Promise<void>((r) => h.httpServer.close(() => r()));
