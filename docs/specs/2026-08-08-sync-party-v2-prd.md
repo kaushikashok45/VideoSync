@@ -32,7 +32,8 @@ room model, and the UI is redesigned around a modern dark streaming aesthetic.
 | Capacity | Up to ~15 viewers per room (v1) |
 | Deployment | Plain HTTP behind a platform TLS proxy (Render/Fly/Railway) |
 | Client state | Zustand for realtime state + React Context for app/session state |
-| UI direction | Modern dark streaming aesthetic (designed in Phase 2) |
+| UI direction | Modern dark streaming aesthetic, designed in Phase 2 via `impeccable`, following **Apple Human Interface Guidelines** for the **entire** frontend (not only error UI) |
+| Error handling | Standardized, typed errors; fail-fast; recoverable errors always offer a recovery path; user-facing messages are human-readable with a stable error code |
 
 ### 1.2 Goals / Non-goals
 
@@ -118,7 +119,7 @@ room model, and the UI is redesigned around a modern dark streaming aesthetic.
 ### 2.9 Visual Redesign (Phase 2) — via `impeccable`
 | # | Feature | Detail | Priority |
 |---|---------|--------|----------|
-| F30 | Dark streaming aesthetic | Palette, typography, component kit, video shell, chat/reactions overlay, responsive mobile. | P2 |
+| F30 | Dark streaming aesthetic | Full frontend design system following **Apple Human Interface Guidelines**: palette, typography, spacing, motion, component kit, video shell, chat/reactions overlay, error surfaces (§3.4.5), responsive mobile. | P2 |
 
 **Priority legend:** P0 = must ship · P1 = strong nice-to-have · P2 = Phase 2 UI.
 
@@ -178,12 +179,107 @@ server/
 6. Chat/reactions → `socket.emit('chat.message')` → server relays to room → all clients append.
 7. Host disconnect → `room-store` terminates room → all viewers get `room.ended` → navigate home.
 
-### 3.4 Error handling
-- **Transport:** Socket.IO reconnect with backoff; viewer rejoins room automatically.
-- **Sync:** drift correction tolerates bounded skew; viewers wait for `playback.ready` if media loads late.
-- **Peer failure:** one retry, then mark viewer "degraded"; chat still works.
-- **Room ended:** toast + redirect home.
-- **Validation:** server validates room-code format, member names, message length, rate limits.
+### 3.4 Standardized error handling
+
+Error handling is a first-class, standardized concern with **one error model** used by
+the server, the client, and the UI.
+
+#### 3.4.1 Error model (`shared/contracts`)
+
+Every error is a typed object:
+
+```
+AppError {
+  code: ErrorCode        // stable, machine-readable, e.g. "ROOM_NOT_FOUND"
+  message: string        // human-readable, non-technical, actionable
+  recovery?: Recovery    // how the user can recover, when recoverable
+  detail?: Record<string, unknown>  // structured context for logging
+}
+```
+
+- `code` is a stable string enum (no magic numbers). Server and client share the enum.
+- `message` is written for a person: what happened, why, and what to do — in one or two
+  plain sentences. No jargon, no stack traces.
+- Error codes are namespaced by domain (see §3.4.3).
+
+#### 3.4.2 Fail-fast principle
+
+- Validate at the boundary immediately. If input or state is invalid, throw a typed
+  `AppError` at the first point of failure — do not continue with corrupted state.
+- On the client, fail the current action fast and surface it; do not silently swallow.
+- On the server, a failed request/event handler rejects with a typed error that is
+  serialized and sent back to the caller.
+- Unhandled errors are caught once at the boundary (root error boundary / socket
+  error handler) and rendered through the standard error UI — never left half-way.
+
+#### 3.4.3 Error code taxonomy
+
+| Domain | Prefix | Examples |
+|---|---|---|
+| Validation | `VALIDATION_` | `VALIDATION_NAME_EMPTY`, `VALIDATION_CODE_MALFORMED`, `VALIDATION_URL_UNSUPPORTED` |
+| Room | `ROOM_` | `ROOM_NOT_FOUND`, `ROOM_FULL`, `ROOM_LOCKED`, `ROOM_ENDED`, `ROOM_PERMISSION_DENIED` |
+| Media | `MEDIA_` | `MEDIA_UPLOAD_FAILED`, `MEDIA_CAPTURE_FAILED`, `MEDIA_UNSUPPORTED_CODEC`, `MEDIA_URL_UNPLAYABLE` |
+| Sync | `SYNC_` | `SYNC_DRIFT_OUT_OF_BOUNDS`, `SYNC_MEDIA_NOT_READY` |
+| Transport | `TRANSPORT_` | `TRANSPORT_DISCONNECTED`, `TRANSPORT_RECONNECT_FAILED`, `TRANSPORT_PEER_FAILED` |
+| Server | `SERVER_` | `SERVER_INTERNAL`, `SERVER_RATE_LIMITED`, `SERVER_ROOM_CAPACITY` |
+
+#### 3.4.4 Recoverable vs non-recoverable
+
+Every error declares whether it is **recoverable** and, if so, its **recovery action**:
+
+- **Recoverable** — the error carries a `recovery` descriptor with a concrete user
+  action (retry, reconnect, re-join, pick a different source, contact-less retry).
+  The UI renders the recovery affordance inline with the message.
+  - Transport: auto-reconnect with backoff → "Reconnecting…" state; on final failure a
+    **Reconnect** button.
+  - Peer failure: retry once, then a "Video degraded" banner + **Retry stream** action.
+  - Upload failure: inline error on the picker with **Choose another file**.
+  - Drift out of bounds: automatic re-align; if it recurs, banner with **Resync**.
+- **Non-recoverable** — the error terminates the current flow:
+  - `ROOM_ENDED`: clear explanation + **Back to home**.
+  - Unsupported browser/codec: **blocked** screen explaining the requirement.
+- When recovery succeeds, the error UI clears; when a recoverable error is left
+  unresolved, it stays visible until the user acts or dismisses (if dismissible).
+
+#### 3.4.5 Error UI
+
+Error UI is designed with the rest of the app (Apple HIG) and rendered through
+`shared/ui-kit`. There are four graded surfaces:
+
+| Severity | Surface | Used for | Apple HIG guidance |
+|---|---|---|---|
+| Inline | Field/row error text + icon | Form validation (`VALIDATION_*`) | Inline error under the field; concise; helper text |
+| Banner | Persistent dismissible banner | Recoverable media/sync/peer errors | Alert-like, actionable; one primary action |
+| Toast | Transient toast | Transient recoverable notices (e.g. "Reconnected") | Short-lived, non-blocking |
+| Screen | Full error screen (error boundary) | Blocking/non-recoverable (room ended, transport dead, unsupported) | Clear explanation + guidance; primary action to recover or leave |
+
+**Message content rules (HIG-aligned):**
+- **Explain what happened** (state it plainly), **why**, and **what the user can do**.
+- Never show raw error codes or stack traces to the user; show the friendly `message`
+  and the `code` as a small, subdued, copyable diagnostic line (e.g.
+  `Code: ROOM_NOT_FOUND`) for support.
+- Keep language calm, specific, and non-blaming. No "Ooops", no exclamation overuse.
+- The recovery action is the visible primary button/affordance.
+
+#### 3.4.6 Where errors are caught
+
+- **Server:** each socket handler and route wraps in a typed error boundary; sends
+  `{ error: AppError }` to the caller; logs with `detail` via `shared/logger`.
+- **Client data layer:** `shared/api` normalizes socket/HTTP errors into `AppError`
+  before they reach components.
+- **React:** route + root error boundaries render the full-screen surface; feature-level
+  errors use inline/banner/toast surfaces via `shared/ui-kit`.
+
+#### 3.4.7 Fail-fast recovery flow (worked example — peer drop)
+
+1. Host detects peer `TRANSPORT_PEER_FAILED` (recoverable, `recovery: reconnect`).
+2. Sync engine flags viewer "degraded"; chat unaffected.
+3. Client retries once automatically. If success → toast "Reconnected" → state clears.
+4. If final failure → persistent banner "We lost the stream for <name> — Retry".
+5. If user retries and fails again → banner updates; user can continue watching
+   others / return home. Non-blocking.
+
+
 
 ---
 
@@ -243,6 +339,23 @@ the highest priority; never sacrifice it for speed.**
 - Keep client socket events and server handlers in sync; a contract change must update both sides.
 - Payloads are typed and validated at the boundary.
 
+### 4.8 Error handling (mandatory)
+- **One error model, everywhere.** Throw/serialize typed `AppError` objects
+  (§3.4.1) — never raw strings or bare `Error` with ad-hoc messages.
+- **Fail fast.** Validate at the first boundary and throw a typed error immediately.
+  Do not continue with invalid or corrupted state. Do not silently swallow errors.
+- **Recoverable errors must carry a recovery path.** If it can be recovered, define
+  the `recovery` action and surface it in the UI. Never leave a recoverable failure
+  with no way forward.
+- **User-facing messages are human-readable.** What happened, why, what to do —
+  plain language, no jargon, no stack traces. The stable error `code` is shown only
+  as a small subdued diagnostic line (e.g. `Code: ROOM_NOT_FOUND`).
+- **Errors are caught once at the boundary.** Route/root error boundaries render the
+  full-screen surface; feature errors use inline/banner/toast (§3.4.5). No partial,
+  half-rendered failure states.
+- **Every error code is a tested constant.** Adding an error means adding its enum
+  member, its mapping to a friendly message, and its test — all in the same change.
+
 ---
 
 ## 5. Testing Strategy
@@ -261,17 +374,21 @@ Test files live next to the code (`foo.test.ts` beside `foo.ts`). Use `@std/asse
 
 ### Phase 1 — Backend (this PRD's first deliverable)
 1. `server/` scaffold (app, env, healthz, logger).
-2. `entities/room-store` + `entities/playback` (pure, TDD).
-3. `features/signaling` (join/signal/leave) + shared contracts.
-4. `features/room` (create/lock/terminate), `features/chat`, `features/reactions`.
-5. Permissions model (grant/revoke/request-approve) in `entities/member`.
-6. Integration + light E2E.
-7. Client updated to typed contracts (functional, minimal UI).
+2. `shared/contracts` error model (`AppError`, error-code enum) + `shared/logger`.
+3. `entities/room-store` + `entities/playback` (pure, TDD).
+4. `features/signaling` (join/signal/leave) + shared contracts.
+5. `features/room` (create/lock/terminate), `features/chat`, `features/reactions`.
+6. Permissions model (grant/revoke/request-approve) in `entities/member`.
+7. Error surfaces in `shared/ui-kit` (inline/banner/toast/screen) wired to the error model.
+8. Integration + light E2E (including a couple of error-path tests).
+9. Client updated to typed contracts (functional, minimal UI).
 
 ### Phase 2 — UI
 1. FSD frontend restructure + Zustand store wiring.
-2. Design system via `impeccable` (dark streaming aesthetic).
-3. Full visual polish + responsive.
+2. Full design system via `impeccable`, following **Apple Human Interface Guidelines**
+   for the entire frontend (palette, type, spacing, motion, components, video shell,
+   chat/reactions overlay, error surfaces, responsive mobile).
+3. Full visual polish + responsive + HIG consistency pass.
 
 ---
 
