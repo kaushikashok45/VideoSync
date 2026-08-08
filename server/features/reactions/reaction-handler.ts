@@ -17,8 +17,9 @@ export class ReactionHandler {
 
   attach(): void {
     this.deps.io.on("connection", (socket) => {
-      socket.on(SOCKET_EVENTS.REACTION_SEND, (p: ReactionSendPayload) =>
-        this.onSend(socket, p)
+      socket.on(
+        SOCKET_EVENTS.REACTION_SEND,
+        (p: ReactionSendPayload) => this.onSend(socket, p),
       );
     });
   }
