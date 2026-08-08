@@ -29,6 +29,9 @@ function SettingRow(
 }
 
 export default function HostTools({ me, roomId, store }: HostToolsProps) {
+  // Lock, everyone-collaborate, and end-party are UI-local scaffolding until
+  // the final socket integration wires ROOM_LOCK/ROOM_UNLOCK and room end;
+  // the room entity's RoomMeta.locked is the eventual source of truth.
   const [locked, setLocked] = useState(false);
   const [everyoneOn, setEveryoneOn] = useState(false);
   const [confirmEnd, setConfirmEnd] = useState(false);

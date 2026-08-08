@@ -4,8 +4,10 @@ export interface MessageStreamProps {
   messages: ChatMessage[];
 }
 
+export const SYSTEM_SENDER_ID = "system";
+
 function isSystemMessage(message: ChatMessage): boolean {
-  return message.senderId === "system";
+  return message.senderId === SYSTEM_SENDER_ID;
 }
 
 function formatTime(ts: number): string {

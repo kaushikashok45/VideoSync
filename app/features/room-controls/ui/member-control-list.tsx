@@ -22,9 +22,9 @@ export default function MemberControlList({
   );
   const viewers = members.filter((member) => member.role !== "host");
   if (viewers.length === 0) return null;
-  const toggle = (id: string, canControl: boolean) => {
-    if (canControl) revokeMemberControl(store, me, id);
-    else grantMemberControl(store, me, id);
+  const toggle = (id: string, enabled: boolean) => {
+    if (enabled) grantMemberControl(store, me, id);
+    else revokeMemberControl(store, me, id);
   };
   return (
     <section className="rounded-md border border-line bg-surface p-md">
