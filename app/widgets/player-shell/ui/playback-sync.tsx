@@ -12,6 +12,7 @@ export interface PlaybackSyncProps {
   store: PlaybackStore;
   videoRef: RefObject<HTMLVideoElement | null>;
   actionRef: RefObject<PlaybackSyncHandle | null>;
+  stream?: MediaStream | null;
   autoplay?: boolean;
   onAutoplayBlocked?: () => void;
 }
@@ -60,6 +61,7 @@ export default function PlaybackSync({
   store,
   videoRef,
   actionRef,
+  stream = null,
   autoplay = false,
   onAutoplayBlocked,
 }: PlaybackSyncProps) {
@@ -77,6 +79,15 @@ export default function PlaybackSync({
   useImperativeHandle(actionRef, () => ({ setVolume, toggleFullscreen }), [
     videoRef,
   ]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.srcObject = stream;
+    return () => {
+      if (video.srcObject === stream) video.srcObject = null;
+    };
+  }, [stream, videoRef]);
 
   useEffect(() => {
     const video = videoRef.current;

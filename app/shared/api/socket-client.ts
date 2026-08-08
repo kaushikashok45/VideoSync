@@ -29,13 +29,13 @@ export interface SocketClient {
   grantControl(targetId: string): void;
   revokeControl(targetId: string): void;
   sendSignal(to: string, signalData: unknown): void;
-  onMemberJoined(cb: (p: MemberJoinedPayload) => void): void;
-  onMemberLeft(cb: (p: MemberLeftPayload) => void): void;
-  onChatMessage(cb: (m: ChatMessage) => void): void;
-  onReaction(cb: (r: Reaction) => void): void;
-  onSignal(cb: (p: RelaySignalPayload) => void): void;
-  onRoomEnded(cb: () => void): void;
-  onAppError(cb: (p: AppErrorPayload) => void): void;
+  onMemberJoined(cb: (p: MemberJoinedPayload) => void): void | (() => void);
+  onMemberLeft(cb: (p: MemberLeftPayload) => void): void | (() => void);
+  onChatMessage(cb: (m: ChatMessage) => void): void | (() => void);
+  onReaction(cb: (r: Reaction) => void): void | (() => void);
+  onSignal(cb: (p: RelaySignalPayload) => void): void | (() => void);
+  onRoomEnded(cb: () => void): void | (() => void);
+  onAppError(cb: (p: AppErrorPayload) => void): void | (() => void);
   getSocketId(): string | undefined;
   disconnect(): void;
 }
@@ -105,24 +105,31 @@ export function createSocketClient(deps: SocketClientDeps): SocketClient {
     },
     onMemberJoined(cb) {
       socket.on(SOCKET_EVENTS.MEMBER_JOINED, cb);
+      return () => socket.off(SOCKET_EVENTS.MEMBER_JOINED, cb);
     },
     onMemberLeft(cb) {
       socket.on(SOCKET_EVENTS.MEMBER_LEFT, cb);
+      return () => socket.off(SOCKET_EVENTS.MEMBER_LEFT, cb);
     },
     onChatMessage(cb) {
       socket.on(SOCKET_EVENTS.CHAT_MESSAGE, cb);
+      return () => socket.off(SOCKET_EVENTS.CHAT_MESSAGE, cb);
     },
     onReaction(cb) {
       socket.on(SOCKET_EVENTS.REACTION, cb);
+      return () => socket.off(SOCKET_EVENTS.REACTION, cb);
     },
     onSignal(cb) {
       socket.on(SOCKET_EVENTS.SIGNAL, cb);
+      return () => socket.off(SOCKET_EVENTS.SIGNAL, cb);
     },
     onRoomEnded(cb) {
       socket.on(SOCKET_EVENTS.ROOM_ENDED, cb);
+      return () => socket.off(SOCKET_EVENTS.ROOM_ENDED, cb);
     },
     onAppError(cb) {
       socket.on(SOCKET_EVENTS.APP_ERROR, cb);
+      return () => socket.off(SOCKET_EVENTS.APP_ERROR, cb);
     },
     getSocketId: () => socket.id,
     disconnect: () => socket.disconnect(),

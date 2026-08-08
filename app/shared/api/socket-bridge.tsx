@@ -67,6 +67,10 @@ export function useOptionalAppStores(): SocketBridgeStores | null {
   return useContext(StoresContext);
 }
 
+export function useOptionalSocketClient(): SocketClient | null {
+  return useContext(SocketContext);
+}
+
 export function SocketProvider({ children }: { children?: ReactNode }) {
   const [client] = useState<SocketClient | null>(() =>
     typeof globalThis.location === "undefined"

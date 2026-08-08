@@ -19,6 +19,8 @@ import RoomSidebar from "~/widgets/room-sidebar/ui/room-sidebar.tsx";
 import ReactionOverlay from "~/widgets/reaction-overlay/ui/reaction-overlay.tsx";
 import { useIdleVisibility } from "../logic/use-idle-visibility.ts";
 import { useLocalFileSource } from "../logic/use-local-file-source.ts";
+import { useOptionalSocketClient } from "~/shared/api/socket-bridge.tsx";
+import { usePeerMediaStream } from "../logic/use-peer-media-stream.ts";
 import ControlBar from "./control-bar.tsx";
 import PlaybackSync, { type PlaybackSyncHandle } from "./playback-sync.tsx";
 import PlayerFeedback from "./player-feedback.tsx";
@@ -75,6 +77,13 @@ export default function PlayerShell({
   const reactionRef = useRef<ReactionStore | null>(reactionStore ?? null);
   if (!reactionRef.current) reactionRef.current = createReactionStore();
   const store = storeRef.current;
+  const socket = useOptionalSocketClient();
+  const remoteStream = usePeerMediaStream({
+    mode,
+    videoRef,
+    socket,
+    membersStore: membersRef.current,
+  });
   const { visible, reveal } = useIdleVisibility(idleMs);
   const snapshot = useSyncExternalStore(
     store.subscribe,
@@ -84,7 +93,7 @@ export default function PlayerShell({
 
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
   const src = useLocalFileSource(mode, file) ?? videoSource(media);
-  const awaitingSource = src === undefined;
+  const awaitingSource = src === undefined && remoteStream === null;
 
   return (
     <div
@@ -129,7 +138,8 @@ export default function PlayerShell({
         store={store}
         videoRef={videoRef}
         actionRef={syncHandleRef}
-        autoplay={mode === "host" && Boolean(src)}
+        stream={remoteStream}
+        autoplay={mode === "host" ? Boolean(src) : remoteStream !== null}
         onAutoplayBlocked={() => setAutoplayBlocked(true)}
       />
       <RoomSidebar
