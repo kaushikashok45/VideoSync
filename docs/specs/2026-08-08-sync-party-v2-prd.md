@@ -297,6 +297,20 @@ the highest priority; never sacrifice it for speed.**
   path (host + viewer join, sync starts).
 - `deno task verify` (fmt + lint + check + test) must pass before any work is declared done.
 
+### 4.1b Test coverage depth (mandatory)
+Every module's tests cover **all five categories** — never just the happy path:
+1. **Happy path** — the intended success flow.
+2. **Sad path** — expected failures (validation rejected, not found, permission
+   denied, rate-limited, etc.).
+3. **Edge cases** — empty/null input, zero values, boundary values, first/last
+   items, concurrent/repeated calls.
+4. **Mutation cases** — tests that FAIL if the implementation were subtly changed
+   (swapping `>`/`>=`, dropping a guard, off-by-one, wrong clamp direction,
+   dropping a payload field). Pin the exact behavior of every critical branch.
+5. **Logical limits** — capacity limits, rate-limit windows, drift thresholds,
+   clamp ranges, max message lengths, reconnect attempts. Test exactly-at-limit
+   and just-beyond-limit.
+
 ### 4.2 Feature-Sliced Design (FSD)
 - **Layer rules (dependency direction):** `shared ← entities ← features ← widgets ← pages ← app`.
   Dependencies only point inward/downward — never outward/upward.
@@ -332,6 +346,21 @@ the highest priority; never sacrifice it for speed.**
 - Consistent naming: `useXBehaviour` for UI hooks, `handleX` for handlers, `*Manager` for
   class managers, `Base*` for abstract bases. Use `Receiver` (not `Reciever`) in new code.
 - No `any`. Use `unknown` + narrowing, or precise event types.
+
+### 4.6b File segregation (mandatory)
+**One entity / type / function per file.** Do not mix several types, entities, and
+functions into a single file.
+- Type definitions get their own file (`error-code.ts` for `type ErrorCode`).
+- Classes get their own file (`app-error.ts` for `class AppError`).
+- Functions get their own file unless they are the single public API of a small
+  module owning one responsibility.
+- Entities get their own file (`member.ts` for `Member`, not a grab-bag of
+  `member` + `room` + `message`).
+- Contract modules are directories of small files, not one big `contracts/types.ts`.
+  No `utils.ts`/`types.ts`/`helpers.ts` dumping grounds.
+- Exception: a tiny private helper used only by one module may live beside it; a
+  cohesive enum + its consumer type may share a file only when they are one
+  concept (e.g. `MemberRole` inside `member.ts`). When in doubt, split.
 
 ### 4.7 Realtime protocol hygiene
 - All socket event names and data-channel message types live in shared contracts
