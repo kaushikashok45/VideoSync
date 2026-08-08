@@ -37,6 +37,7 @@ export class ChatHandler {
         SOCKET_EVENTS.CHAT_SEND,
         (p: ChatSendPayload) => this.onSend(socket, p),
       );
+      socket.on("disconnect", () => this.sendTimes.delete(socket.id));
     });
   }
 
@@ -44,10 +45,11 @@ export class ChatHandler {
     const room = currentRoom(socket);
     if (!room) return;
     const text = typeof payload?.text === "string" ? payload.text : "";
-    if (text.trim() === "" || text.length > this.maxMessageLength) {
+    if (text.trim() === "") return;
+    if (text.length > this.maxMessageLength) {
       socket.emit(
         SOCKET_EVENTS.APP_ERROR,
-        new AppError("VALIDATION_CODE_MALFORMED").toJSON(),
+        new AppError("VALIDATION_CHAT_TOO_LONG").toJSON(),
       );
       return;
     }

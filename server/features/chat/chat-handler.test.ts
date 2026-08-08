@@ -136,7 +136,7 @@ Deno.test("oversized chat message is rejected with a typed error", async () => {
       senderName: "Bob",
     }); // beyond
     const err = await errP;
-    assertEquals(err.code, "VALIDATION_CODE_MALFORMED");
+    assertEquals(err.code, "VALIDATION_CHAT_TOO_LONG");
     host.disconnect();
     viewer.disconnect();
   } finally {

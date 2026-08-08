@@ -12,6 +12,10 @@ export const ERROR_DEFS: Record<
   VALIDATION_URL_UNSUPPORTED: {
     message: "That link can't be played here. Try a different video URL.",
   },
+  VALIDATION_CHAT_TOO_LONG: {
+    message: "That message is too long. Shorten it and try again.",
+    recovery: { label: "Retry", action: { kind: "retry" } },
+  },
   ROOM_NOT_FOUND: {
     message:
       "We couldn't find that room. The code may be wrong or the party may have ended.",
