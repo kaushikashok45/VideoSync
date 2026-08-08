@@ -1,5 +1,6 @@
 import { AppError } from "../../../shared/contracts/app-error.ts";
 import type { Member } from "../../../shared/contracts/member.ts";
+import type { PlaybackSnapshot } from "../../../shared/contracts/playback.ts";
 import type { RoomMeta } from "../../../shared/contracts/room-meta.ts";
 import type { Room } from "./room.ts";
 import { generateRoomCode, isValidRoomCode } from "./room-code.ts";
@@ -26,24 +27,32 @@ export class RoomStore {
       locked: false,
       members: new Map(),
       mediaSource: null,
-      playback: {
-        status: "paused",
-        currentTime: 0,
-        duration: 0,
-        rate: 1,
-        updatedAt: this.deps.now(),
-      },
+      playback: this.initialPlayback(),
       createdAt: this.deps.now(),
     };
-    room.members.set(hostId, {
+    room.members.set(hostId, this.initialHostMember(hostId, name));
+    this.rooms.set(code, room);
+    return room;
+  }
+
+  private initialPlayback(): PlaybackSnapshot {
+    return {
+      status: "paused",
+      currentTime: 0,
+      duration: 0,
+      rate: 1,
+      updatedAt: this.deps.now(),
+    };
+  }
+
+  private initialHostMember(hostId: string, name: string): Member {
+    return {
       id: hostId,
       name,
       role: "host",
       canControl: true,
       joinedAt: this.deps.now(),
-    });
-    this.rooms.set(code, room);
-    return room;
+    };
   }
 
   private uniqueCode(): string {
