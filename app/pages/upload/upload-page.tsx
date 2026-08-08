@@ -35,7 +35,6 @@ export default function UploadPage() {
             value={url}
             onChange={setUrl}
             error={error}
-            onLookup={submit}
           />
         )
         : (

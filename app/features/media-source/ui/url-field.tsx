@@ -1,18 +1,16 @@
 import type { ChangeEvent } from "react";
-import { Button, TextField } from "~/shared/ui-kit/index.ts";
+import { TextField } from "~/shared/ui-kit/index.ts";
 
 export interface UrlFieldProps {
   value: string;
   onChange: (value: string) => void;
   error: string | null;
-  onLookup: () => void;
 }
 
 export default function UrlField({
   value,
   onChange,
   error,
-  onLookup,
 }: UrlFieldProps) {
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     onChange(event.target.value);
@@ -27,15 +25,9 @@ export default function UrlField({
         error={error ?? undefined}
         onChange={handleChange}
       />
-      <div className="flex justify-end">
-        <Button
-          variant="secondary"
-          data-testid="lookup-button"
-          onClick={onLookup}
-        >
-          Look up metadata
-        </Button>
-      </div>
+      <p className="font-mono text-xs text-ink-faint">
+        Metadata is looked up automatically when you start watching.
+      </p>
     </div>
   );
 }
