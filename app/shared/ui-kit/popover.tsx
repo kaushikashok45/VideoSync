@@ -1,6 +1,13 @@
 import { cloneElement, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import type { HTMLAttributes, ReactElement, ReactNode, Ref } from "react";
+import type {
+  HTMLAttributes,
+  MouseEvent as ReactMouseEvent,
+  ReactElement,
+  ReactNode,
+  Ref,
+  RefObject,
+} from "react";
 
 export type PopoverTriggerProps = HTMLAttributes<HTMLElement> & {
   ref?: Ref<HTMLElement>;
@@ -12,20 +19,22 @@ export interface PopoverProps {
   className?: string;
 }
 
-export function Popover({ trigger, children, className = "" }: PopoverProps) {
-  const [open, setOpen] = useState(false);
-  const triggerRef = useRef<HTMLElement>(null);
-
+function usePopoverDismiss(
+  open: boolean,
+  close: () => void,
+  triggerRef: RefObject<HTMLElement | null>,
+  contentRef: RefObject<HTMLDivElement | null>,
+): void {
   useEffect(() => {
     if (!open) return;
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape") close();
     };
     const handleMouseDown = (event: MouseEvent) => {
       const target = event.target as Node;
       if (triggerRef.current?.contains(target)) return;
       if (contentRef.current?.contains(target)) return;
-      setOpen(false);
+      close();
     };
     document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("mousedown", handleMouseDown);
@@ -33,15 +42,23 @@ export function Popover({ trigger, children, className = "" }: PopoverProps) {
       document.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("mousedown", handleMouseDown);
     };
-  }, [open]);
+  }, [open, close, triggerRef, contentRef]);
+}
 
+export function Popover({ trigger, children, className = "" }: PopoverProps) {
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  usePopoverDismiss(open, () => setOpen(false), triggerRef, contentRef);
 
   const triggerWithProps = cloneElement(trigger, {
     ...trigger.props,
     ref: triggerRef,
     "aria-expanded": open,
-    onClick: () => setOpen((value) => !value),
+    onClick: (event: ReactMouseEvent<HTMLElement>) => {
+      trigger.props.onClick?.(event);
+      setOpen((value) => !value);
+    },
   });
 
   return (
@@ -51,7 +68,6 @@ export function Popover({ trigger, children, className = "" }: PopoverProps) {
         ? createPortal(
           <div
             ref={contentRef}
-            role="dialog"
             className={`fixed z-dropdown rounded-lg border border-line-strong bg-surface-raised p-md shadow-overlay animate-fade-in ${className}`}
           >
             {children}

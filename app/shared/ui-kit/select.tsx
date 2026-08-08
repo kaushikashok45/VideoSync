@@ -35,6 +35,7 @@ export function Select({
           {...rest}
           id={fieldId}
           aria-invalid={error ? true : undefined}
+          aria-describedby={error ? `${fieldId}-error` : undefined}
           className={`${baseClass} ${className}`}
         >
           {children}

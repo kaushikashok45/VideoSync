@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useId, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
-import type { ReactNode } from "react";
+import type { ReactNode, RefObject } from "react";
 import { IconButton } from "./icon-button.tsx";
 
 export interface ModalProps {
@@ -19,27 +19,31 @@ function findFocusable(panel: HTMLElement | null): HTMLElement[] {
   return Array.from(panel.querySelectorAll<HTMLElement>(focusableSelector));
 }
 
-export function Modal(
-  { open, title, onClose, children, className = "" }: ModalProps,
-) {
-  const titleId = useId();
-  const panelRef = useRef<HTMLDivElement>(null);
-  const lastFocusedRef = useRef<HTMLElement | null>(null);
+function cycleFocus(event: KeyboardEvent, panel: HTMLElement | null): void {
+  if (event.key !== "Tab") return;
+  const focusable = findFocusable(panel);
+  if (focusable.length === 0) return;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
 
-  const trapFocus = useCallback((event: KeyboardEvent) => {
-    if (event.key !== "Tab") return;
-    const focusable = findFocusable(panelRef.current);
-    if (focusable.length === 0) return;
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
-    }
-  }, []);
+function useModalAccessibility(
+  open: boolean,
+  onClose: () => void,
+  panelRef: RefObject<HTMLDivElement | null>,
+): void {
+  const lastFocusedRef = useRef<HTMLElement | null>(null);
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (!open) return;
@@ -48,8 +52,8 @@ export function Modal(
     (focusable[0] ?? panelRef.current)?.focus();
     document.body.style.overflow = "hidden";
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-      else trapFocus(event);
+      if (event.key === "Escape") onCloseRef.current();
+      else cycleFocus(event, panelRef.current);
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => {
@@ -57,11 +61,22 @@ export function Modal(
       document.body.style.overflow = "";
       lastFocusedRef.current?.focus();
     };
-  }, [open, onClose, trapFocus]);
+  }, [open, panelRef]);
+}
 
-  if (!open || typeof document === "undefined") return null;
+interface ModalPanelProps {
+  titleId: string;
+  title: string;
+  onClose: () => void;
+  panelRef: RefObject<HTMLDivElement | null>;
+  className: string;
+  children: ReactNode;
+}
 
-  return createPortal(
+function ModalPanel(
+  { titleId, title, onClose, panelRef, className, children }: ModalPanelProps,
+) {
+  return (
     <div
       className="fixed inset-0 z-modalBackdrop flex items-center justify-center bg-bg/72 animate-fade-in"
       onClick={onClose}
@@ -96,7 +111,29 @@ export function Modal(
         </header>
         <div className="mt-md">{children}</div>
       </div>
-    </div>,
+    </div>
+  );
+}
+
+export function Modal(
+  { open, title, onClose, children, className = "" }: ModalProps,
+) {
+  const titleId = useId();
+  const panelRef = useRef<HTMLDivElement>(null);
+  useModalAccessibility(open, onClose, panelRef);
+
+  if (!open || typeof document === "undefined") return null;
+
+  return createPortal(
+    <ModalPanel
+      titleId={titleId}
+      title={title}
+      onClose={onClose}
+      panelRef={panelRef}
+      className={className}
+    >
+      {children}
+    </ModalPanel>,
     document.body,
   );
 }

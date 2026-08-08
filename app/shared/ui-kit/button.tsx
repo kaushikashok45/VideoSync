@@ -38,12 +38,13 @@ export function Button({
 }: ButtonProps) {
   return (
     <button
+      {...rest}
+      type="button"
+      disabled={rest.disabled || loading}
+      aria-busy={loading || undefined}
       className={`${baseClass} ${variantClass[variant]} ${
         sizeClass[size]
       } ${className}`}
-      disabled={rest.disabled || loading}
-      aria-busy={loading || undefined}
-      {...rest}
     >
       {loading ? <Spinner size="sm" /> : null}
       {children}

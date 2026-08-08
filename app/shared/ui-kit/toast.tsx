@@ -1,12 +1,19 @@
 import { Toaster } from "sonner";
 import type { ComponentProps } from "react";
 
-export type ToastProps = ComponentProps<typeof Toaster>;
+export type ToastProps =
+  & Omit<
+    ComponentProps<typeof Toaster>,
+    "theme"
+  >
+  & {
+    theme?: "dark" | "light";
+  };
 
-export function Toast(props: ToastProps) {
+export function Toast({ theme = "dark", ...props }: ToastProps) {
   return (
     <Toaster
-      theme="dark"
+      theme={theme}
       position="top-right"
       richColors
       closeButton

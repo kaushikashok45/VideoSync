@@ -37,7 +37,18 @@ export default {
       },
       fontFamily: {
         sans: ["Overpass", "ui-monospace", "SFMono-Regular", "monospace"],
+        mono: ["Overpass", "ui-monospace", "SFMono-Regular", "monospace"],
         script: ["Yesteryear", "cursive"],
+      },
+      spacing: {
+        xxs: "4px",
+        xs: "8px",
+        sm: "12px",
+        md: "16px",
+        lg: "24px",
+        xl: "32px",
+        xxl: "48px",
+        xxxl: "64px",
       },
       borderRadius: {
         xxs: "4px",
