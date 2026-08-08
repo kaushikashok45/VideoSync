@@ -27,6 +27,7 @@ input[data-testid="seeker"]:hover::-moz-range-thumb {
   input[data-testid="seeker"]::-webkit-slider-thumb,
   input[data-testid="seeker"]::-moz-range-thumb {
     transition: none;
+    transform: none;
   }
 }`;
 
