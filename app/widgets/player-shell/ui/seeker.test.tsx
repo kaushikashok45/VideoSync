@@ -14,7 +14,7 @@ Deno.test("renders a seeker with the current time", () => {
   assertEquals(input.getAttribute("value"), "10");
 });
 
-// Edge: duration 0 renders a disabled-at-zero seeker (max 0, value 0).
+// Edge: currentTime beyond duration clamps to the duration.
 Deno.test("clamps the value to the duration", () => {
   setupDom();
   const { container } = render(
@@ -25,7 +25,10 @@ Deno.test("clamps the value to the duration", () => {
   assertEquals(input.getAttribute("value"), "100");
 });
 
-// Mutation: the seeker thumb grows on hover, guarded for reduced motion.
+// Mutation: the seeker thumb grows on hover, and the reduced-motion block
+// neutralizes the HOVER scale too (same selectors) — a lower-specificity
+// transform:none alone would NOT win over :hover scale, so this pins the
+// hover selectors are inside the media query.
 Deno.test("seeker thumb hover scale is motion-reduce guarded", () => {
   setupDom();
   const { container } = render(
@@ -37,4 +40,10 @@ Deno.test("seeker thumb hover scale is motion-reduce guarded", () => {
   assertEquals(css.includes(":hover::-moz-range-thumb"), true);
   assertEquals(css.includes("transform: scale(1.3)"), true);
   assertEquals(css.includes("prefers-reduced-motion"), true);
+  const reduceBlock = css.slice(css.indexOf("@media (prefers-reduced-motion"));
+  assertEquals(
+    reduceBlock.includes(":hover::-webkit-slider-thumb"),
+    true,
+  );
+  assertEquals(reduceBlock.includes(":hover::-moz-range-thumb"), true);
 });

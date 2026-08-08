@@ -25,7 +25,9 @@ input[data-testid="seeker"]:hover::-moz-range-thumb {
 }
 @media (prefers-reduced-motion: reduce) {
   input[data-testid="seeker"]::-webkit-slider-thumb,
-  input[data-testid="seeker"]::-moz-range-thumb {
+  input[data-testid="seeker"]::-moz-range-thumb,
+  input[data-testid="seeker"]:hover::-webkit-slider-thumb,
+  input[data-testid="seeker"]:hover::-moz-range-thumb {
     transition: none;
     transform: none;
   }
