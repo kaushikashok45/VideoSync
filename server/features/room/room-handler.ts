@@ -62,6 +62,9 @@ export class RoomHandler {
       const code = payload?.code;
       const name = payload?.name ?? "";
       const room = this.deps.rooms.getOrThrow(code);
+      if (room.locked) {
+        throw new AppError("ROOM_LOCKED");
+      }
       const member: Member = {
         id: socket.id,
         name: name.trim(),

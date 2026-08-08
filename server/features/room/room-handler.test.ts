@@ -212,6 +212,31 @@ Deno.test("a viewer cannot lock the room", async () => {
   }
 });
 
+// Sad path: joining a locked room surfaces ROOM_LOCKED
+Deno.test("joining a locked room surfaces ROOM_LOCKED", async () => {
+  const h = await makeHarness();
+  try {
+    const host = await h.connect();
+    const createdP = h.waitFor<{ room: { code: string } }>(
+      host,
+      SOCKET_EVENTS.ROOM_CREATED,
+    );
+    host.emit(SOCKET_EVENTS.ROOM_CREATE, { name: "Alice" });
+    const { room } = await createdP;
+    host.emit(SOCKET_EVENTS.ROOM_LOCK, {});
+    const viewer = await h.connect();
+    const errP = h.waitFor<{ code: string }>(viewer, SOCKET_EVENTS.APP_ERROR);
+    viewer.emit(SOCKET_EVENTS.ROOM_JOIN, { code: room.code, name: "Bob" });
+    const err = await errP;
+    assertEquals(err.code, "ROOM_LOCKED");
+    host.disconnect();
+    viewer.disconnect();
+  } finally {
+    h.io.close();
+    await new Promise<void>((r) => h.httpServer.close(() => r()));
+  }
+});
+
 // Happy path: host locks/unlocks and viewers are notified
 Deno.test("host lock and unlock broadcast to the room", async () => {
   const h = await makeHarness();
