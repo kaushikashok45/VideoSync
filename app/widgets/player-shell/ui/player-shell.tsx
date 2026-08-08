@@ -16,6 +16,7 @@ import {
   type ReactionStore,
 } from "~/entities/reaction/reaction-store.ts";
 import RoomSidebar from "~/widgets/room-sidebar/ui/room-sidebar.tsx";
+import ReactionOverlay from "~/widgets/reaction-overlay/ui/reaction-overlay.tsx";
 import { useIdleVisibility } from "../logic/use-idle-visibility.ts";
 import ControlBar from "./control-bar.tsx";
 import PlaybackSync, { type PlaybackSyncHandle } from "./playback-sync.tsx";
@@ -135,6 +136,10 @@ export default function PlayerShell({
         membersStore={membersRef.current}
         chatStore={chatRef.current}
         reactionStore={reactionRef.current}
+      />
+      <ReactionOverlay
+        reactionStore={reactionRef.current}
+        membersStore={membersRef.current}
       />
     </div>
   );

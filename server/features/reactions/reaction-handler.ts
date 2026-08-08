@@ -1,11 +1,10 @@
 import type { Server, Socket } from "socket.io";
+import { REACTION_EMOJIS } from "../../../shared/contracts/reaction-emojis.ts";
 import { SOCKET_EVENTS } from "../../../shared/contracts/socket-events.ts";
 import type { Reaction } from "../../../shared/contracts/reaction.ts";
 import type { ReactionSendPayload } from "../../../shared/contracts/payloads/reaction-send-payload.ts";
 import type { Logger } from "../../shared/logger/logger.ts";
 import { currentRoom } from "../../shared/socket-utils.ts";
-
-const ALLOWED_EMOJI = ["👍", "😂", "😮", "❤️", "🔥"];
 
 export interface ReactionHandlerDeps {
   io: Server;
@@ -28,7 +27,7 @@ export class ReactionHandler {
     const room = currentRoom(socket);
     if (!room) return;
     const emoji = payload?.emoji;
-    if (!ALLOWED_EMOJI.includes(emoji)) return;
+    if (!REACTION_EMOJIS.includes(emoji)) return;
     const reaction: Reaction = {
       senderId: socket.id,
       senderName: payload.senderName ?? "",
