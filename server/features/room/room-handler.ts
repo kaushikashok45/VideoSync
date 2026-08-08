@@ -107,7 +107,7 @@ export class RoomHandler {
     const room = this.findRoomFor(socket);
     if (!room) return;
     if (room.hostId === socket.id) {
-      this.endRoom(socket, room);
+      this.endRoom(room);
       return;
     }
     const member = this.deps.rooms.removeMember(room, socket.id);
@@ -115,7 +115,7 @@ export class RoomHandler {
     const memberLeft: MemberLeftPayload = { memberId: member.id };
     this.deps.io.to(room.code).emit(SOCKET_EVENTS.MEMBER_LEFT, memberLeft);
   }
-  private endRoom(socket: Socket, room: Room): void {
+  private endRoom(room: Room): void {
     this.deps.io.to(room.code).emit(SOCKET_EVENTS.ROOM_ENDED, {});
     this.deps.io.in(room.code).socketsLeave(room.code);
     this.deps.rooms.delete(room.code);
