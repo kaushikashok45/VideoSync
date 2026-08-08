@@ -5,7 +5,7 @@ join a room by link, and playback (pause/resume/seek/forward/rewind/volume)
 stays in sync across all peers.
 
 - **App**: React 19 + React Router v7 (framework mode, SSR, flat routes)
-- **Signaling**: Express + Socket.IO over HTTPS
+- **Signaling**: Express + Socket.IO over HTTP
 - **Media**: WebRTC via `simple-peer` (P2P stream + data channel for control
   events)
 - **Runtime**: [Deno](https://deno.com) 2.x — no Node.js required
@@ -24,22 +24,22 @@ deno install
 # 3. Generate the HTTPS certs (once, after clone)
 deno task setuphttps
 
-# 4. Start the dev server → https://localhost:5173
+# 4. Start the dev server → http://localhost:5173
 deno task dev
 ```
 
 ## Commands
 
-| Command            | What it does                                             |
-| ------------------ | -------------------------------------------------------- |
-| `deno task dev`    | Dev server (HTTPS + React Router + Socket.IO + Vite HMR) |
-| `deno task build`  | Production build                                         |
-| `deno task start`  | Serve the production build                               |
-| `deno task lint`   | `deno lint`                                              |
-| `deno task check`  | `deno check` (typecheck)                                 |
-| `deno task fmt`    | `deno fmt`                                               |
-| `deno task test`   | `deno test` (built-in runner)                            |
-| `deno task verify` | fmt + lint + check + test                                |
+| Command            | What it does                                       |
+| ------------------ | -------------------------------------------------- |
+| `deno task dev`    | Dev server (Express + Socket.IO + Vite HMR)        |
+| `deno task build`  | Production build                                   |
+| `deno task start`  | Serve the production build (`server/app/entry.ts`) |
+| `deno task lint`   | `deno lint`                                        |
+| `deno task check`  | `deno check` (typecheck)                           |
+| `deno task fmt`    | `deno fmt`                                         |
+| `deno task test`   | `deno test` (built-in runner)                      |
+| `deno task verify` | fmt + lint + check + test                          |
 
 ## How it works
 
@@ -61,7 +61,11 @@ app/
   features/      feature-scoped modules (videoPlayback, webRTC, webSocket, toastMessages)
   routes/        React Router flat routes
   utils/         shared helper contracts
-server.js        Express + HTTPS + Socket.IO + React Router request handler
+server/
+  app/           server bootstrap (config, entry, Express + Socket.IO wiring)
+  entities/      domain stores (room-store)
+  features/      feature handlers (room, chat, reactions, signaling)
+  shared/        server-side shared code (logger, socket-utils)
 ```
 
 See [AGENTS.md](./AGENTS.md) for architecture conventions, naming rules, and the

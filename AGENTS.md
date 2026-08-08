@@ -10,7 +10,7 @@ join a room by link, and playback (pause/resume/seek/forward/rewind/volume)
 stays in sync across all peers.
 
 - **App**: React 19 + React Router v7 (framework mode, SSR, `flatRoutes`)
-- **Signaling**: Express + Socket.IO over HTTPS
+- **Signaling**: Express + Socket.IO over HTTP
 - **Media**: WebRTC via `simple-peer` (P2P stream + data channel for control
   events)
 - **Runtime**: Deno (2.x) — the project runs on Deno, not Node. Node is **not**
@@ -21,18 +21,18 @@ stays in sync across all peers.
 
 ## Commands (all via `deno task`)
 
-| Command                | What it does                                                                        |
-| ---------------------- | ----------------------------------------------------------------------------------- |
-| `deno task setuphttps` | Generate self-signed `localhost.key`/`localhost.pem` (run once after clone)         |
-| `deno task dev`        | Dev server: HTTPS + React Router + Socket.IO + Vite HMR on `https://localhost:5173` |
-| `deno task build`      | Production build via React Router CLI (runs Vite)                                   |
-| `deno task start`      | Serve production build (`NODE_ENV=production deno run -A server.js`)                |
-| `deno task lint`       | `deno lint`                                                                         |
-| `deno task fmt`        | `deno fmt`                                                                          |
-| `deno task check`      | `deno check --sloppy-imports app server.js` (typecheck)                             |
-| `deno task test`       | `deno test -A --sloppy-imports`                                                     |
-| `deno task verify`     | fmt-check + lint + check + test (run before finishing any task)                     |
-| `deno install`         | Install/sync npm dependencies into `node_modules` (managed by Deno)                 |
+| Command                | What it does                                                                    |
+| ---------------------- | ------------------------------------------------------------------------------- |
+| `deno task setuphttps` | Generate self-signed `localhost.key`/`localhost.pem` (run once after clone)     |
+| `deno task dev`        | Dev server (`deno run -A server/app/entry.ts` — Express + Socket.IO + Vite HMR) |
+| `deno task build`      | Production build via React Router CLI (runs Vite)                               |
+| `deno task start`      | Serve production build (`NODE_ENV=production deno run -A server/app/entry.ts`)  |
+| `deno task lint`       | `deno lint`                                                                     |
+| `deno task fmt`        | `deno fmt`                                                                      |
+| `deno task check`      | `deno check --sloppy-imports app server` (typecheck)                            |
+| `deno task test`       | `deno test -A --sloppy-imports`                                                 |
+| `deno task verify`     | fmt-check + lint + check + test (run before finishing any task)                 |
+| `deno install`         | Install/sync npm dependencies into `node_modules` (managed by Deno)             |
 
 **The build and typecheck pipelines have already been verified to work under
 Deno.** Do not reintroduce `package.json`, `yarn.lock`, `.yarnrc.yml`, ESLint,
@@ -64,7 +64,11 @@ app/
     $id.HostVideoPlayerNew.tsx      host playback route
     $id.RecieverVideoPlayerNew.tsx  receiver playback route
   utils/                  shared helper contracts (peerRegistry, peerSignal, videoPlayerUtils)
-server.js                 Express + HTTPS + Socket.IO + React Router request handler
+server/
+  app/                    server bootstrap (config, entry, Express + Socket.IO wiring)
+  entities/               domain stores (room-store)
+  features/               feature handlers (room, chat, reactions, signaling)
+  shared/                 server-side shared code (logger, socket-utils)
 ```
 
 ### Data flow
@@ -239,6 +243,6 @@ path:
   feature PR — it is its own refactor.
 - Keep socket event names and data-channel message types in sync between
   `webSocket` and `webRTC` contracts.
-- `server.js` is the only server entry point — if you need to add socket events,
-  add them in `attachSocketIOServer` there, and mirror the event names in the
+- `server/app/entry.ts` is the server entry point — if you need to add socket
+  events, add them in `server/app/server.ts`, and mirror the event names in the
   client `contracts/constants.ts`.

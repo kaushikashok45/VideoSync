@@ -1,4 +1,6 @@
 import http from "node:http";
+import path from "node:path";
+import process from "node:process";
 import express from "express";
 import { createRequestHandler } from "@react-router/express";
 import type { ServerBuild } from "react-router";
@@ -58,7 +60,9 @@ export async function startServer(
     app.use(express.static(config.clientBuildPath));
     app.use(
       createRequestHandler({
-        build: await import(config.serverBuildPath),
+        build: await import(
+          path.resolve(process.cwd(), config.serverBuildPath)
+        ),
       }),
     );
   }

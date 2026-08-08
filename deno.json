@@ -19,9 +19,9 @@
     "start": "NODE_ENV=production deno run -A server/app/entry.ts",
     "lint": "deno lint",
     "fmt": "deno fmt",
-    "check": "deno check --sloppy-imports app server.js",
+    "check": "deno check --sloppy-imports app server",
     "test": "deno test -A --sloppy-imports",
-    "verify": "deno fmt --check && deno lint && deno check --sloppy-imports app server.js && deno test -A --sloppy-imports"
+    "verify": "deno fmt --check && deno lint && deno check --sloppy-imports app server && deno test -A --sloppy-imports"
   },
   "fmt": {
     "exclude": [
