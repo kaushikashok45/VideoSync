@@ -21,7 +21,9 @@ async function makeHarness() {
 
   function connect(): Promise<Socket> {
     return new Promise((resolve) => {
-      const client: Socket = ClientIO(url, { transports: ["websocket", "polling"] });
+      const client: Socket = ClientIO(url, {
+        transports: ["websocket", "polling"],
+      });
       client.on("connect", () => resolve(client));
     });
   }
@@ -35,9 +37,11 @@ Deno.test("signal relays to a targeted socket with sender peerId", async () => {
   try {
     const a = await h.connect();
     const b = await h.connect();
-    const received = new Promise<{ peerId: string; signalData: unknown }>((resolve) => {
-      b.on(SOCKET_EVENTS.SIGNAL, resolve);
-    });
+    const received = new Promise<{ peerId: string; signalData: unknown }>(
+      (resolve) => {
+        b.on(SOCKET_EVENTS.SIGNAL, resolve);
+      },
+    );
     a.emit(SOCKET_EVENTS.SIGNAL, { to: b.id, signalData: { sdp: "offer" } });
     const payload = await received;
     assertEquals(payload.peerId, a.id);

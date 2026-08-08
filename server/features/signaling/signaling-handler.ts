@@ -19,8 +19,9 @@ export class SignalingHandler {
 
   private onConnection(socket: Socket): void {
     socket.emit(SOCKET_EVENTS.SOCKET_ID_META, { peerId: socket.id });
-    socket.on(SOCKET_EVENTS.SIGNAL, (payload: SignalPayloadT) =>
-      this.onSignal(socket, payload)
+    socket.on(
+      SOCKET_EVENTS.SIGNAL,
+      (payload: SignalPayloadT) => this.onSignal(socket, payload),
     );
   }
 
