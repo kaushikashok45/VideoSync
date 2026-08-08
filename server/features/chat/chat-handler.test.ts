@@ -13,10 +13,20 @@ function silentLogger() {
   return createLogger({ level: "error", sink: () => {} });
 }
 
-async function makeHarness(opts: { messagesPerWindow?: number; windowMs?: number; maxMessageLength?: number } = {}) {
+async function makeHarness(
+  opts: {
+    messagesPerWindow?: number;
+    windowMs?: number;
+    maxMessageLength?: number;
+  } = {},
+) {
   const httpServer: Server = createServer();
   const io = new SocketIOServer(httpServer, { cors: { origin: "*" } });
-  const rooms = new RoomStore({ maxMembers: 15, now: () => Date.now(), codeLength: 5 });
+  const rooms = new RoomStore({
+    maxMembers: 15,
+    now: () => Date.now(),
+    codeLength: 5,
+  });
   new RoomHandler({ io, rooms, logger: silentLogger() }).attach();
   new ChatHandler({
     io,
@@ -31,7 +41,9 @@ async function makeHarness(opts: { messagesPerWindow?: number; windowMs?: number
 
   function connect(): Promise<Socket> {
     return new Promise((resolve) => {
-      const client: Socket = ClientIO(url, { transports: ["websocket", "polling"] });
+      const client: Socket = ClientIO(url, {
+        transports: ["websocket", "polling"],
+      });
       client.on("connect", () => resolve(client));
     });
   }
@@ -42,11 +54,17 @@ async function makeHarness(opts: { messagesPerWindow?: number; windowMs?: number
 
   async function joinPair() {
     const host = await connect();
-    const createdP = waitFor<{ room: { code: string } }>(host, SOCKET_EVENTS.ROOM_CREATED);
+    const createdP = waitFor<{ room: { code: string } }>(
+      host,
+      SOCKET_EVENTS.ROOM_CREATED,
+    );
     host.emit(SOCKET_EVENTS.ROOM_CREATE, { name: "Alice" });
     const { room } = await createdP;
     const viewer = await connect();
-    const joinedP = waitFor<Record<string, unknown>>(viewer, SOCKET_EVENTS.ROOM_JOINED);
+    const joinedP = waitFor<Record<string, unknown>>(
+      viewer,
+      SOCKET_EVENTS.ROOM_JOINED,
+    );
     viewer.emit(SOCKET_EVENTS.ROOM_JOIN, { code: room.code, name: "Bob" });
     await joinedP;
     return { host, viewer, code: room.code };
@@ -60,12 +78,19 @@ Deno.test("chat message is relayed to the room with sender metadata", async () =
   const h = await makeHarness();
   try {
     const { host, viewer } = await h.joinPair();
-    const msgOnHost = h.waitFor<{ text: string; senderName: string }>(host, SOCKET_EVENTS.CHAT_MESSAGE);
-    viewer.emit(SOCKET_EVENTS.CHAT_SEND, { text: "hi everyone", senderName: "Bob" });
+    const msgOnHost = h.waitFor<{ text: string; senderName: string }>(
+      host,
+      SOCKET_EVENTS.CHAT_MESSAGE,
+    );
+    viewer.emit(SOCKET_EVENTS.CHAT_SEND, {
+      text: "hi everyone",
+      senderName: "Bob",
+    });
     const msg = await msgOnHost;
     assertEquals(msg.text, "hi everyone");
     assertEquals(msg.senderName, "Bob");
-    host.disconnect(); viewer.disconnect();
+    host.disconnect();
+    viewer.disconnect();
   } finally {
     h.io.close();
     await new Promise<void>((r) => h.httpServer.close(() => r()));
@@ -78,11 +103,14 @@ Deno.test("empty chat message is ignored", async () => {
   try {
     const { host, viewer } = await h.joinPair();
     let emitted = false;
-    host.on(SOCKET_EVENTS.CHAT_MESSAGE, () => { emitted = true; });
+    host.on(SOCKET_EVENTS.CHAT_MESSAGE, () => {
+      emitted = true;
+    });
     viewer.emit(SOCKET_EVENTS.CHAT_SEND, { text: "   ", senderName: "Bob" });
     await new Promise((r) => setTimeout(r, 200));
     assertEquals(emitted, false);
-    host.disconnect(); viewer.disconnect();
+    host.disconnect();
+    viewer.disconnect();
   } finally {
     h.io.close();
     await new Promise<void>((r) => h.httpServer.close(() => r()));
@@ -95,15 +123,22 @@ Deno.test("oversized chat message is rejected with a typed error", async () => {
   try {
     const { host, viewer } = await h.joinPair();
     const msgP = h.waitFor<{ text: string }>(host, SOCKET_EVENTS.CHAT_MESSAGE);
-    viewer.emit(SOCKET_EVENTS.CHAT_SEND, { text: "1234567890", senderName: "Bob" }); // at limit
+    viewer.emit(SOCKET_EVENTS.CHAT_SEND, {
+      text: "1234567890",
+      senderName: "Bob",
+    }); // at limit
     const msg = await msgP;
     assertEquals(msg.text, "1234567890");
 
     const errP = h.waitFor<{ code: string }>(viewer, SOCKET_EVENTS.APP_ERROR);
-    viewer.emit(SOCKET_EVENTS.CHAT_SEND, { text: "12345678901", senderName: "Bob" }); // beyond
+    viewer.emit(SOCKET_EVENTS.CHAT_SEND, {
+      text: "12345678901",
+      senderName: "Bob",
+    }); // beyond
     const err = await errP;
     assertEquals(err.code, "VALIDATION_CODE_MALFORMED");
-    host.disconnect(); viewer.disconnect();
+    host.disconnect();
+    viewer.disconnect();
   } finally {
     h.io.close();
     await new Promise<void>((r) => h.httpServer.close(() => r()));
@@ -116,7 +151,10 @@ Deno.test("chat rate limiter allows the window budget and rejects beyond", async
   try {
     const { host, viewer } = await h.joinPair();
     const seen: string[] = [];
-    host.on(SOCKET_EVENTS.CHAT_MESSAGE, (m: { text: string }) => seen.push(m.text));
+    host.on(
+      SOCKET_EVENTS.CHAT_MESSAGE,
+      (m: { text: string }) => seen.push(m.text),
+    );
     const errP = h.waitFor<{ code: string }>(viewer, SOCKET_EVENTS.APP_ERROR);
 
     viewer.emit(SOCKET_EVENTS.CHAT_SEND, { text: "one", senderName: "Bob" });
@@ -128,7 +166,8 @@ Deno.test("chat rate limiter allows the window budget and rejects beyond", async
     const err = await errP;
     assertEquals(err.code, "SERVER_RATE_LIMITED");
     assertEquals(seen.length, 2);
-    host.disconnect(); viewer.disconnect();
+    host.disconnect();
+    viewer.disconnect();
   } finally {
     h.io.close();
     await new Promise<void>((r) => h.httpServer.close(() => r()));
@@ -142,11 +181,14 @@ Deno.test("chat before joining is dropped", async () => {
     const { host } = await h.joinPair();
     const stray = await h.connect();
     let emitted = false;
-    host.on(SOCKET_EVENTS.CHAT_MESSAGE, () => { emitted = true; });
+    host.on(SOCKET_EVENTS.CHAT_MESSAGE, () => {
+      emitted = true;
+    });
     stray.emit(SOCKET_EVENTS.CHAT_SEND, { text: "lonely", senderName: "L" });
     await new Promise((r) => setTimeout(r, 200));
     assertEquals(emitted, false);
-    host.disconnect(); stray.disconnect();
+    host.disconnect();
+    stray.disconnect();
   } finally {
     h.io.close();
     await new Promise<void>((r) => h.httpServer.close(() => r()));

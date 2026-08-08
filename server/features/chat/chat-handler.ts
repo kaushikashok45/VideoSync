@@ -33,8 +33,9 @@ export class ChatHandler {
 
   attach(): void {
     this.io.on("connection", (socket) => {
-      socket.on(SOCKET_EVENTS.CHAT_SEND, (p: ChatSendPayload) =>
-        this.onSend(socket, p)
+      socket.on(
+        SOCKET_EVENTS.CHAT_SEND,
+        (p: ChatSendPayload) => this.onSend(socket, p),
       );
     });
   }
@@ -44,11 +45,17 @@ export class ChatHandler {
     if (!room) return;
     const text = typeof payload?.text === "string" ? payload.text : "";
     if (text.trim() === "" || text.length > this.maxMessageLength) {
-      socket.emit(SOCKET_EVENTS.APP_ERROR, new AppError("VALIDATION_CODE_MALFORMED").toJSON());
+      socket.emit(
+        SOCKET_EVENTS.APP_ERROR,
+        new AppError("VALIDATION_CODE_MALFORMED").toJSON(),
+      );
       return;
     }
     if (!this.rateLimitOk(socket.id)) {
-      socket.emit(SOCKET_EVENTS.APP_ERROR, new AppError("SERVER_RATE_LIMITED").toJSON());
+      socket.emit(
+        SOCKET_EVENTS.APP_ERROR,
+        new AppError("SERVER_RATE_LIMITED").toJSON(),
+      );
       return;
     }
     const message: ChatMessage = {
