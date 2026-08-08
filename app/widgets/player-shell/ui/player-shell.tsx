@@ -1,4 +1,4 @@
-import { useRef, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { MediaSource } from "contracts/media-source.ts";
 import type { Member } from "contracts/member.ts";
 import type { MovieMetadata } from "contracts/movie-metadata.ts";
@@ -28,6 +28,7 @@ export interface PlayerShellProps {
   metadata?: MovieMetadata | null;
   me?: Member | null;
   roomId?: string;
+  file?: File | null;
   idleMs?: number;
   playbackStore?: PlaybackStore;
   membersStore?: MembersStore;
@@ -45,16 +46,13 @@ function videoSource(media: PlayerShellProps["media"]): string | undefined {
   return media.url;
 }
 
-function isUploadMode(media: PlayerShellProps["media"]): boolean {
-  return "mode" in media && media.mode === "upload";
-}
-
 export default function PlayerShell({
   mode,
   media,
   metadata = null,
   me = null,
   roomId = "",
+  file = null,
   idleMs = 3000,
   playbackStore,
   membersStore,
@@ -82,7 +80,23 @@ export default function PlayerShell({
     () => store.getState().getSnapshot(),
     () => undefined,
   );
-  const src = videoSource(media);
+
+  const [objectUrl, setObjectUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (mode !== "host" || file === null) {
+      setObjectUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    setObjectUrl(url);
+    return () => {
+      URL.revokeObjectURL(url);
+      setObjectUrl(null);
+    };
+  }, [mode, file]);
+
+  const src = objectUrl ?? videoSource(media);
+  const awaitingSource = src === undefined;
 
   return (
     <div
@@ -103,7 +117,7 @@ export default function PlayerShell({
         className="h-full w-full object-contain"
         data-testid="player-video"
       />
-      {isUploadMode(media) ? <UploadWaiting /> : null}
+      {awaitingSource ? <UploadWaiting mode={mode} /> : null}
       <div
         aria-hidden="true"
         className={`pointer-events-none absolute inset-0 bg-gradient-to-t from-bg/80 via-transparent to-bg/40 transition-opacity duration-300 ${

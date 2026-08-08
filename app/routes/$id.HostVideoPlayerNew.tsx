@@ -29,6 +29,7 @@ export default function HostVideoPlayerNew() {
       metadata={handoff.metadata}
       me={me}
       roomId={roomId}
+      file={handoff.file}
     />
   );
 }

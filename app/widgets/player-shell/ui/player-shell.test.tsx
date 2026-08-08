@@ -11,6 +11,12 @@ import {
 } from "~/shared/ui-kit/render-helper.ts";
 import PlayerShell from "./player-shell.tsx";
 
+let blobCounter = 0;
+if (typeof URL.createObjectURL !== "function") {
+  URL.createObjectURL = () => `blob:mock-${++blobCounter}`;
+  URL.revokeObjectURL = () => {};
+}
+
 const URL_MEDIA: MediaSource = {
   mode: "url",
   url: "https://example.com/movie.mp4",
@@ -30,7 +36,12 @@ function host(): Member {
   return { id: "host", name: "H", role: "host", canControl: true, joinedAt: 0 };
 }
 function shell(
-  opts: { idleMs?: number; media?: MediaSource; me?: Member | null } = {},
+  opts: {
+    idleMs?: number;
+    media?: MediaSource;
+    me?: Member | null;
+    file?: File | null;
+  } = {},
 ) {
   const store = createPlaybackStore({ driftThresholdMs: 1500 });
   return render(
@@ -39,6 +50,7 @@ function shell(
       media={opts.media ?? URL_MEDIA}
       me={opts.me ?? null}
       idleMs={opts.idleMs ?? 3000}
+      file={opts.file ?? null}
       playbackStore={store}
     />,
   );
@@ -100,7 +112,7 @@ Deno.test("keyboard interaction reveals hidden controls", async () => {
   await flush(25);
 });
 
-// 3. Mutation: upload mode keeps the video element and shows the waiting frame.
+// 3. Mutation: upload mode without a file keeps the video element and shows the waiting frame.
 Deno.test("upload mode shows the waiting frame but keeps the video element", () => {
   setupDom();
   const { container } = shell({ idleMs: 10, media: { mode: "upload" } });
@@ -112,7 +124,26 @@ Deno.test("upload mode shows the waiting frame but keeps the video element", () 
     container.querySelector('[data-testid="player-video"]') !== null,
     true,
   );
-  assertEquals(container.textContent?.includes("Waiting for the stream"), true);
+  assertEquals(container.textContent?.includes("Loading your video"), true);
+  return flush(15);
+});
+
+// 3c. Fix: a host upload with a local file plays via object URL — no waiting frame.
+Deno.test("host upload with a local file gets a video src and no waiting frame", () => {
+  setupDom();
+  const blob = new File(["video"], "clip.mp4", { type: "video/mp4" });
+  const { container } = shell({
+    idleMs: 10,
+    media: { mode: "upload" },
+    file: blob,
+  });
+  assertEquals(
+    container.querySelector('[data-testid="upload-waiting"]'),
+    null,
+  );
+  const video = container.querySelector('[data-testid="player-video"]');
+  if (!video) throw new Error("no video element");
+  assertEquals(video.getAttribute("src")?.startsWith("blob:"), true);
   return flush(15);
 });
 

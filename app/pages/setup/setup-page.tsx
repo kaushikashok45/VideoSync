@@ -8,6 +8,7 @@ import {
   joinTarget,
 } from "~/features/room-join/model/join-path.ts";
 import JoinPartyButton from "~/features/room-join/ui/join-party-button.tsx";
+import RoomCodeCopy from "~/features/room-join/ui/room-code-copy.tsx";
 import NowShowingCard from "~/widgets/movie-now-showing/ui/now-showing-card.tsx";
 
 export default function SetupPage() {
@@ -27,14 +28,16 @@ export default function SetupPage() {
 
   if (isHost(role)) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center gap-lg bg-bg px-md">
-        <h1 className="font-script text-3xl text-ink">Host the party</h1>
-        <p className="max-w-[40ch] text-center font-mono text-sm text-ink-muted">
-          Your room code is{" "}
-          {roomId}. Share it with friends, then pick a movie to start the watch
-          party.
+      <main className="flex min-h-screen flex-col items-center justify-center gap-xl bg-bg px-md py-xxl">
+        <h1 className="font-script text-3xl text-ink md:text-4xl">
+          Host the party
+        </h1>
+        <p className="max-w-[50ch] text-center font-mono text-sm text-ink-muted">
+          Share your room code so friends can join, then pick a video to start
+          the show.
         </p>
-        <JoinPartyButton label="Host the party" onClick={onJoin} />
+        <RoomCodeCopy code={roomId} />
+        <JoinPartyButton label="Pick a video" onClick={onJoin} />
       </main>
     );
   }
