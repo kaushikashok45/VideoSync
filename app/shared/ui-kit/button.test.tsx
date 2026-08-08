@@ -59,6 +59,18 @@ Deno.test("primary uses brand classes, secondary uses surface", () => {
   );
 });
 
+// Edge: defaults to type="button" but honors an explicit override
+Deno.test("defaults to type button and honors a submit override", () => {
+  setupDom();
+  const plain = render(<Button>Go</Button>);
+  const submit = render(<Button type="submit">Go</Button>);
+  const plainButton = plain.container.querySelector("button");
+  const submitButton = submit.container.querySelector("button");
+  if (!plainButton || !submitButton) throw new Error("no buttons");
+  assertEquals(plainButton.getAttribute("type"), "button");
+  assertEquals(submitButton.getAttribute("type"), "submit");
+});
+
 // Limits: size classes differ (sm vs lg)
 Deno.test("size classes differ between sm and lg", () => {
   setupDom();

@@ -40,7 +40,7 @@ export default function JoinForm() {
         error={codeError ?? undefined}
         onChange={(event) => setCode(event.target.value)}
       />
-      <Button variant="primary" size="lg" onClick={submit}>
+      <Button variant="primary" size="lg" type="submit">
         Join watch party
       </Button>
     </form>

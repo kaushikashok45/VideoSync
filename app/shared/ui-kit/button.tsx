@@ -39,7 +39,7 @@ export function Button({
   return (
     <button
       {...rest}
-      type="button"
+      type={rest.type ?? "button"}
       disabled={rest.disabled || loading}
       aria-busy={loading || undefined}
       className={`${baseClass} ${variantClass[variant]} ${
