@@ -1,12 +1,11 @@
 import {
-  isRouteErrorResponse,
-  Link,
   Links,
   LinksFunction,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
+  useNavigate,
   useRouteError,
 } from "react-router";
 import fontsUrl from "./styles/fonts.css?url";
@@ -14,9 +13,9 @@ import styles from "./tailwind.css?url";
 import { Toaster } from "sonner";
 import { APP_NAME } from "./common/contracts/constants";
 import favicon from "../public/thesyncpartyfavicon.png";
-import errorImg from "../public/errorImg.png";
 import { Providers } from "./app/providers.tsx";
-import UnifiedButton from "./common/components/UnifiedButton";
+import { toAppErrorPayload } from "./shared/api/error-bridge.ts";
+import { ErrorScreen } from "./shared/ui-kit/error-screen.tsx";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: fontsUrl },
@@ -25,43 +24,9 @@ export const links: LinksFunction = () => [
 
 export function ErrorBoundary() {
   const error = useRouteError();
-
-  if (isRouteErrorResponse(error)) {
-    return (
-      <div>
-        <h1>
-          {error.status} {error.statusText}
-        </h1>
-        <p>{error.data}</p>
-      </div>
-    );
-  } else if (error instanceof Error) {
-    return (
-      <div className="flex flex-col h-dvh w-full justify-center items-center gap-3">
-        <div
-          id="error-img-wrapper"
-          className="max-h-[200px] max-w-[200px] rounded-lg"
-        >
-          <img
-            alt="Cute apology"
-            src={errorImg}
-            className="max-h-full max-w-full rounded-lg"
-          />
-        </div>
-        <h1 className="font-yesteryear text-red-600 text-2xl md:text-4xl">
-          It isn&apos;t you, it&apos;s us ! Something went wrong on our end
-        </h1>
-        <p className="font-overpass text-sm px-2">
-          Click the button below to return to home page.
-        </p>
-        <Link to="/">
-          <UnifiedButton buttonLabel="Home"></UnifiedButton>
-        </Link>
-      </div>
-    );
-  } else {
-    return <h1>Unknown Error</h1>;
-  }
+  const navigate = useNavigate();
+  const payload = toAppErrorPayload(error);
+  return <ErrorScreen payload={payload} onHome={() => navigate("/")} />;
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
