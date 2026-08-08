@@ -32,13 +32,13 @@ Deno.test("burst drops the oldest reaction when over cap", () => {
   assertEquals(store.getState().active.map((r) => r.senderId), ["b", "c"]);
 });
 
-// Mutation: expire removes only the matching sender
-Deno.test("expire removes only the matching sender's reactions", () => {
+// Mutation: expireSender removes only the matching sender
+Deno.test("expireSender removes only the matching sender's reactions", () => {
   const store = createReactionStore({ maxConcurrent: 12 });
   store.getState().burst(reaction("a", "👍"));
   store.getState().burst(reaction("b", "🔥"));
   store.getState().burst(reaction("a", "❤️"));
-  store.getState().expire("a");
+  store.getState().expireSender("a");
   assertEquals(store.getState().active.map((r) => r.senderId), ["b"]);
 });
 
