@@ -36,7 +36,7 @@ export class SignalingHandler {
     }
     const room = currentRoom(socket);
     if (room) {
-      this.deps.io.to(room).emit(SOCKET_EVENTS.SIGNAL, relay);
+      socket.to(room).emit(SOCKET_EVENTS.SIGNAL, relay);
     }
     this.deps.logger.debug("signal relayed", { from: socket.id, room });
   }

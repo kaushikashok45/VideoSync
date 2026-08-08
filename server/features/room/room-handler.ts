@@ -117,6 +117,7 @@ export class RoomHandler {
   }
   private endRoom(socket: Socket, room: Room): void {
     this.deps.io.to(room.code).emit(SOCKET_EVENTS.ROOM_ENDED, {});
+    this.deps.io.in(room.code).socketsLeave(room.code);
     this.deps.rooms.delete(room.code);
     this.deps.logger.info("room ended by host disconnect", {
       code: room.code,
