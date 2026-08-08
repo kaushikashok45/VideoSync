@@ -107,3 +107,28 @@ Deno.test("toMeta reflects membership count, lock, host, and capacity", () => {
   assertEquals(meta.maxMembers, 15);
   assertEquals(meta.locked, true);
 });
+
+// Mutation case: metadata flows from create options into toMeta
+Deno.test("metadata provided at create is surfaced in toMeta", () => {
+  const store = new RoomStore(opts);
+  const metadata = {
+    title: "The Matrix",
+    overview: "",
+    posterUrl: "",
+    backdropUrl: "",
+    releaseYear: 1999,
+    ageRating: "NR",
+    runtime: 136,
+    genres: ["Action"],
+    cast: [],
+  };
+  const room = store.create("host", "H", { metadata });
+  assertEquals(store.toMeta(room).metadata, metadata);
+});
+
+// Edge case: no metadata leaves toMeta.metadata undefined
+Deno.test("toMeta omits metadata when none was provided", () => {
+  const store = new RoomStore(opts);
+  const room = store.create("host", "H");
+  assertEquals(store.toMeta(room).metadata, undefined);
+});

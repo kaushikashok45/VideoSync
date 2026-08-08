@@ -38,7 +38,12 @@ export async function fetchMetadata(
   if (!response.ok) {
     throw metadataError("http-error", { status: response.status });
   }
-  const body: unknown = await response.json();
+  let body: unknown;
+  try {
+    body = await response.json();
+  } catch (err) {
+    throw metadataError("malformed-response", { error: String(err) });
+  }
   if (!isRecord(body) || !("metadata" in body)) {
     throw metadataError("malformed-response");
   }

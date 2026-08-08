@@ -22,7 +22,7 @@ Deno.test("maps a full TMDB movie to MovieMetadata fields", () => {
     posterUrl: "https://image.tmdb.org/t/p/w500/p1.jpg",
     backdropUrl: "https://image.tmdb.org/t/p/w1280/b1.jpg",
     releaseYear: 1999,
-    ageRating: "PG-13",
+    ageRating: "NR",
     runtime: 136,
     genres: ["Action", "Sci-Fi"],
     cast: ["Keanu Reeves", "Carrie-Anne Moss"],

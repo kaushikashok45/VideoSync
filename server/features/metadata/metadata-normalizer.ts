@@ -42,7 +42,7 @@ function imageUrl(value: unknown, size: string): string {
 }
 
 function ratingFor(payload: Record<string, unknown>): string {
-  return payload.adult === true ? "18+" : "PG-13";
+  return payload.adult === true ? "18+" : "NR";
 }
 
 export function normalizeMovie(payload: unknown): MovieMetadata | null {

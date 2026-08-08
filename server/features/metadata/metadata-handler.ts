@@ -5,12 +5,10 @@ import type { MovieMetadata } from "../../../shared/contracts/movie-metadata.ts"
 import type { AppConfig } from "../../app/config.ts";
 import type { Logger } from "../../shared/logger/logger.ts";
 import { MetadataCache } from "./metadata-cache.ts";
-import { normalizeMovie } from "./metadata-normalizer.ts";
+import { TmdbClient } from "./metadata-tmdb.ts";
+import type { FetchLike } from "./metadata-tmdb.ts";
 
-export type FetchLike = (
-  url: string | URL | Request,
-  init?: RequestInit,
-) => Promise<Response>;
+export type { FetchLike } from "./metadata-tmdb.ts";
 
 export interface MetadataHandlerDeps {
   app: express.Express;
@@ -20,7 +18,6 @@ export interface MetadataHandlerDeps {
   now?: () => number;
 }
 
-const SEARCH_URL = "https://api.themoviedb.org/3/search/movie";
 const RATE_WINDOW_MS = 60_000;
 
 interface RateEntry {
@@ -28,18 +25,19 @@ interface RateEntry {
   startedAt: number;
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
 export class MetadataHandler {
   private cache: MetadataCache<MovieMetadata | null>;
   private rate = new Map<string, RateEntry>();
+  private tmdb: TmdbClient;
 
   constructor(private deps: MetadataHandlerDeps) {
     this.cache = new MetadataCache<MovieMetadata | null>({
       ttlMs: this.deps.config.metadataTtlMs,
       now: this.deps.now ?? Date.now,
+    });
+    this.tmdb = new TmdbClient({
+      apiKey: this.deps.config.metadataApiKey ?? "",
+      fetchLike: this.deps.fetchLike ?? globalThis.fetch,
     });
   }
 
@@ -74,7 +72,7 @@ export class MetadataHandler {
     query: string,
   ): Promise<void> {
     try {
-      const metadata = await this.fetch(query);
+      const metadata = await this.tmdb.fetchByTitle(query);
       this.cache.set(query, metadata);
       this.respond(res, { metadata });
     } catch (err) {
@@ -84,30 +82,6 @@ export class MetadataHandler {
       });
       this.typed(res, 502, this.error("fetch-failed"));
     }
-  }
-
-  private async fetch(query: string): Promise<MovieMetadata | null> {
-    const apiKey = this.deps.config.metadataApiKey;
-    if (!apiKey) return null;
-    const url = `${SEARCH_URL}?api_key=${apiKey}&query=${
-      encodeURIComponent(query)
-    }`;
-    const response = await this.doFetch(url);
-    if (!response.ok) {
-      throw new Error(`metadata api responded ${response.status}`);
-    }
-    const body: unknown = await response.json();
-    return normalizeMovie(this.firstResult(body));
-  }
-
-  private firstResult(body: unknown): unknown {
-    if (!isRecord(body) || !Array.isArray(body.results)) return null;
-    return body.results[0] ?? null;
-  }
-
-  private doFetch(url: string): Promise<Response> {
-    const fetchLike = this.deps.fetchLike ?? globalThis.fetch;
-    return fetchLike(url);
   }
 
   private rateLimit(ip: string): boolean {
