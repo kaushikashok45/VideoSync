@@ -141,9 +141,14 @@ Deno.test("host upload with a local file gets a video src and no waiting frame",
     container.querySelector('[data-testid="upload-waiting"]'),
     null,
   );
-  const video = container.querySelector('[data-testid="player-video"]');
+  const video = container.querySelector<HTMLVideoElement>(
+    '[data-testid="player-video"]',
+  );
   if (!video) throw new Error("no video element");
   assertEquals(video.getAttribute("src")?.startsWith("blob:"), true);
+  assertEquals(video.autoplay, true);
+  assertEquals(video.muted, false);
+  assertEquals(video.volume, 1);
   return flush(15);
 });
 

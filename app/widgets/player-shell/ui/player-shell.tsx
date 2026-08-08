@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 import type { MediaSource } from "contracts/media-source.ts";
 import type { Member } from "contracts/member.ts";
 import type { MovieMetadata } from "contracts/movie-metadata.ts";
@@ -18,9 +18,10 @@ import {
 import RoomSidebar from "~/widgets/room-sidebar/ui/room-sidebar.tsx";
 import ReactionOverlay from "~/widgets/reaction-overlay/ui/reaction-overlay.tsx";
 import { useIdleVisibility } from "../logic/use-idle-visibility.ts";
+import { useLocalFileSource } from "../logic/use-local-file-source.ts";
 import ControlBar from "./control-bar.tsx";
 import PlaybackSync, { type PlaybackSyncHandle } from "./playback-sync.tsx";
-import UploadWaiting from "./upload-waiting.tsx";
+import PlayerFeedback from "./player-feedback.tsx";
 
 export interface PlayerShellProps {
   mode: "host" | "receiver";
@@ -81,21 +82,8 @@ export default function PlayerShell({
     () => undefined,
   );
 
-  const [objectUrl, setObjectUrl] = useState<string | null>(null);
-  useEffect(() => {
-    if (mode !== "host" || file === null) {
-      setObjectUrl(null);
-      return;
-    }
-    const url = URL.createObjectURL(file);
-    setObjectUrl(url);
-    return () => {
-      URL.revokeObjectURL(url);
-      setObjectUrl(null);
-    };
-  }, [mode, file]);
-
-  const src = objectUrl ?? videoSource(media);
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+  const src = useLocalFileSource(mode, file) ?? videoSource(media);
   const awaitingSource = src === undefined;
 
   return (
@@ -107,32 +95,29 @@ export default function PlayerShell({
       onPointerMove={reveal}
       onKeyDown={reveal}
       onClick={reveal}
-      className="relative aspect-video w-full overflow-hidden rounded-lg bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-text focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+      className="relative h-dvh min-h-0 w-full max-w-none overflow-hidden rounded-none bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-text focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
     >
       <video
         ref={videoRef}
         src={src}
+        autoPlay={mode === "host" && !autoplayBlocked}
         preload="metadata"
         playsInline
-        className="h-full w-full object-contain"
+        className="h-full w-full bg-black object-contain"
         data-testid="player-video"
       />
-      {awaitingSource ? <UploadWaiting mode={mode} /> : null}
-      <div
-        aria-hidden="true"
-        className={`pointer-events-none absolute inset-0 bg-gradient-to-t from-bg/80 via-transparent to-bg/40 transition-opacity duration-300 ${
-          visible ? "opacity-100" : "opacity-0"
-        }`}
+      <PlayerFeedback
+        mode={mode}
+        src={src}
+        awaitingSource={awaitingSource}
+        autoplayBlocked={autoplayBlocked}
+        visible={visible}
+        metadata={metadata}
+        onPlayWithSound={() => {
+          setAutoplayBlocked(false);
+          store.getState().play();
+        }}
       />
-      {metadata?.title
-        ? (
-          <div className="pointer-events-none absolute left-md top-md z-10">
-            <h2 className="font-mono text-sm font-semibold text-ink">
-              {metadata.title}
-            </h2>
-          </div>
-        )
-        : null}
       <ControlBar
         hidden={!visible}
         me={me}
@@ -144,6 +129,8 @@ export default function PlayerShell({
         store={store}
         videoRef={videoRef}
         actionRef={syncHandleRef}
+        autoplay={mode === "host" && Boolean(src)}
+        onAutoplayBlocked={() => setAutoplayBlocked(true)}
       />
       <RoomSidebar
         roomId={roomId}

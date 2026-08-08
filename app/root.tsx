@@ -15,22 +15,25 @@ import { Toast } from "./shared/ui-kit/toast.tsx";
 import favicon from "../public/thesyncpartyfavicon.png";
 import { Providers } from "./app/providers.tsx";
 import { toAppErrorPayload } from "./shared/api/error-bridge.ts";
-import { createErrorStore } from "./shared/api/error-store.ts";
 import { ErrorScreen } from "./shared/ui-kit/error-screen.tsx";
 import { ErrorSurface } from "./widgets/error-surface/ui/error-surface.tsx";
+import { useAppStores } from "./shared/api/socket-bridge.tsx";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: fontsUrl },
   { rel: "stylesheet", href: styles },
 ];
 
-const errorStore = createErrorStore();
-
 export function ErrorBoundary() {
   const error = useRouteError();
   const navigate = useNavigate();
   const payload = toAppErrorPayload(error);
   return <ErrorScreen payload={payload} onHome={() => navigate("/")} />;
+}
+
+function RootErrorSurface({ onHome }: { onHome: () => void }) {
+  const { error } = useAppStores();
+  return <ErrorSurface errorStore={error} onHome={onHome} />;
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -50,10 +53,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body className="bg-bg text-ink font-sans min-h-screen w-full flex flex-col">
         <Providers>
-          <ErrorSurface
-            errorStore={errorStore}
-            onHome={() => navigate("/")}
-          />
+          <RootErrorSurface onHome={() => navigate("/")} />
           <Toast position="top-right" richColors closeButton theme="dark" />
           <main id="content-container" className="flex-1 w-full flex">
             {children}

@@ -12,6 +12,8 @@ export interface PlaybackSyncProps {
   store: PlaybackStore;
   videoRef: RefObject<HTMLVideoElement | null>;
   actionRef: RefObject<PlaybackSyncHandle | null>;
+  autoplay?: boolean;
+  onAutoplayBlocked?: () => void;
 }
 
 const DRIFT_SECONDS = 1.5;
@@ -58,6 +60,8 @@ export default function PlaybackSync({
   store,
   videoRef,
   actionRef,
+  autoplay = false,
+  onAutoplayBlocked,
 }: PlaybackSyncProps) {
   const setVolume = (volume: number) => {
     const video = videoRef.current;
@@ -81,7 +85,13 @@ export default function PlaybackSync({
       const snapshot = store.getState().getSnapshot();
       if (snapshot) applySnapshotToVideo(video, snapshot);
     });
-    const onLoaded = () => seedSnapshot(video, store);
+    const onLoaded = () => {
+      seedSnapshot(video, store);
+      if (!autoplay) return;
+      void video.play()
+        .then(() => store.getState().play())
+        .catch(() => onAutoplayBlocked?.());
+    };
     const onTime = () => {
       const projected = store.getState().projectedAt(Date.now());
       correctDrift(video, projected);
@@ -93,7 +103,7 @@ export default function PlaybackSync({
       video.removeEventListener("loadedmetadata", onLoaded);
       video.removeEventListener("timeupdate", onTime);
     };
-  }, [store, videoRef]);
+  }, [autoplay, onAutoplayBlocked, store, videoRef]);
 
   return null;
 }

@@ -1,12 +1,8 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import SessionContext from "~/context/Session/logic/SessionContext.ts";
-import {
-  decideJoinPath,
-  hostTarget,
-  isHost,
-  joinTarget,
-} from "~/features/room-join/model/join-path.ts";
+import { useAppStores, useSocketClient } from "~/shared/api/socket-bridge.tsx";
+import { isHost } from "~/features/room-join/model/join-path.ts";
 import JoinPartyButton from "~/features/room-join/ui/join-party-button.tsx";
 import RoomCodeCopy from "~/features/room-join/ui/room-code-copy.tsx";
 import NowShowingCard from "~/widgets/movie-now-showing/ui/now-showing-card.tsx";
@@ -15,15 +11,39 @@ export default function SetupPage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { role, userName } = useContext(SessionContext);
+  const socket = useSocketClient();
+  const stores = useAppStores();
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const roomId = id ?? "";
 
-  const onJoin = () => {
-    const decision = decideJoinPath(role, roomId, userName);
-    if (decision) {
-      navigate(decision.target);
-      return;
+  const onJoin = async () => {
+    setPending(true);
+    setError(null);
+    try {
+      const payload = isHost(role)
+        ? { room: await socket.createRoom(userName || "Host") }
+        : await socket.joinRoom(roomId, userName);
+      stores.room.getState().setRoom(payload.room);
+      if ("members" in payload) {
+        stores.members.getState().setMembers(
+          payload.members,
+          socket.getSocketId() ?? "",
+        );
+      }
+      const targetRoomId = payload.room.code;
+      navigate(
+        isHost(role)
+          ? `/${targetRoomId}/file-upload`
+          : `/${targetRoomId}/RecieverVideoPlayerNew`,
+      );
+    } catch (caught) {
+      setError(
+        caught instanceof Error ? caught.message : "Could not join the party.",
+      );
+    } finally {
+      setPending(false);
     }
-    navigate(isHost(role) ? hostTarget(roomId) : joinTarget(roomId));
   };
 
   if (isHost(role)) {
@@ -37,7 +57,18 @@ export default function SetupPage() {
           the show.
         </p>
         <RoomCodeCopy code={roomId} />
-        <JoinPartyButton label="Pick a video" onClick={onJoin} />
+        <JoinPartyButton
+          label="Pick a video"
+          onClick={onJoin}
+          loading={pending}
+        />
+        {error
+          ? (
+            <p role="alert" className="font-mono text-sm text-status-danger">
+              {error}
+            </p>
+          )
+          : null}
       </main>
     );
   }

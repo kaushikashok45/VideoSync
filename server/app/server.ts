@@ -45,7 +45,10 @@ export async function startServer(
 
   if (config.nodeEnv === "development") {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: {
+        middlewareMode: true,
+        hmr: { server },
+      },
       appType: "custom",
     });
     app.use(vite.middlewares);
