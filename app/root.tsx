@@ -11,19 +11,17 @@ import {
 } from "react-router";
 import fontsUrl from "./styles/fonts.css?url";
 import styles from "./tailwind.css?url";
-import Header from "~/common/components/Header";
 import { Toaster } from "sonner";
-import SessionContextProvider from "~/context/Session/components/SessionContextProvider";
 import { APP_NAME } from "./common/contracts/constants";
-import Footer from "~/common/components/Footer";
 import favicon from "../public/thesyncpartyfavicon.png";
 import errorImg from "../public/errorImg.png";
+import { Providers } from "./app/providers.tsx";
+import UnifiedButton from "./common/components/UnifiedButton";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: fontsUrl },
   { rel: "stylesheet", href: styles },
 ];
-import UnifiedButton from "./common/components/UnifiedButton";
 
 export function ErrorBoundary() {
   const error = useRouteError();
@@ -80,30 +78,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="
-    font-overpass
-    min-h-screen
-    w-full
-    flex flex-col
-    bg-[linear-gradient(180deg,#fff6f5_0%,#ffffff_100%)]
-    dark:bg-[radial-gradient(circle_at_top,#131821_0%,#0d1117_100%)]
-  ">
-        <SessionContextProvider>
-          <Toaster
-            position="top-right"
-            richColors
-            closeButton
-            theme="system"
-          />
-          <Header />
-
+      <body className="bg-bg text-ink font-sans min-h-screen w-full flex flex-col">
+        <Providers>
+          <Toaster position="top-right" richColors closeButton theme="dark" />
           <main id="content-container" className="flex-1 w-full flex">
             {children}
           </main>
-          <Footer />
           <ScrollRestoration />
           <Scripts />
-        </SessionContextProvider>
+        </Providers>
       </body>
     </html>
   );

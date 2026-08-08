@@ -35,6 +35,7 @@ export interface SocketClient {
   onReaction(cb: (r: Reaction) => void): void;
   onSignal(cb: (p: RelaySignalPayload) => void): void;
   onRoomEnded(cb: () => void): void;
+  onAppError(cb: (p: AppErrorPayload) => void): void;
   getSocketId(): string | undefined;
   disconnect(): void;
 }
@@ -119,6 +120,9 @@ export function createSocketClient(deps: SocketClientDeps): SocketClient {
     },
     onRoomEnded(cb) {
       socket.on(SOCKET_EVENTS.ROOM_ENDED, cb);
+    },
+    onAppError(cb) {
+      socket.on(SOCKET_EVENTS.APP_ERROR, cb);
     },
     getSocketId: () => socket.id,
     disconnect: () => socket.disconnect(),
