@@ -109,7 +109,7 @@ export default function PlayerShell({
       <video
         ref={videoRef}
         src={src}
-        autoPlay={mode === "host" && !autoplayBlocked}
+        autoPlay={mode === "host" ? !autoplayBlocked : remoteStream !== null}
         preload="metadata"
         playsInline
         className="h-full w-full bg-black object-contain"
@@ -118,6 +118,7 @@ export default function PlayerShell({
       <PlayerFeedback
         mode={mode}
         src={src}
+        hasStream={remoteStream !== null}
         awaitingSource={awaitingSource}
         autoplayBlocked={autoplayBlocked}
         visible={visible}

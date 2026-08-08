@@ -84,10 +84,15 @@ export default function PlaybackSync({
     const video = videoRef.current;
     if (!video) return;
     video.srcObject = stream;
+    if (stream && autoplay) {
+      void video.play()
+        .then(() => store.getState().play())
+        .catch(() => onAutoplayBlocked?.());
+    }
     return () => {
       if (video.srcObject === stream) video.srcObject = null;
     };
-  }, [stream, videoRef]);
+  }, [stream, autoplay, onAutoplayBlocked, store, videoRef]);
 
   useEffect(() => {
     const video = videoRef.current;

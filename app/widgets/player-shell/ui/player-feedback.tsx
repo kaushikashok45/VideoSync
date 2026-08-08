@@ -4,6 +4,7 @@ import UploadWaiting from "./upload-waiting.tsx";
 export interface PlayerFeedbackProps {
   mode: "host" | "receiver";
   src?: string;
+  hasStream?: boolean;
   awaitingSource: boolean;
   autoplayBlocked: boolean;
   visible: boolean;
@@ -14,16 +15,18 @@ export interface PlayerFeedbackProps {
 export default function PlayerFeedback({
   mode,
   src,
+  hasStream = false,
   awaitingSource,
   autoplayBlocked,
   visible,
   metadata,
   onPlayWithSound,
 }: PlayerFeedbackProps) {
+  const playable = Boolean(src) || hasStream;
   return (
     <>
       {awaitingSource ? <UploadWaiting mode={mode} /> : null}
-      {autoplayBlocked && src
+      {autoplayBlocked && playable
         ? (
           <button
             type="button"
