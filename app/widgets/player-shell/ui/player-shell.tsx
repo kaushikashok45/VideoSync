@@ -63,10 +63,11 @@ export default function PlayerShell({
       data-testid="player-shell"
       role="group"
       aria-label={mode === "host" ? "Host player" : "Receiver player"}
+      tabIndex={0}
       onPointerMove={reveal}
       onKeyDown={reveal}
       onClick={reveal}
-      className="relative aspect-video w-full overflow-hidden rounded-lg bg-surface-sunken"
+      className="relative aspect-video w-full overflow-hidden rounded-lg bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-text focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
     >
       <video
         ref={videoRef}

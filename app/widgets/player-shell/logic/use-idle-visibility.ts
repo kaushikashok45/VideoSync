@@ -1,16 +1,23 @@
 import { useEffect, useState } from "react";
 
+export function prefersReducedMotion(): boolean {
+  if (typeof matchMedia === "undefined") return false;
+  return matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
 export function useIdleVisibility(idleMs: number): {
   visible: boolean;
   reveal: () => void;
 } {
   const [visible, setVisible] = useState(true);
   const [lastActivity, setLastActivity] = useState(() => Date.now());
+  const reducedMotion = prefersReducedMotion();
 
   useEffect(() => {
+    if (reducedMotion) return;
     const timer = setTimeout(() => setVisible(false), idleMs);
     return () => clearTimeout(timer);
-  }, [lastActivity, idleMs]);
+  }, [lastActivity, idleMs, reducedMotion]);
 
   const reveal = () => {
     setVisible(true);
