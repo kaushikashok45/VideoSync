@@ -16,7 +16,6 @@ export function ErrorBanner(
   return (
     <div
       role="alert"
-      aria-live="polite"
       data-testid="error-banner"
       className="flex items-start gap-md rounded-md border border-status-danger/40 bg-surface-raised px-md py-sm"
     >

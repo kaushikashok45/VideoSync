@@ -10,8 +10,8 @@ import {
 } from "react-router";
 import fontsUrl from "./styles/fonts.css?url";
 import styles from "./tailwind.css?url";
-import { Toaster } from "sonner";
 import { APP_NAME } from "./common/contracts/constants";
+import { Toast } from "./shared/ui-kit/toast.tsx";
 import favicon from "../public/thesyncpartyfavicon.png";
 import { Providers } from "./app/providers.tsx";
 import { toAppErrorPayload } from "./shared/api/error-bridge.ts";
@@ -54,7 +54,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             errorStore={errorStore}
             onHome={() => navigate("/")}
           />
-          <Toaster position="top-right" richColors closeButton theme="dark" />
+          <Toast position="top-right" richColors closeButton theme="dark" />
           <main id="content-container" className="flex-1 w-full flex">
             {children}
           </main>

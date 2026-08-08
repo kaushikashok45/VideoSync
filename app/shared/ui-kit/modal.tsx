@@ -78,7 +78,7 @@ function ModalPanel(
 ) {
   return (
     <div
-      className="fixed inset-0 z-modalBackdrop flex items-center justify-center bg-bg/72 animate-fade-in"
+      className="fixed inset-0 z-modalBackdrop flex items-center justify-center bg-bg/75 animate-fade-in"
       onClick={onClose}
     >
       <div

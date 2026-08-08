@@ -23,6 +23,7 @@ export default function ReactionOverlay({
   const active = useSyncExternalStore(
     reactionStore.subscribe,
     () => reactionStore.getState().active,
+    () => reactionStore.getState().active,
   );
   const timersRef = useRef(new Map<string, TimerId>());
   useEffect(() => {

@@ -74,12 +74,17 @@ const ThemeContext = createContext<ThemeContextValue>({
 
 export function ThemeProvider({ children }: { children?: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() =>
-    resolveInitialTheme(prefersLightScheme(), readStoredTheme(defaultStorage()))
+    readStoredTheme(defaultStorage()) ?? "dark"
   );
 
   useEffect(() => {
     applyThemeClass(document, theme);
   }, [theme]);
+
+  useEffect(() => {
+    if (readStoredTheme(defaultStorage()) !== null) return;
+    setTheme(resolveInitialTheme(prefersLightScheme(), null));
+  }, []);
 
   const toggle = () => {
     setTheme((current) => {

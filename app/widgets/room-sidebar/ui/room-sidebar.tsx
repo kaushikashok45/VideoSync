@@ -59,9 +59,11 @@ export default function RoomSidebar({
   const members = useSyncExternalStore(
     membersStore.subscribe,
     () => membersStore.getState().members,
+    () => membersStore.getState().members,
   );
   const messages = useSyncExternalStore(
     chatStore.subscribe,
+    () => chatStore.getState().messages,
     () => chatStore.getState().messages,
   );
   const senderName = me?.name ?? "You";
@@ -74,7 +76,7 @@ export default function RoomSidebar({
           <div
             data-testid="sidebar-scrim"
             aria-hidden="true"
-            className="absolute inset-0 z-20 bg-bg/72 animate-fade-in"
+            className="absolute inset-0 z-20 bg-bg/75 animate-fade-in"
             onClick={close}
           />
         )

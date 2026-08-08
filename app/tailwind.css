@@ -5,32 +5,40 @@
 @layer base {
   :root {
     color-scheme: dark;
-    --bg: #0d1117;
-    --surface: #161b22;
-    --surface-raised: #1c222b;
-    --surface-sunken: #0a0e13;
-    --ink: #e6e9ee;
-    --ink-muted: #aeb6c2;
-    --ink-faint: #7d8794;
-    --brand: #d93036;
-    --brand-hover: #e5484d;
-    --brand-text: #f85149;
+    --bg-rgb: 13 17 23;
+    --surface-rgb: 22 27 34;
+    --surface-raised-rgb: 28 34 43;
+    --surface-sunken-rgb: 10 14 19;
+    --ink-rgb: 230 233 238;
+    --ink-muted-rgb: 174 182 194;
+    --ink-faint-rgb: 125 135 148;
+    --brand-rgb: 217 48 54;
+    --brand-hover-rgb: 229 72 77;
+    --brand-text-rgb: 248 81 73;
+    --brand-muted-rgb: 42 22 24;
+    --brand-soft-rgb: 28 18 19;
+    --onbrand-rgb: 255 255 255;
+    --status-success-rgb: 63 185 80;
+    --status-warning-rgb: 210 153 34;
+    --status-danger-rgb: 248 81 73;
     --line: rgba(230, 233, 238, 0.1);
     --line-strong: rgba(230, 233, 238, 0.18);
   }
 
   html.light {
     color-scheme: light;
-    --bg: #f8f8f7;
-    --surface: #ffffff;
-    --surface-raised: #ffffff;
-    --surface-sunken: #f0f0ee;
-    --ink: #17181a;
-    --ink-muted: #4a4d52;
-    --ink-faint: #6f737a;
-    --brand: #c52a30;
-    --brand-hover: #b0262c;
-    --brand-text: #c52a30;
+    --bg-rgb: 248 248 247;
+    --surface-rgb: 255 255 255;
+    --surface-raised-rgb: 255 255 255;
+    --surface-sunken-rgb: 240 240 238;
+    --ink-rgb: 23 24 26;
+    --ink-muted-rgb: 74 77 82;
+    --ink-faint-rgb: 111 115 122;
+    --brand-rgb: 197 42 48;
+    --brand-hover-rgb: 176 38 44;
+    --brand-text-rgb: 197 42 48;
+    --brand-muted-rgb: 243 201 203;
+    --brand-soft-rgb: 251 232 233;
     --line: rgba(23, 24, 26, 0.1);
     --line-strong: rgba(23, 24, 26, 0.18);
   }
@@ -38,8 +46,8 @@
   html,
   body {
     @apply bg-bg text-ink font-sans;
-    background: var(--bg);
-    color: var(--ink);
+    background: rgb(var(--bg-rgb));
+    color: rgb(var(--ink-rgb));
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
@@ -49,7 +57,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--brand-text);
+    outline: 2px solid rgb(var(--brand-text-rgb));
     outline-offset: 2px;
   }
 

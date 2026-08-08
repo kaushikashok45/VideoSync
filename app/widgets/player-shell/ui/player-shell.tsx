@@ -80,6 +80,7 @@ export default function PlayerShell({
   const snapshot = useSyncExternalStore(
     store.subscribe,
     () => store.getState().getSnapshot(),
+    () => undefined,
   );
   const src = videoSource(media);
 

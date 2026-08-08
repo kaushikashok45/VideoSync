@@ -9,6 +9,7 @@ export default function PresencePill({ store }: PresencePillProps) {
   const members = useSyncExternalStore(
     store.subscribe,
     () => store.getState().members,
+    () => store.getState().members,
   );
   if (members.length === 0) return null;
   return (
