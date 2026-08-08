@@ -14,8 +14,8 @@ import {
   sendReaction,
 } from "./reaction-behaviour.ts";
 
-function reaction(senderId: string, emoji = "👍"): Reaction {
-  return { senderId, senderName: `name-${senderId}`, emoji, ts: 100_000 };
+function reaction(senderId: string, emoji = "👍", ts = 100_000): Reaction {
+  return { senderId, senderName: `name-${senderId}`, emoji, ts };
 }
 
 // 1. Happy: send adds an allowed reaction; expiry removes it.
@@ -29,8 +29,9 @@ Deno.test("sendReaction adds an allowed reaction with the sender name", () => {
 
 Deno.test("expireReaction removes a reaction the user sent", () => {
   const store = createReactionStore();
-  sendReaction("👍", "me", store);
-  expireReaction(LOCAL_SENDER_ID, store);
+  const sent = sendReaction("👍", "me", store);
+  if (!sent) throw new Error("send failed");
+  expireReaction(LOCAL_SENDER_ID, sent.ts, store);
   assertEquals(store.getState().active.length, 0);
 });
 
@@ -64,13 +65,23 @@ Deno.test("burstReaction appends duplicates without dedupe", () => {
   assertEquals(store.getState().active.length, 2);
 });
 
-Deno.test("expireReaction removes only the given sender's reactions", () => {
+Deno.test("expireReaction removes only the matching sender and ts", () => {
   const store = createReactionStore();
-  burstReaction(reaction("a", "👍"), store);
-  burstReaction(reaction("b", "🔥"), store);
-  burstReaction(reaction("a", "❤️"), store);
-  expireReaction("a", store);
-  assertEquals(store.getState().active.map((r) => r.senderId), ["b"]);
+  burstReaction(reaction("a", "👍", 1), store);
+  burstReaction(reaction("b", "🔥", 2), store);
+  burstReaction(reaction("a", "❤️", 3), store);
+  expireReaction("a", 1, store);
+  assertEquals(store.getState().active.map((r) => r.ts), [2, 3]);
+});
+
+Deno.test("expireReaction does not remove same-sender reactions with other ts", () => {
+  const store = createReactionStore();
+  burstReaction(reaction("a", "👍", 1), store);
+  burstReaction(reaction("a", "🔥", 2), store);
+  expireReaction("a", 1, store);
+  const active = store.getState().active;
+  assertEquals(active.length, 1);
+  assertEquals(active[0].ts, 2);
 });
 
 // 5. Limits: burst floods stay capped; positions stay in bounds.

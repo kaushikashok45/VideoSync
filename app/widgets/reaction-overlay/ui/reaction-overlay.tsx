@@ -32,7 +32,7 @@ export default function ReactionOverlay({
       if (timers.has(key)) continue;
       const timer = setTimeout(() => {
         timers.delete(key);
-        expireReaction(reaction.senderId, reactionStore);
+        expireReaction(reaction.senderId, reaction.ts, reactionStore);
       }, expireMs);
       timers.set(key, timer);
     }

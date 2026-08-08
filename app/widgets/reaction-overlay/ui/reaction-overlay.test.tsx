@@ -96,6 +96,25 @@ Deno.test("expiry removes the float after expireMs", async () => {
   assertEquals(floats(container).length, 0);
 });
 
+// 4c. Mutation: same-sender concurrent reactions expire individually by
+// timestamp. A second reaction added mid-window must NOT be wiped by the first
+// reaction's expiry (per-sender expiry would remove it too).
+Deno.test("same-sender reactions expire individually by timestamp", async () => {
+  setupDom();
+  const store = createReactionStore();
+  const { container } = render(
+    <ReactionOverlay reactionStore={store} expireMs={50} />,
+  );
+  act(() => store.getState().burst(reaction("a", "👍", 1)));
+  await flush(25);
+  act(() => store.getState().burst(reaction("a", "🔥", 2)));
+  await flush(30);
+  const remaining = store.getState().active;
+  assertEquals(remaining.length, 1);
+  assertEquals(remaining[0].ts, 2);
+  assertEquals(floats(container).length, 1);
+});
+
 // 5. Edge: presence pill reflects the member count.
 Deno.test("presence pill shows the member count", () => {
   setupDom();

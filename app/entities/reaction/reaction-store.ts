@@ -11,6 +11,7 @@ export interface ReactionState {
   active: Reaction[];
   send(emoji: string, senderName: string): Reaction | undefined;
   burst(r: Reaction): void;
+  expireReaction(senderId: string, ts: number): void;
   expireSender(senderId: string): void;
   expireAll(): void;
 }
@@ -59,6 +60,20 @@ function burstAction(
   set({ active: capped([...active, r], maxConcurrent) });
 }
 
+function expireReactionAction(
+  set: SetFn,
+  get: GetFn,
+  senderId: string,
+  ts: number,
+): void {
+  const { active } = get();
+  set({
+    active: active.filter(
+      (r) => !(r.senderId === senderId && r.ts === ts),
+    ),
+  });
+}
+
 function expireSenderAction(set: SetFn, get: GetFn, senderId: string): void {
   const { active } = get();
   set({ active: active.filter((r) => r.senderId !== senderId) });
@@ -77,6 +92,8 @@ export function createReactionStore(
     send: (emoji, senderName) =>
       sendAction({ set, get, maxConcurrent }, emoji, senderName),
     burst: (r) => burstAction(set, get, maxConcurrent, r),
+    expireReaction: (senderId, ts) =>
+      expireReactionAction(set, get, senderId, ts),
     expireSender: (senderId) => expireSenderAction(set, get, senderId),
     expireAll: () => expireAllAction(set),
   }));

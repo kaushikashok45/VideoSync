@@ -2,8 +2,8 @@ import { assertEquals } from "@std/assert";
 import { createReactionStore, LOCAL_SENDER_ID } from "./reaction-store.ts";
 import type { Reaction } from "contracts/reaction.ts";
 
-function reaction(senderId: string, emoji = "👍"): Reaction {
-  return { senderId, senderName: `name-${senderId}`, emoji, ts: 100_000 };
+function reaction(senderId: string, emoji = "👍", ts = 100_000): Reaction {
+  return { senderId, senderName: `name-${senderId}`, emoji, ts };
 }
 
 // Happy path: send adds a local reaction
@@ -40,6 +40,16 @@ Deno.test("expireSender removes only the matching sender's reactions", () => {
   store.getState().burst(reaction("a", "❤️"));
   store.getState().expireSender("a");
   assertEquals(store.getState().active.map((r) => r.senderId), ["b"]);
+});
+
+// Mutation: expireReaction removes one (senderId, ts), not the whole sender
+Deno.test("expireReaction removes only the matching sender and ts", () => {
+  const store = createReactionStore({ maxConcurrent: 12 });
+  store.getState().burst(reaction("a", "👍", 1));
+  store.getState().burst(reaction("a", "🔥", 2));
+  store.getState().burst(reaction("b", "❤️", 3));
+  store.getState().expireReaction("a", 1);
+  assertEquals(store.getState().active.map((r) => r.ts), [2, 3]);
 });
 
 // Mutation: expireAll clears every active reaction

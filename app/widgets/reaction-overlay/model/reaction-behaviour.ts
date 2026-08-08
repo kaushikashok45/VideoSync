@@ -22,7 +22,15 @@ export function burstReaction(r: Reaction, store: ReactionStore): void {
   store.getState().burst(r);
 }
 
-export function expireReaction(senderId: string, store: ReactionStore): void {
+export function expireReaction(
+  senderId: string,
+  ts: number,
+  store: ReactionStore,
+): void {
+  store.getState().expireReaction(senderId, ts);
+}
+
+export function expireSender(senderId: string, store: ReactionStore): void {
   store.getState().expireSender(senderId);
 }
 
