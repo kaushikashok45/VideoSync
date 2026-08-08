@@ -1,4 +1,4 @@
-import Homepage from "./components/Homepage";
+import HomePage from "~/pages/home/home-page.tsx";
 export default function IndexRoute() {
-  return <Homepage />;
+  return <HomePage />;
 }
