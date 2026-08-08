@@ -36,7 +36,7 @@ export default function NowShowingCard({
     return <JoinEmptyState onJoin={onJoin} />;
   }
   return (
-    <section className="relative flex flex-col gap-lg">
+    <section className="relative isolate flex flex-col gap-lg">
       <Backdrop backdropUrl={metadata.backdropUrl} />
       <div className="relative z-10 flex flex-col gap-md px-md py-lg md:flex-row md:gap-xl md:px-lg md:py-xxl">
         <div

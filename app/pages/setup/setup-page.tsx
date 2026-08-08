@@ -2,6 +2,7 @@ import { useContext } from "react";
 import { useNavigate, useParams } from "react-router";
 import SessionContext from "~/context/Session/logic/SessionContext.ts";
 import {
+  decideJoinPath,
   hostTarget,
   isHost,
   joinTarget,
@@ -12,8 +13,17 @@ import NowShowingCard from "~/widgets/movie-now-showing/ui/now-showing-card.tsx"
 export default function SetupPage() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { role } = useContext(SessionContext);
+  const { role, userName } = useContext(SessionContext);
   const roomId = id ?? "";
+
+  const onJoin = () => {
+    const decision = decideJoinPath(role, roomId, userName);
+    if (decision) {
+      navigate(decision.target);
+      return;
+    }
+    navigate(isHost(role) ? hostTarget(roomId) : joinTarget(roomId));
+  };
 
   if (isHost(role)) {
     return (
@@ -24,17 +34,14 @@ export default function SetupPage() {
           {roomId}. Share it with friends, then pick a movie to start the watch
           party.
         </p>
-        <JoinPartyButton
-          label="Host the party"
-          onClick={() => navigate(hostTarget(roomId))}
-        />
+        <JoinPartyButton label="Host the party" onClick={onJoin} />
       </main>
     );
   }
 
   return (
     <main className="relative min-h-screen bg-bg">
-      <NowShowingCard onJoin={() => navigate(joinTarget(roomId))} />
+      <NowShowingCard onJoin={onJoin} />
     </main>
   );
 }
