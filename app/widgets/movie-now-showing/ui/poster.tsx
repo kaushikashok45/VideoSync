@@ -21,7 +21,7 @@ export default function Poster({ posterUrl, title }: PosterProps) {
       data-testid="poster-image"
       src={posterUrl}
       alt={`${title} poster`}
-      className="aspect-[2/3] w-44 rounded-lg object-cover shadow-pop"
+      className="aspect-[2/3] w-44 rounded-lg object-cover shadow-pop transition-[transform,box-shadow] duration-200 hover:scale-[1.02] hover:shadow-overlay motion-reduce:hover:scale-100 motion-reduce:transition-none"
     />
   );
 }

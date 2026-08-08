@@ -128,3 +128,16 @@ Deno.test("renders a long cast list of twelve without crashing", () => {
     12,
   );
 });
+
+// Mutation: the poster hover micro-interaction stays transform-only and guarded.
+Deno.test("poster scales on hover with a motion-reduce guard", () => {
+  setupDom();
+  const { container } = render(
+    <NowShowingCard metadata={METADATA} onJoin={noop} />,
+  );
+  const poster = container.querySelector('[data-testid="poster-image"]');
+  const className = poster?.getAttribute("class") ?? "";
+  assertEquals(className.includes("hover:scale-[1.02]"), true);
+  assertEquals(className.includes("motion-reduce:hover:scale-100"), true);
+  assertEquals(className.includes("motion-reduce:transition-none"), true);
+});

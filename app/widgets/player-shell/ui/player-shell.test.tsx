@@ -148,3 +148,16 @@ Deno.test("idle boundary: visible before the deadline, hidden at and beyond it",
   await flush(15);
   assertEquals(bar(container)?.getAttribute("aria-hidden"), "true");
 });
+
+// 5. Mutation: the seeker thumb grows on hover, guarded for reduced motion.
+Deno.test("seeker thumb hover scale is motion-reduce guarded", () => {
+  setupDom();
+  const { container } = shell({ idleMs: 10 });
+  const style = container.querySelector("style");
+  const css = style?.textContent ?? "";
+  assertEquals(css.includes(":hover::-webkit-slider-thumb"), true);
+  assertEquals(css.includes(":hover::-moz-range-thumb"), true);
+  assertEquals(css.includes("transform: scale(1.3)"), true);
+  assertEquals(css.includes("prefers-reduced-motion"), true);
+  return flush(15);
+});

@@ -1,9 +1,5 @@
 import { useEffect, useState } from "react";
-
-export function prefersReducedMotion(): boolean {
-  if (typeof matchMedia === "undefined") return false;
-  return matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
+import { prefersReducedMotion } from "~/shared/ui-kit/reduced-motion.ts";
 
 export function useIdleVisibility(idleMs: number): {
   visible: boolean;

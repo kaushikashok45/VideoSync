@@ -1,5 +1,11 @@
 import type { MovieMetadata } from "contracts/movie-metadata.ts";
-import { Avatar, Badge, Button, EmptyState } from "~/shared/ui-kit/index.ts";
+import {
+  Avatar,
+  Badge,
+  Button,
+  EmptyState,
+  useReveal,
+} from "~/shared/ui-kit/index.ts";
 import Backdrop from "./backdrop.tsx";
 import Poster from "./poster.tsx";
 
@@ -32,6 +38,9 @@ export default function NowShowingCard({
   metadata,
   onJoin,
 }: NowShowingCardProps) {
+  const posterReveal = useReveal({ delayMs: 100, durationMs: 400 });
+  const contentReveal = useReveal({ delayMs: 200, durationMs: 400 });
+  const actionReveal = useReveal({ delayMs: 300, durationMs: 400 });
   if (metadata === undefined) {
     return <JoinEmptyState onJoin={onJoin} />;
   }
@@ -41,13 +50,13 @@ export default function NowShowingCard({
       <div className="relative z-10 flex flex-col gap-md px-md py-lg md:flex-row md:gap-xl md:px-lg md:py-xxl">
         <div
           className="animate-fade-up motion-reduce:animate-none"
-          style={{ animationDelay: "0.1s" }}
+          style={posterReveal.style}
         >
           <Poster posterUrl={metadata.posterUrl} title={metadata.title} />
         </div>
         <div
           className="flex animate-fade-up flex-col gap-md motion-reduce:animate-none"
-          style={{ animationDelay: "0.2s" }}
+          style={contentReveal.style}
         >
           <header className="flex flex-col gap-sm">
             <h1 className="text-3xl font-semibold text-ink md:text-4xl">
@@ -104,7 +113,7 @@ export default function NowShowingCard({
           </p>
           <div
             className="animate-fade-up motion-reduce:animate-none"
-            style={{ animationDelay: "0.3s" }}
+            style={actionReveal.style}
           >
             <JoinButton onJoin={onJoin} />
           </div>
