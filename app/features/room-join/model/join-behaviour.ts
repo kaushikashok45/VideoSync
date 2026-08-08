@@ -22,6 +22,15 @@ export function normalizeRoomCode(code: string): string {
   return code.trim().toLowerCase();
 }
 
+export function generateRoomCode(length = ROOM_CODE_LENGTH): string {
+  let out = "";
+  for (let i = 0; i < length; i++) {
+    const idx = Math.floor(Math.random() * ROOM_CODE_ALPHABET.length);
+    out += ROOM_CODE_ALPHABET[idx];
+  }
+  return out;
+}
+
 export function validateName(name: string): string | null {
   const trimmed = name.trim();
   if (trimmed === "") return "Enter your name to join the party.";

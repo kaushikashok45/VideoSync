@@ -1,7 +1,9 @@
 import { assertEquals } from "@std/assert";
 import {
+  generateRoomCode,
   NAME_MAX,
   normalizeRoomCode,
+  ROOM_CODE_ALPHABET,
   ROOM_CODE_LENGTH,
   submitJoin,
   validateName,
@@ -109,4 +111,20 @@ Deno.test("room code length is pinned at 5 characters", () => {
   assertEquals(ROOM_CODE_LENGTH, 5);
   assertEquals(validateRoomCode("abc23"), null);
   assertEquals(validateRoomCode("abc234"), "Room codes are 5 characters.");
+});
+
+// Mutation: generateRoomCode produces a valid-length code from the alphabet.
+Deno.test("generateRoomCode yields a 5-char code from the room alphabet", () => {
+  const code = generateRoomCode();
+  assertEquals(code.length, ROOM_CODE_LENGTH);
+  assertEquals(validateRoomCode(code), null);
+  assertEquals(
+    [...code].every((ch) => ROOM_CODE_ALPHABET.includes(ch)),
+    true,
+  );
+});
+
+// Limits: a custom length is honored.
+Deno.test("generateRoomCode honors a custom length", () => {
+  assertEquals(generateRoomCode(8).length, 8);
 });
