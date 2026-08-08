@@ -45,7 +45,8 @@ Deno.test("addMember enforces the exact capacity boundary", () => {
   for (let i = 0; i < 14; i++) store.addMember(room, viewer(`v${i}`, `v${i}`));
   assertEquals(store.memberCount(room), 15); // at limit
   assertRejects(
-    () => Promise.resolve().then(() => store.addMember(room, viewer("extra", "x"))),
+    () =>
+      Promise.resolve().then(() => store.addMember(room, viewer("extra", "x"))),
     AppError,
     "full",
   );
@@ -57,7 +58,8 @@ Deno.test("addMember rejects joining a locked room as a viewer, allows host", ()
   const room = store.create("host", "H");
   room.locked = true;
   assertRejects(
-    () => Promise.resolve().then(() => store.addMember(room, viewer("v1", "V"))),
+    () =>
+      Promise.resolve().then(() => store.addMember(room, viewer("v1", "V"))),
     AppError,
     "locked",
   );
