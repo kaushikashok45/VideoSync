@@ -1,5 +1,5 @@
-import UploadFile from "./components/UploadFile";
+import UploadPage from "~/pages/upload/upload-page.tsx";
 
 export default function FileUploadPage() {
-  return <UploadFile />;
+  return <UploadPage />;
 }
