@@ -1,6 +1,8 @@
 import { io, type Socket } from "socket.io-client";
 import { SOCKET_EVENTS } from "contracts/socket-events.ts";
 import { AppError } from "contracts/app-error.ts";
+import type { AppErrorPayload } from "contracts/app-error-payload.ts";
+import type { ErrorCode } from "contracts/error-code.ts";
 import type { ChatMessage } from "contracts/chat-message.ts";
 import type { MemberJoinedPayload } from "contracts/payloads/member-joined-payload.ts";
 import type { MemberLeftPayload } from "contracts/payloads/member-left-payload.ts";
@@ -56,10 +58,10 @@ export function createSocketClient(deps: SocketClientDeps): SocketClient {
     pending.get("join")?.(p);
     pending.delete("join");
   });
-  socket.on(SOCKET_EVENTS.APP_ERROR, (err: { code: string }) => {
+  socket.on(SOCKET_EVENTS.APP_ERROR, (err: AppErrorPayload) => {
     const reject = pending.get("error");
     pending.clear();
-    reject?.(new AppError(err.code as never));
+    reject?.(new AppError(err.code as ErrorCode));
   });
 
   function request<T>(key: string, payload: unknown): Promise<T> {
