@@ -109,6 +109,19 @@ Deno.test("play is a no-op when ended", () => {
   assertEquals(state.play().status, "ended");
 });
 
+// Mutation case: redundant play() while already playing must not rewind
+Deno.test("play on an already-playing state does not rewind or rebaseline", () => {
+  const { state, setTime } = makeState({ status: "playing", currentTime: 30 });
+  setTime(101_000); // projected 31
+  const first = state.getSnapshot();
+  const second = state.play();
+  assertEquals(second.status, "playing");
+  assertEquals(second.currentTime, 31);
+  assertEquals(second.currentTime, first.currentTime);
+  setTime(101_500); // still projecting forward from 31
+  assertEquals(state.getSnapshot().currentTime, 31.5);
+});
+
 // Happy path + mutation: drift is signed and relative to authoritative position
 Deno.test("drift detection reports signed difference", () => {
   const { state } = makeState({ status: "playing", currentTime: 30 });

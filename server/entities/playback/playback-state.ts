@@ -21,7 +21,11 @@ export class PlaybackState {
   }
 
   play(): PlaybackSnapshot {
-    if (this.snapshot.status === "ended") return this.getSnapshot();
+    if (
+      this.snapshot.status === "ended" || this.snapshot.status === "playing"
+    ) {
+      return this.getSnapshot();
+    }
     this.snapshot = {
       ...this.snapshot,
       status: "playing",
