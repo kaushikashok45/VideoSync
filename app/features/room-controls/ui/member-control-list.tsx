@@ -19,6 +19,7 @@ export default function MemberControlList({
   const members = useSyncExternalStore(
     store.subscribe,
     () => store.getState().members,
+    () => [],
   );
   const viewers = members.filter((member) => member.role !== "host");
   if (viewers.length === 0) return null;

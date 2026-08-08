@@ -39,6 +39,10 @@
     --brand-text-rgb: 197 42 48;
     --brand-muted-rgb: 243 201 203;
     --brand-soft-rgb: 251 232 233;
+    --onbrand-rgb: 255 255 255;
+    --status-success-rgb: 27 127 58;
+    --status-warning-rgb: 122 91 0;
+    --status-danger-rgb: 179 38 30;
     --line: rgba(23, 24, 26, 0.1);
     --line-strong: rgba(23, 24, 26, 0.18);
   }
@@ -88,7 +92,8 @@
   }
 
   .glass-panel {
-    background: color-mix(in srgb, var(--surface-raised) 82%, transparent);
+    background: color-mix(in srgb, rgb(var(--surface-raised-rgb)) 82%,
+      transparent);
     backdrop-filter: blur(16px) saturate(1.2);
     -webkit-backdrop-filter: blur(16px) saturate(1.2);
   }

@@ -72,19 +72,22 @@ const ThemeContext = createContext<ThemeContextValue>({
   toggle: () => {},
 });
 
+function useSystemThemeFallback(setTheme: (t: Theme) => void): void {
+  useEffect(() => {
+    if (readStoredTheme(defaultStorage()) !== null) return;
+    setTheme(resolveInitialTheme(prefersLightScheme(), null));
+  }, [setTheme]);
+}
+
 export function ThemeProvider({ children }: { children?: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() =>
     readStoredTheme(defaultStorage()) ?? "dark"
   );
+  useSystemThemeFallback(setTheme);
 
   useEffect(() => {
     applyThemeClass(document, theme);
   }, [theme]);
-
-  useEffect(() => {
-    if (readStoredTheme(defaultStorage()) !== null) return;
-    setTheme(resolveInitialTheme(prefersLightScheme(), null));
-  }, []);
 
   const toggle = () => {
     setTheme((current) => {

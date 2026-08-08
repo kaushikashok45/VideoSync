@@ -19,6 +19,7 @@ export default function ControlRequestList({
   const requests = useSyncExternalStore(
     store.subscribe,
     () => store.getState().controlRequests,
+    () => [],
   );
   if (requests.length === 0) return null;
   return (
