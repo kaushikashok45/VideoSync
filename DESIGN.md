@@ -10,8 +10,9 @@ colors:
   ink: "#e6e9ee"
   inkMuted: "#aeb6c2"
   inkFaint: "#7d8794"
-  brand: "#f85149"
-  brandHover: "#ff6a61"
+  brand: "#d93036"
+  brandHover: "#e5484d"
+  brandText: "#f85149"
   brandMuted: "color-mix(in srgb, #f85149 18%, #161b22)"
   brandSoft: "color-mix(in srgb, #f85149 10%, #0d1117)"
   success: "#3fb950"
@@ -131,12 +132,15 @@ dark: bright surfaces would glare in the room and fight the video.
 - **ink `#e6e9ee`** — primary text. Cool-tinted white, never pure (avoids glare).
 - **inkMuted `#aeb6c2` / inkFaint `#7d8794`** — secondary + placeholder text. `inkFaint`
   is only for truly secondary content; body text never falls below `inkMuted`.
-- **brand `#f85149`** — the red accent: primary actions, focus, the active state, the
-  playhead. Warm and confident, the only saturated color on screen most of the time.
+- **brand `#d93036`** — the red accent for filled buttons and the playhead: white text on
+  it hits 4.74:1 (AA). Warm and confident.
+- **brandText `#f85149`** — a lighter red for brand-colored *text* (links, active tab
+  labels, icons): 5.65:1 on `bg` (AA). Buttons use the darker `brand` so white text passes.
 - **brandMuted / brandSoft** — tinted fills for active chips, hover wells, selection.
 - **success / warning / danger** — status only (connection, rate limit, errors). Never
   decorative.
-- **onBrand `#ffffff`** — text on the brand button (contrast ~4.6:1 against `#f85149`).
+- **onBrand `#ffffff`** — text on the brand button (contrast 4.74:1 against `brand
+  #d93036`).
 
 ### Contrast
 
@@ -144,8 +148,10 @@ dark: bright surfaces would glare in the room and fight the video.
 - `inkMuted` on `surface` ≈ 5.9:1; placeholder `inkFaint` on `surface` ≈ 4.4:1 (≥4.5 target
   on the most common field surfaces — if a field sits on `surfaceSunken`, use `inkMuted`
   for placeholders there).
-- `onBrand` on `brand` ≈ 4.6:1 — meets AA for normal text and icons.
-- `brand` as text on `bg` ≈ 4.8:1 — usable for links and the active tab label.
+- `onBrand` on `brand` ≈ 4.74:1 — meets AA for normal text and icons.
+- `brandText` on `bg` ≈ 5.65:1 — usable for links and the active tab label.
+- `brand` as text on `bg` ≈ 3.99:1 — for large/bold display only; use `brandText` for
+  normal-size text.
 
 ## Typography
 
