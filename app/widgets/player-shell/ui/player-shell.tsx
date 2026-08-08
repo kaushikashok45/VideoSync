@@ -2,10 +2,20 @@ import { useRef, useSyncExternalStore } from "react";
 import type { MediaSource } from "contracts/media-source.ts";
 import type { Member } from "contracts/member.ts";
 import type { MovieMetadata } from "contracts/movie-metadata.ts";
+import { type ChatStore, createChatStore } from "~/entities/chat/chat-store.ts";
+import {
+  createMembersStore,
+  type MembersStore,
+} from "~/entities/member/members-store.ts";
 import {
   createPlaybackStore,
   type PlaybackStore,
 } from "~/entities/playback/playback-store.ts";
+import {
+  createReactionStore,
+  type ReactionStore,
+} from "~/entities/reaction/reaction-store.ts";
+import RoomSidebar from "~/widgets/room-sidebar/ui/room-sidebar.tsx";
 import { useIdleVisibility } from "../logic/use-idle-visibility.ts";
 import ControlBar from "./control-bar.tsx";
 import PlaybackSync, { type PlaybackSyncHandle } from "./playback-sync.tsx";
@@ -16,8 +26,12 @@ export interface PlayerShellProps {
   media: MediaSource | { url?: string };
   metadata?: MovieMetadata | null;
   me?: Member | null;
+  roomId?: string;
   idleMs?: number;
   playbackStore?: PlaybackStore;
+  membersStore?: MembersStore;
+  chatStore?: ChatStore;
+  reactionStore?: ReactionStore;
 }
 
 const DRIFT_THRESHOLD_MS = 1500;
@@ -39,8 +53,12 @@ export default function PlayerShell({
   media,
   metadata = null,
   me = null,
+  roomId = "",
   idleMs = 3000,
   playbackStore,
+  membersStore,
+  chatStore,
+  reactionStore,
 }: PlayerShellProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const syncHandleRef = useRef<PlaybackSyncHandle>(null);
@@ -50,6 +68,12 @@ export default function PlayerShell({
       driftThresholdMs: DRIFT_THRESHOLD_MS,
     });
   }
+  const membersRef = useRef<MembersStore | null>(membersStore ?? null);
+  if (!membersRef.current) membersRef.current = createMembersStore();
+  const chatRef = useRef<ChatStore | null>(chatStore ?? null);
+  if (!chatRef.current) chatRef.current = createChatStore();
+  const reactionRef = useRef<ReactionStore | null>(reactionStore ?? null);
+  if (!reactionRef.current) reactionRef.current = createReactionStore();
   const store = storeRef.current;
   const { visible, reveal } = useIdleVisibility(idleMs);
   const snapshot = useSyncExternalStore(
@@ -104,6 +128,13 @@ export default function PlayerShell({
         store={store}
         videoRef={videoRef}
         actionRef={syncHandleRef}
+      />
+      <RoomSidebar
+        roomId={roomId}
+        me={me}
+        membersStore={membersRef.current}
+        chatStore={chatRef.current}
+        reactionStore={reactionRef.current}
       />
     </div>
   );

@@ -12,5 +12,12 @@ export default function RecieverVideoPlayerNew() {
     canControl: false,
     joinedAt: Date.now(),
   };
-  return <PlayerShell mode="receiver" media={{ mode: "upload" }} me={me} />;
+  return (
+    <PlayerShell
+      mode="receiver"
+      media={{ mode: "upload" }}
+      me={me}
+      roomId={roomId}
+    />
+  );
 }
