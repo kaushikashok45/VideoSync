@@ -93,6 +93,34 @@ Deno.test("home recovery routes to onHome, other recoveries to onRecover", () =>
   assertEquals(recover, 0);
 });
 
+// Mutation: a non-home recovery (e.g. reconnect) routes to onRecover, never
+// onHome. A regression of recoverHandler to always call onHome would fail this.
+Deno.test("reconnect recovery routes to onRecover, not onHome", () => {
+  setupDom();
+  let home = 0;
+  let recover = 0;
+  const store = createErrorStore();
+  const { container } = render(
+    <ErrorSurface
+      errorStore={store}
+      onHome={() => home++}
+      onRecover={() => recover++}
+    />,
+  );
+  setError(store, recoverable());
+  const recoverButton = container.querySelector(
+    '[data-testid="recover-button"]',
+  );
+  if (!recoverButton) throw new Error("no recover button");
+  act(() => {
+    recoverButton.dispatchEvent(
+      new globalThis.MouseEvent("click", { bubbles: true }),
+    );
+  });
+  assertEquals(home, 0);
+  assertEquals(recover, 1);
+});
+
 // Limits: dismissing the banner clears the store.
 Deno.test("dismissing the banner clears the store", () => {
   setupDom();

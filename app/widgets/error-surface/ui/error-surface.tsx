@@ -26,6 +26,7 @@ export function ErrorSurface(
   const lastError = useSyncExternalStore(
     (listener) => errorStore.subscribe(listener),
     () => errorStore.getState().lastError,
+    () => null,
   );
   if (lastError === null) return null;
   if (severityOf(lastError.code) === "recoverable") {
@@ -37,5 +38,9 @@ export function ErrorSurface(
       />
     );
   }
-  return <ErrorScreen payload={lastError} onHome={onHome} />;
+  return (
+    <div className="fixed inset-0 z-toast bg-bg">
+      <ErrorScreen payload={lastError} onHome={onHome} />
+    </div>
+  );
 }
