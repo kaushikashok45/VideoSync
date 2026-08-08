@@ -22,7 +22,11 @@ export class PlaybackState {
 
   play(): PlaybackSnapshot {
     if (this.snapshot.status === "ended") return this.getSnapshot();
-    this.snapshot = { ...this.snapshot, status: "playing", updatedAt: this.deps.now() };
+    this.snapshot = {
+      ...this.snapshot,
+      status: "playing",
+      updatedAt: this.deps.now(),
+    };
     return this.getSnapshot();
   }
 
@@ -37,7 +41,11 @@ export class PlaybackState {
 
   seek(time: number): PlaybackSnapshot {
     const clamped = Math.max(0, Math.min(time, this.snapshot.duration || time));
-    this.snapshot = { ...this.snapshot, currentTime: clamped, updatedAt: this.deps.now() };
+    this.snapshot = {
+      ...this.snapshot,
+      currentTime: clamped,
+      updatedAt: this.deps.now(),
+    };
     return this.getSnapshot();
   }
 
@@ -56,9 +64,13 @@ export class PlaybackState {
 
   projected(now: number): PlaybackSnapshot {
     if (this.snapshot.status !== "playing") return this.snapshot;
-    const elapsedSec = Math.max(0, (now - this.snapshot.updatedAt) / 1000) * this.snapshot.rate;
+    const elapsedSec = Math.max(0, (now - this.snapshot.updatedAt) / 1000) *
+      this.snapshot.rate;
     const duration = this.snapshot.duration || Number.POSITIVE_INFINITY;
-    const currentTime = Math.min(this.snapshot.currentTime + elapsedSec, duration);
+    const currentTime = Math.min(
+      this.snapshot.currentTime + elapsedSec,
+      duration,
+    );
     return { ...this.snapshot, currentTime };
   }
 

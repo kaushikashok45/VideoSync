@@ -17,7 +17,12 @@ function makeState(overrides: Partial<PlaybackSnapshot> = {}) {
     { now: () => clock, driftThresholdMs: 1500, seekStepSeconds: 10 },
     initial,
   );
-  return { state, setTime: (t: number) => { clock = t; } };
+  return {
+    state,
+    setTime: (t: number) => {
+      clock = t;
+    },
+  };
 }
 
 // Happy path: paused does not advance
@@ -29,14 +34,22 @@ Deno.test("paused state does not advance over time", () => {
 
 // Happy path: playing projects forward at rate
 Deno.test("playing state projects currentTime forward at rate", () => {
-  const { state, setTime } = makeState({ status: "playing", currentTime: 30, rate: 1 });
+  const { state, setTime } = makeState({
+    status: "playing",
+    currentTime: 30,
+    rate: 1,
+  });
   setTime(102_000);
   assertEquals(state.getSnapshot().currentTime, 32);
 });
 
 // Edge: rate > 1 accelerates projection
 Deno.test("rate scales the projected elapsed time", () => {
-  const { state, setTime } = makeState({ status: "playing", currentTime: 30, rate: 2 });
+  const { state, setTime } = makeState({
+    status: "playing",
+    currentTime: 30,
+    rate: 2,
+  });
   setTime(101_000); // +1s at 2x
   assertEquals(state.getSnapshot().currentTime, 32);
 });
@@ -52,7 +65,11 @@ Deno.test("pause freezes at the projected time", () => {
 
 // Logical limit: seek clamps to [0, duration]
 Deno.test("seek clamps to duration and zero bounds", () => {
-  const { state } = makeState({ status: "paused", currentTime: 30, duration: 120 });
+  const { state } = makeState({
+    status: "paused",
+    currentTime: 30,
+    duration: 120,
+  });
   assertEquals(state.seek(500).currentTime, 120);
   assertEquals(state.seek(-5).currentTime, 0);
   assertEquals(state.seek(50).currentTime, 50);
@@ -67,7 +84,11 @@ Deno.test("forward and rewind step by configured seconds", () => {
 
 // Mutation case: forward clamps at duration, rewind clamps at zero
 Deno.test("forward/rewind respect the duration and zero bounds", () => {
-  const { state } = makeState({ status: "paused", currentTime: 118, duration: 120 });
+  const { state } = makeState({
+    status: "paused",
+    currentTime: 118,
+    duration: 120,
+  });
   assertEquals(state.forward().currentTime, 120);
   const zero = makeState({ status: "paused", currentTime: 3, duration: 120 });
   assertEquals(zero.state.rewind().currentTime, 0);
@@ -104,7 +125,11 @@ Deno.test("drift acceptability respects the exact threshold", () => {
 
 // Edge: setDuration updates the ceiling for projection
 Deno.test("setDuration caps projection at the new duration", () => {
-  const { state, setTime } = makeState({ status: "playing", currentTime: 100, duration: 120 });
+  const { state, setTime } = makeState({
+    status: "playing",
+    currentTime: 100,
+    duration: 120,
+  });
   state.setDuration(101);
   setTime(102_000); // would reach 102 without the cap
   assertEquals(state.getSnapshot().currentTime, 101);
