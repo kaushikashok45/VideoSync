@@ -1,130 +1,23 @@
-import { MutableRefObject, useContext, useEffect, useRef } from "react";
+import { useContext } from "react";
 import { useLocation } from "react-router";
-import { VideoPlayer } from "../features/videoPlayback/components/VideoPlayer";
+import type { MediaSource } from "contracts/media-source.ts";
+import type { Member } from "contracts/member.ts";
 import SessionContext from "../context/Session/logic/SessionContext";
-import HostSocketManager from "~/features/webSocket/logic/HostSocketManager";
+import PlayerShell from "~/widgets/player-shell/ui/player-shell.tsx";
 
 export default function HostVideoPlayerNew() {
   const location = useLocation();
-  const passedState = location.state as { videoURL: string };
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const socketManagerRef: MutableRefObject<HostSocketManager | null> = useRef(
-    null,
-  );
-  const { userName, roomId } = useContext(SessionContext);
-
-  function pausePlaybackForAllPeers(e: unknown) {
-    const initiator =
-      e && (e as { detail: { userName: string } }).detail.userName
-        ? (e as { detail: { userName: string } }).detail.userName
-        : undefined;
-    if (!socketManagerRef.current) return;
-    socketManagerRef.current.pausePlaybackForAllPeers(initiator);
-  }
-
-  function resumePlaybackForAllPeers(e: unknown) {
-    const initiator =
-      e && (e as { detail: { userName: string } }).detail.userName
-        ? (e as { detail: { userName: string } }).detail.userName
-        : undefined;
-    if (!socketManagerRef.current) return;
-    socketManagerRef.current.resumePlaybackForAllPeers(initiator);
-  }
-
-  function forwardPlaybackForAllPeers(e: unknown) {
-    const initiator =
-      e && (e as { detail: { userName: string } }).detail.userName
-        ? (e as { detail: { userName: string } }).detail.userName
-        : userName;
-    socketManagerRef.current?.forwardPlaybackForAllPeers(initiator);
-  }
-
-  function rewindPlaybackForAllPeers(e: unknown) {
-    const initiator =
-      e && (e as { detail: { userName: string } }).detail.userName
-        ? (e as { detail: { userName: string } }).detail.userName
-        : userName;
-    socketManagerRef.current?.rewindPlaybackForAllPeers(initiator);
-  }
-
-  function seekPlaybackForAllPeers(e: unknown) {
-    const isNumeric = typeof e === "number";
-    const initiator =
-      !isNumeric && e && (e as { detail: { userName: string } }).detail.userName
-        ? (e as { detail: { userName: string } }).detail.userName
-        : userName;
-    const currentTime =
-      !isNumeric && e && (e as { detail: { time: number } }).detail.time
-        ? (e as { detail: { time: number } }).detail.time
-        : 0;
-    socketManagerRef.current?.seekPlaybackForAllPeers(
-      initiator,
-      currentTime,
-    );
-  }
-
-  useEffect(() => {
-    socketManagerRef.current = new HostSocketManager(
-      { userName, roomId },
-      videoRef.current as HTMLVideoElement,
-    );
-    videoRef.current?.addEventListener(
-      "pause-playback",
-      pausePlaybackForAllPeers,
-    );
-    videoRef.current?.addEventListener(
-      "resume-playback",
-      resumePlaybackForAllPeers,
-    );
-    videoRef.current?.addEventListener(
-      "forward-playback",
-      forwardPlaybackForAllPeers,
-    );
-    videoRef.current?.addEventListener(
-      "rewind-playback",
-      rewindPlaybackForAllPeers,
-    );
-    videoRef.current?.addEventListener(
-      "seek-playback",
-      seekPlaybackForAllPeers,
-    );
-    return () => {
-      socketManagerRef.current?.destroy();
-      videoRef.current?.removeEventListener(
-        "pause-playback",
-        pausePlaybackForAllPeers,
-      );
-      videoRef.current?.removeEventListener(
-        "resume-playback",
-        resumePlaybackForAllPeers,
-      );
-      videoRef.current?.removeEventListener(
-        "forward-playback",
-        forwardPlaybackForAllPeers,
-      );
-      videoRef.current?.removeEventListener(
-        "rewind-playback",
-        rewindPlaybackForAllPeers,
-      );
-      videoRef.current?.removeEventListener(
-        "seek-playback",
-        seekPlaybackForAllPeers,
-      );
-    };
-  }, []);
-
-  return (
-    <div className="h-[90%] w-[90%] md:h-3/4 md:w-3/4 min-h-3/4 min-w-3/4 rounded-md flex justify-center items-center md:p-[2em] m-auto">
-      <VideoPlayer
-        videoURL={passedState.videoURL}
-        getRef={videoRef}
-        onManualPause={pausePlaybackForAllPeers}
-        onManualResume={resumePlaybackForAllPeers}
-        onManualForward={forwardPlaybackForAllPeers}
-        onManualRewind={rewindPlaybackForAllPeers}
-        onManualSeek={seekPlaybackForAllPeers}
-      >
-      </VideoPlayer>
-    </div>
-  );
+  const passedState = location.state as { videoURL?: string };
+  const { roomId, userName } = useContext(SessionContext);
+  const media: MediaSource = passedState?.videoURL
+    ? { mode: "url", url: passedState.videoURL }
+    : { mode: "upload" };
+  const me: Member = {
+    id: `${roomId}:host`,
+    name: userName,
+    role: "host",
+    canControl: true,
+    joinedAt: Date.now(),
+  };
+  return <PlayerShell mode="host" media={media} me={me} />;
 }
