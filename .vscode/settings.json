@@ -1,0 +1,23 @@
+{
+  "deno.enable": true,
+  "deno.suggest.imports.hosts": {
+    "https://cdn.jsdelivr.net": true,
+    "https://esm.sh": true,
+    "https://npm.jsr.io": true,
+    "https://registry.npmjs.org": true
+  },
+  "editor.defaultFormatter": "denoland.vscode-deno",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.deno": "explicit",
+    "source.organizeImports.deno": "explicit"
+  },
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "tailwindCSS.includeLanguages": {
+    "typescript": "javascript",
+    "typescriptreact": "javascript"
+  },
+  "typescript.tsserver.experimental.enableProjectDiagnostics": false
+}

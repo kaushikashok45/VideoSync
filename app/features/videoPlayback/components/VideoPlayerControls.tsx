@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import ForwardIcon from "./ForwardIcon";
 import RewindIcon from "./RewindIcon";
 import VolumeControl from "./VolumeControl";
@@ -9,14 +9,14 @@ import VideoMeta from "../types/VideoMeta";
 import ProgressSeeker from "./ProgressSeeker";
 
 type VideoPlayerControlsProps = {
-  videoRef: React.RefObject<HTMLVideoElement>;
-  videoWrapperRef: React.RefObject<HTMLDivElement>;
+  videoRef: React.RefObject<HTMLVideoElement | null>;
+  videoWrapperRef: React.RefObject<HTMLDivElement | null>;
   videoMeta?: VideoMeta;
-  onManualPause?: (e: any) => void;
-  onManualResume?: (e: any) => void;
-  onManualForward?: (e: any) => void;
-  onManualRewind?: (e: any) => void;
-  onManualSeek?: (e: any) => void;
+  onManualPause?: (e: unknown) => void;
+  onManualResume?: (e: unknown) => void;
+  onManualForward?: (e: unknown) => void;
+  onManualRewind?: (e: unknown) => void;
+  onManualSeek?: (time: number) => void;
 };
 
 const formatTime = (seconds: number): string => {
@@ -26,9 +26,9 @@ const formatTime = (seconds: number): string => {
   const formattedMins = mins.toString().padStart(2, "0");
   const secs = Math.floor(seconds % 60);
   const formattedSecs = secs.toString().padStart(2, "0");
-  return `${
-    hours > 0 ? formattedHours + ":" : ""
-  }${formattedMins}:${formattedSecs.toString().padStart(2, "0")}`;
+  return `${hours > 0 ? formattedHours + ":" : ""}${formattedMins}:${
+    formattedSecs.toString().padStart(2, "0")
+  }`;
 };
 
 export function VideoPlayerControls({
@@ -41,48 +41,11 @@ export function VideoPlayerControls({
   onManualRewind,
   onManualSeek,
 }: VideoPlayerControlsProps) {
-  const [isControlsVisible, setIsControlsVisible] = useState(true);
-  const controlsTimerId = useRef<NodeJS.Timeout | null>(null);
+  const [isControlsVisible] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
 
   const progressPercent = duration ? (currentTime / duration) * 100 : 0;
-
-  function hideControls() {
-    controlsTimerId.current = setTimeout(() => {
-      setIsControlsVisible(false);
-      controlsTimerId.current = null;
-    }, 3000);
-  }
-
-  function showControls(e) {
-    setIsControlsVisible(true);
-  }
-
-  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.stopPropagation();
-    if (!videoRef.current || duration === 0) return;
-
-    const bar = e.currentTarget;
-    const rect = bar.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const percent = clickX / rect.width;
-    const newTime = percent * duration;
-
-    videoRef.current.currentTime = newTime;
-    setCurrentTime(newTime);
-  };
-
-  function toggleControlsVisibility(e) {
-    if (isControlsVisible) {
-      if (controlsTimerId.current) {
-        clearTimeout(controlsTimerId.current);
-      }
-      hideControls();
-    } else if (!isControlsVisible) {
-      showControls(e);
-    }
-  }
 
   function handleTimeUpdate() {
     if (videoMeta) {
@@ -106,33 +69,13 @@ export function VideoPlayerControls({
   }
 
   useEffect(() => {
-    // hideControls();
-    // videoRef.current?.addEventListener("mousemove", toggleControlsVisibility);
-    // videoWrapperRef.current?.addEventListener(
-    //   "mousemove",
-    //   toggleControlsVisibility
-    // );
-    // videoRef.current?.addEventListener("mouseleave", hideControls);
-    // return () => {
-    //   if (controlsTimerId.current) {
-    //     clearTimeout(controlsTimerId.current);
-    //   }
-    //   videoRef.current?.removeEventListener(
-    //     "mousemove",
-    //     toggleControlsVisibility
-    //   );
-    //   videoWrapperRef.current?.removeEventListener(
-    //     "mousemove",
-    //     toggleControlsVisibility
-    //   );
-    // };
     videoRef.current?.addEventListener("timeupdate", handleTimeUpdate);
     videoRef.current?.addEventListener("loadedmetadata", handleLoadedMetadata);
     return () => {
       videoRef.current?.removeEventListener("timeupdate", handleTimeUpdate);
       videoRef.current?.removeEventListener(
         "loadedmetadata",
-        handleLoadedMetadata
+        handleLoadedMetadata,
       );
     };
   }, [videoMeta]);
@@ -143,7 +86,8 @@ export function VideoPlayerControls({
         isControlsVisible ? "opacity-100" : "opacity-0"
       }`}
     >
-      {/*<div id="progress-seeker-wrapper">
+      {
+        /*<div id="progress-seeker-wrapper">
         <div
           className={`h-2 w-full bg-black/30 backdrop-blur-lg border-t border-white/10  rounded cursor-pointer relative`}
           onClick={handleProgressClick}
@@ -155,7 +99,8 @@ export function VideoPlayerControls({
             style={{ width: `${progressPercent}%` }}
           ></div>
         </div>
-      </div>*/}
+      </div>*/
+      }
       <ProgressSeeker
         duration={duration}
         progressPercent={progressPercent}
@@ -173,17 +118,20 @@ export function VideoPlayerControls({
             videoRef={videoRef}
             onManualPause={onManualPause}
             onManualResume={onManualResume}
-          ></PausePlayControls>
+          >
+          </PausePlayControls>
           <RewindIcon
             videoRef={videoRef}
             setCurrentTime={setCurrentTime}
             onManualAction={onManualRewind}
-          ></RewindIcon>
+          >
+          </RewindIcon>
           <ForwardIcon
             videoRef={videoRef}
             setCurrentTime={setCurrentTime}
             onManualAction={onManualForward}
-          ></ForwardIcon>
+          >
+          </ForwardIcon>
           <div className="self-center font-extrabold text-white text-[0.75rem] md:text-[1rem] bg-black/30 backdrop-blur-lg border-t border-white/10 rounded-lg p-2 md:p-2">
             <p>
               {formatTime(currentTime)} / {formatTime(duration)}
@@ -198,7 +146,8 @@ export function VideoPlayerControls({
           <VolumeControl videoRef={videoRef}></VolumeControl>
           <FullScreenToggleComponent
             videoWrapperRef={videoWrapperRef}
-          ></FullScreenToggleComponent>
+          >
+          </FullScreenToggleComponent>
         </div>
       </div>
     </div>

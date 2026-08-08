@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import ProgressSeekerProps from "../types/ProgressSeekerProps";
 
 export default function ProgressBar({
@@ -18,14 +18,16 @@ export default function ProgressBar({
     };
   }, []);
 
-  const seekPlayback = (data) => {
-    const time = isNaN(data) ? data.detail.time : data;
+  const seekPlayback = (data: unknown) => {
+    const time = isNaN(data as number)
+      ? (data as { detail: { time: number } }).detail.time
+      : data;
     if (!videoRef.current || !time) return;
-    videoRef.current.currentTime = time;
-    setCurrentTime(time);
+    videoRef.current.currentTime = time as number;
+    setCurrentTime(time as number);
   };
 
-  const handleProgressClick = (e) => {
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!videoRef.current) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const percent = (e.clientX - rect.left) / rect.width;
@@ -34,7 +36,7 @@ export default function ProgressBar({
     seekPlayback(newTime);
   };
 
-  const handleMouseMove = (e) => {
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const hoverPosition = ((e.clientX - rect.left) / rect.width) * 100;
     setHoverPercent(hoverPosition);
@@ -45,8 +47,8 @@ export default function ProgressBar({
   };
 
   // Only show hover if it's ahead of current progress
-  const showHoverPreview =
-    hoverPercent !== null && hoverPercent > progressPercent;
+  const showHoverPreview = hoverPercent !== null &&
+    hoverPercent > progressPercent;
 
   return (
     <div id="progress-seeker-wrapper">
@@ -62,14 +64,16 @@ export default function ProgressBar({
         <div
           className="h-full bg-red-600 rounded absolute inset-0"
           style={{ width: `${progressPercent}%` }}
-        ></div>
+        >
+        </div>
 
         {/* Hover preview (only beyond current progress) */}
         {showHoverPreview && (
           <div
             className="h-full bg-red-400/50 rounded absolute inset-0 pointer-events-none"
             style={{ width: `${hoverPercent}%` }}
-          ></div>
+          >
+          </div>
         )}
       </div>
     </div>

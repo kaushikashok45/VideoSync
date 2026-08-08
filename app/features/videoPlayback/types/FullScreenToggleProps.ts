@@ -1,7 +1,5 @@
-import { RefObject } from "react";
-
 type FullScreenToggleProps = {
-  videoWrapperRef: RefObject<HTMLDivElement>;
+  videoWrapperRef: React.RefObject<HTMLDivElement | null>;
 };
 
 export default FullScreenToggleProps;

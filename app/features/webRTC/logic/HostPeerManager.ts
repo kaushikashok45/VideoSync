@@ -1,77 +1,78 @@
 import BasePeerManager from "./BasePeerManager";
 import { PEER_CONNECTION_EVENTS } from "../contracts/constants";
 import { Socket } from "socket.io-client";
-import { SignalData } from "simple-peer";
+import type { peerMeta } from "../../../utils/peerRegistryContract";
 
 class HostPeerManager extends BasePeerManager {
-    private syncInterval: number;
-    private syncIntervalId: NodeJS.Timeout | undefined;
-    private mediaStream: MediaStream | undefined;
-    private userName: string;
-    private addPeer: (peerId: string, peerMetaData: any) => void;
+  private syncInterval: number;
+  private syncIntervalId: NodeJS.Timeout | undefined;
+  private mediaStream: MediaStream | undefined;
+  private userName: string;
+  private addPeer: (peerId: string, peerMetaData: peerMeta) => void;
 
-    constructor(
-        videoElement: HTMLVideoElement,
-        mediaStream: MediaStream,
-        socket: Socket,
-        recieverId: string,
-        userName: string,
-        addPeer: (peerId: string, peerMetaData: any) => void,
-        syncInterval = 1000
+  constructor(
+    videoElement: HTMLVideoElement,
+    mediaStream: MediaStream,
+    socket: Socket,
+    recieverId: string,
+    userName: string,
+    addPeer: (peerId: string, peerMetaData: peerMeta) => void,
+    syncInterval = 1000,
+  ) {
+    super(
+      { initiator: true, trickle: false },
+      videoElement,
+      recieverId,
+      socket,
+    );
+    this.syncInterval = syncInterval;
+    this.mediaStream = mediaStream;
+    this.userName = userName;
+    this.addPeer = addPeer;
+    this.setupListeners();
+  }
+
+  startSync() {
+    if (
+      this.videoElement.paused ||
+      !this.peerDataChannel ||
+      !this.mediaStream
     ) {
-        super(
-            { initiator: true, trickle: false },
-            videoElement,
-            recieverId,
-            socket
-        );
-        this.syncInterval = syncInterval;
-        this.mediaStream = mediaStream;
-        this.userName = userName;
-        this.addPeer = addPeer;
-        this.setupListeners();
+      return;
     }
+    this.peerInstance.addStream(this.mediaStream);
+    this.addPeer(this.otherPeerId, {
+      userName: this.userName,
+      ...this.serialize(),
+    });
+    this.peerDataChannel.sendVideoDuration();
+    this.syncIntervalId = setInterval(() => {
+      this.peerDataChannel && this.peerDataChannel.sendVideoCurrentTime();
+    }, this.syncInterval);
+  }
 
-    startSync() {
-        if (
-            this.videoElement.paused ||
-            !this.peerDataChannel ||
-            !this.mediaStream
-        )
-            return;
-        this.peerInstance.addStream(this.mediaStream);
-        this.addPeer(this.otherPeerId, {
-            userName: this.userName,
-            ...this.serialize(),
-        });
-        this.peerDataChannel.sendVideoDuration();
-        this.syncIntervalId = setInterval(() => {
-            this.peerDataChannel && this.peerDataChannel.sendVideoCurrentTime();
-        }, this.syncInterval);
+  stopSync(): void {
+    if (this.syncIntervalId) {
+      clearInterval(this.syncIntervalId);
     }
+  }
 
-    stopSync(): void {
-        if (this.syncIntervalId) {
-            clearInterval(this.syncIntervalId);
-        }
-    }
+  override handleConnectionSetup() {
+    super.handleConnectionSetup();
+    this.startSync();
+  }
 
-    handleConnectionSetup() {
-        super.handleConnectionSetup();
-        this.startSync();
-    }
+  override setupListeners(): void {
+    super.setupListeners();
+    this.peerInstance.on(
+      PEER_CONNECTION_EVENTS.CONNECT,
+      this.handleConnectionSetup.bind(this),
+    );
+  }
 
-    setupListeners(): void {
-        super.setupListeners();
-        this.peerInstance.on(
-            PEER_CONNECTION_EVENTS.CONNECT,
-            this.handleConnectionSetup.bind(this)
-        );
-    }
-
-    destroy(): void {
-        this.stopSync();
-        this.peerInstance.destroy();
-    }
+  destroy(): void {
+    this.stopSync();
+    this.peerInstance.destroy();
+  }
 }
 export default HostPeerManager;

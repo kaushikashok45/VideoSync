@@ -10,7 +10,8 @@ export function joinedPartySuccessMessage(userName: string) {
       message={message}
       userName={userName}
       icon={icon}
-    ></ToastMessageView>
+    >
+    </ToastMessageView>,
   );
 }
 
@@ -22,7 +23,8 @@ export function pausedPlaybackMessage(userName: string) {
       message={message}
       userName={userName}
       icon={icon}
-    ></ToastMessageView>
+    >
+    </ToastMessageView>,
   );
 }
 
@@ -34,7 +36,8 @@ export function resumedPlaybackMessage(userName: string) {
       message={message}
       userName={userName}
       icon={icon}
-    ></ToastMessageView>
+    >
+    </ToastMessageView>,
   );
 }
 
@@ -46,7 +49,8 @@ export function forwardedPlaybackMessage(userName: string) {
       message={message}
       userName={userName}
       icon={icon}
-    ></ToastMessageView>
+    >
+    </ToastMessageView>,
   );
 }
 
@@ -58,7 +62,8 @@ export function rewindedPlaybackMessage(userName: string) {
       message={message}
       userName={userName}
       icon={icon}
-    ></ToastMessageView>
+    >
+    </ToastMessageView>,
   );
 }
 
@@ -70,6 +75,7 @@ export function seekPlaybackMessage(userName: string) {
       message={message}
       userName={userName}
       icon={icon}
-    ></ToastMessageView>
+    >
+    </ToastMessageView>,
   );
 }

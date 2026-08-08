@@ -13,7 +13,7 @@ export default function ForwardIcon({
     return () => {
       videoRef.current?.removeEventListener(
         "forward-playback",
-        forwardPlayback
+        forwardPlayback,
       );
     };
   }, []);
@@ -26,7 +26,7 @@ export default function ForwardIcon({
     setCurrentTime(newTime);
   }
 
-  function handleForwardClick(event) {
+  function handleForwardClick(event: React.MouseEvent) {
     event.preventDefault();
     onManualAction && onManualAction(event);
     if (!videoRef.current) return;

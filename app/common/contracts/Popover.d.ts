@@ -1,17 +1,17 @@
-declare namespace Popover{
-    type PopoverProps = {
-      children: React.ReactNode;
-      triggerElementRef: React.RefObject<HTMLElement>;
-      classList?: string;
-    };
+declare namespace Popover {
+  type PopoverProps = {
+    children: React.ReactNode;
+    triggerElementRef: React.RefObject<HTMLElement | null>;
+    classList?: string;
+  };
 
-    type usePopoverBehaviourParams = {
-        triggerElement : HTMLElement;
-        popoverElement : HTMLElement;
-    };
+  type usePopoverBehaviourParams = {
+    triggerElementRef: React.RefObject<HTMLElement | null>;
+    popoverElementRef: React.RefObject<HTMLElement | null>;
+  };
 
-    type usePopoverBehaviourResult = {
-        isPopoverVisible: boolean;
-    };
+  type usePopoverBehaviourResult = {
+    isPopoverVisible: boolean;
+  };
 }
 export = Popover;

@@ -1,10 +1,9 @@
 import useFileUploadBehaviour from "../logic/useFileUploadBehaviour";
 
-export default function UploadFile(){
+export default function UploadFile() {
+  const { handleFileUpload: handleChange } = useFileUploadBehaviour();
 
-    const { handleFileUpload: handleChange } = useFileUploadBehaviour();
-
-    return (
+  return (
     <div className="flex flex-col h-full w-full md:w-1/2 justify-center items-center p-[2em] mx-auto my-auto">
       <label
         htmlFor="file-upload"

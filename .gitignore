@@ -10,6 +10,5 @@ node_modules
 /.react-router
 vite.config.ts.timestamp*
 *.csr
-.DS_Store
 *.gz
-
+.gstack/

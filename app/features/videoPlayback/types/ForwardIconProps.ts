@@ -1,7 +1,7 @@
 type ForwardIconProps = {
-  videoRef: React.RefObject<HTMLVideoElement>;
+  videoRef: React.RefObject<HTMLVideoElement | null>;
   setCurrentTime: (time: number) => void;
-  onManualAction?: (e) => void;
+  onManualAction?: (e: React.MouseEvent) => void;
 };
 
 export default ForwardIconProps;

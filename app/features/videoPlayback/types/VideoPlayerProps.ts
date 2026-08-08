@@ -7,11 +7,11 @@ type VideoPlayerProps = {
   shareLink?: string;
   stream?: MediaStream;
   getRef?: Ref<HTMLVideoElement>;
-  onManualPause?: (e: any) => void;
-  onManualResume?: (e: any) => void;
-  onManualForward?: (e: any) => void;
-  onManualRewind?: (e: any) => void;
-  onManualSeek?: (e: any) => void;
+  onManualPause?: (e: unknown) => void;
+  onManualResume?: (e: unknown) => void;
+  onManualForward?: (e: unknown) => void;
+  onManualRewind?: (e: unknown) => void;
+  onManualSeek?: (time: number) => void;
 };
 
 export default VideoPlayerProps;

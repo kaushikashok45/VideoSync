@@ -23,11 +23,9 @@ export default function FullScreenToggleComponent({
   return (
     <>
       <ButtonComponent onClick={handleScreenResize}>
-        {isFullScreen ? (
-          <ArrowsPointingInIcon className="size-6"></ArrowsPointingInIcon>
-        ) : (
-          <ArrowsPointingOutIcon className="size-6"></ArrowsPointingOutIcon>
-        )}
+        {isFullScreen
+          ? <ArrowsPointingInIcon className="size-6"></ArrowsPointingInIcon>
+          : <ArrowsPointingOutIcon className="size-6"></ArrowsPointingOutIcon>}
       </ButtonComponent>
     </>
   );

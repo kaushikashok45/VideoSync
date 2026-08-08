@@ -5,8 +5,8 @@ import ButtonComponent from "./VideoPlayerButtonComponent";
 import VolumeControlProps from "../types/VolumeControlProps";
 
 function SpeakerWithSoundBar({ videoRef }: VolumeControlProps) {
-  const audioIconRef: React.RefObject<HTMLElement> = useRef(null);
-  const volumeControlRef: React.RefObject<HTMLInputElement> = useRef(null);
+  const audioIconRef = useRef<HTMLDivElement>(null);
+  const volumeControlRef = useRef<HTMLInputElement>(null);
   const [audioLevel, setAudioLevel] = useState(1);
 
   return (
@@ -54,7 +54,7 @@ function VolumeMutedIcon() {
   );
 }
 
-export default function VolumeControl({ videoRef }: volumeControlProps) {
+export default function VolumeControl({ videoRef }: VolumeControlProps) {
   const [isMuted, setIsMuted] = useState(false);
 
   useEffect(() => {
@@ -70,7 +70,7 @@ export default function VolumeControl({ videoRef }: volumeControlProps) {
     }
   }
 
-  function handleKeyPress(e) {
+  function handleKeyPress(e: React.KeyboardEvent) {
     if (e.key === "Enter") {
       e.preventDefault();
       handleMuteToggle();
@@ -83,11 +83,9 @@ export default function VolumeControl({ videoRef }: volumeControlProps) {
       tabIndex={0}
       onKeyPress={handleKeyPress}
     >
-      {isMuted ? (
-        <VolumeMutedIcon></VolumeMutedIcon>
-      ) : (
-        <SpeakerWithSoundBar videoRef={videoRef}></SpeakerWithSoundBar>
-      )}
+      {isMuted
+        ? <VolumeMutedIcon></VolumeMutedIcon>
+        : <SpeakerWithSoundBar videoRef={videoRef}></SpeakerWithSoundBar>}
     </div>
   );
 }

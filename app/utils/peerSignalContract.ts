@@ -1,24 +1,24 @@
-import {SignalData} from "simple-peer";
+import { SignalData } from "simple-peer";
 
 export type peerSignal = {
-    peerId: string;
-    signalData:SignalData;
+  peerId: string;
+  signalData: SignalData;
 };
 
 export type peerVideoMeta = {
-    duration: number;
-    currentTime: number;
+  duration: number;
+  currentTime: number;
 };
 
 export type peerDataChannelObject = {
-    action: string;
-    peerId: string;
-    userName: string;
-    data: any;
-}
+  action: string;
+  peerId: string;
+  userName: string;
+  data: unknown;
+};
 
 export type videoPlaybackControlMeta = {
-    userName: string;
-    peerId: string;
-    target:HTMLVideoElement;
+  userName: string;
+  peerId: string;
+  target: HTMLVideoElement;
 };

@@ -18,19 +18,19 @@ export default defineConfig({
     reactRouter({
       babel: {
         plugins: [
-          ['babel-plugin-react-compiler', ReactCompilerConfig],
+          ["babel-plugin-react-compiler", ReactCompilerConfig],
         ],
       },
     }),
-    tsconfigPaths(),
+    tsconfigPaths({ ignoreConfigErrors: true }),
   ],
   server: isDev
     ? {
-        https: {
-          key: fs.readFileSync("./localhost.key"),
-          cert: fs.readFileSync("./localhost.pem"),
-        },
-      }
+      https: {
+        key: fs.readFileSync("./localhost.key"),
+        cert: fs.readFileSync("./localhost.pem"),
+      },
+    }
     : undefined,
 
   resolve: {

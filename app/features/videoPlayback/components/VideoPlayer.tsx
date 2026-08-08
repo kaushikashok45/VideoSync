@@ -18,10 +18,16 @@ export function VideoPlayer({
 
   useEffect(() => {
     if (getRef) {
-      getRef.current = videoRef.current;
+      const videoEl = videoRef.current;
+      if (typeof getRef === "function") {
+        getRef(videoEl);
+      } else {
+        (getRef as React.MutableRefObject<HTMLVideoElement | null>).current =
+          videoEl;
+      }
     }
     if (videoRef.current && stream) {
-      // @ts-ignore
+      // @ts-ignore - setSrcObject is not in the standard HTMLVideoElement type
       videoRef.current.setSrcObject(stream);
     }
   }, []);
@@ -37,7 +43,8 @@ export function VideoPlayer({
         controls={false}
         playsInline
         className="rounded-lg h-full w-full max-h-full max-w-full"
-      ></video>
+      >
+      </video>
       <VideoPlayerControls
         videoRef={videoRef}
         videoMeta={videoMeta}
@@ -47,7 +54,8 @@ export function VideoPlayer({
         onManualForward={onManualForward}
         onManualRewind={onManualRewind}
         onManualSeek={onManualSeek}
-      ></VideoPlayerControls>
+      >
+      </VideoPlayerControls>
     </div>
   );
 }

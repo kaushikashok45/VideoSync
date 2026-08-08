@@ -1,40 +1,68 @@
-# Welcome to Remix!
+# VideoSync — "The Sync Party"
 
-- 📖 [Remix docs](https://remix.run/docs)
+Real-time synchronized video watching. A host uploads a video file, receivers
+join a room by link, and playback (pause/resume/seek/forward/rewind/volume)
+stays in sync across all peers.
 
-## Development
+- **App**: React 19 + React Router v7 (framework mode, SSR, flat routes)
+- **Signaling**: Express + Socket.IO over HTTPS
+- **Media**: WebRTC via `simple-peer` (P2P stream + data channel for control
+  events)
+- **Runtime**: [Deno](https://deno.com) 2.x — no Node.js required
+- **Package manager**: Deno's built-in (`deno.json` + `deno install`), no
+  `package.json`/Yarn
 
-Run the dev server:
-
-```shellscript
-npm run dev
-```
-
-## Deployment
-
-First, build your app for production:
-
-```sh
-npm run build
-```
-
-Then run the app in production mode:
+## Getting started
 
 ```sh
-npm start
+# 1. Install Deno (macOS via Homebrew, or see https://deno.com)
+brew install deno
+
+# 2. Install dependencies (managed by Deno into ./node_modules)
+deno install
+
+# 3. Generate the HTTPS certs (once, after clone)
+deno task setuphttps
+
+# 4. Start the dev server → https://localhost:5173
+deno task dev
 ```
 
-Now you'll need to pick a host to deploy it to.
+## Commands
 
-### DIY
+| Command            | What it does                                             |
+| ------------------ | -------------------------------------------------------- |
+| `deno task dev`    | Dev server (HTTPS + React Router + Socket.IO + Vite HMR) |
+| `deno task build`  | Production build                                         |
+| `deno task start`  | Serve the production build                               |
+| `deno task lint`   | `deno lint`                                              |
+| `deno task check`  | `deno check` (typecheck)                                 |
+| `deno task fmt`    | `deno fmt`                                               |
+| `deno task test`   | `deno test` (built-in runner)                            |
+| `deno task verify` | fmt + lint + check + test                                |
 
-If you're familiar with deploying Node applications, the built-in Remix app server is production-ready.
+## How it works
 
-Make sure to deploy the output of `npm run build`
+1. Host uploads a video and opens a room.
+2. Receivers join via a `/roomId` share link and name themselves.
+3. Socket.IO signaling establishes a peer-to-peer `simple-peer` connection.
+4. The host captures the video as a `MediaStream` and streams it to receivers
+   over WebRTC.
+5. Playback control events flow host → receiver over the peer data channel; the
+   video element dispatches `CustomEvent`s that route-level logic listens for
+   and relays.
 
-- `build/server`
-- `build/client`
+## Repository layout
 
-## Styling
+```
+app/
+  common/        cross-cutting components, contracts, and logic
+  context/Session/  global session state (roomId, userName, role)
+  features/      feature-scoped modules (videoPlayback, webRTC, webSocket, toastMessages)
+  routes/        React Router flat routes
+  utils/         shared helper contracts
+server.js        Express + HTTPS + Socket.IO + React Router request handler
+```
 
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever css framework you prefer. See the [Vite docs on css](https://vitejs.dev/guide/features.html#css) for more information.
+See [AGENTS.md](./AGENTS.md) for architecture conventions, naming rules, and the
+agent governance that keeps this codebase consistent.

@@ -16,12 +16,12 @@ export default {
           "Noto Color Emoji",
         ],
         yesteryear: [
-            'Yesteryear',
-            'cursive',
+          "Yesteryear",
+          "cursive",
         ],
         overpass: [
-          'Overpass',
-          'monospace',
+          "Overpass",
+          "monospace",
         ],
       },
     },

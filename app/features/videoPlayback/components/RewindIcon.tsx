@@ -23,7 +23,7 @@ export default function RewindIcon({
     setCurrentTime(newTime);
   }
 
-  function handleRewindClick(event) {
+  function handleRewindClick(event: React.MouseEvent) {
     event.preventDefault();
     onManualAction && onManualAction(event);
     rewindPlayback();
