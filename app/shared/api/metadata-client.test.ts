@@ -67,6 +67,17 @@ Deno.test("throws when the response omits the metadata key", async () => {
   );
 });
 
+// Sad path: non-JSON body surfaces as a typed malformed-response error
+Deno.test("throws a typed error when the body is not JSON", async () => {
+  const fetchLike = () =>
+    Promise.resolve(new Response("not json", { status: 200 }));
+  const err = await assertRejects(
+    () => fetchMetadata("matrix", { fetchLike }),
+    AppError,
+  );
+  assertEquals(err.detail?.reason, "malformed-response");
+});
+
 // Logical limits: query is url-encoded on the wire
 Deno.test("url-encodes the query parameter", async () => {
   let seen = "";
