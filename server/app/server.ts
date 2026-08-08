@@ -1,4 +1,6 @@
 import http from "node:http";
+import https from "node:https";
+import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import express from "express";
@@ -21,7 +23,14 @@ export async function startServer(
   logger: Logger,
 ): Promise<http.Server> {
   const app = express();
-  const server = http.createServer(app);
+  const useDevHttps = config.nodeEnv === "development" &&
+    Deno.env.get("DEV_HTTPS") === "true";
+  const server = useDevHttps
+    ? https.createServer({
+      key: fs.readFileSync("./localhost.key"),
+      cert: fs.readFileSync("./localhost.pem"),
+    }, app)
+    : http.createServer(app);
 
   const io = new SocketIOServer(server, {
     cors: { origin: config.corsOrigin, credentials: true },

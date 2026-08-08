@@ -15,6 +15,7 @@
   "tasks": {
     "setuphttps": "openssl req -x509 -newkey rsa:2048 -nodes -keyout localhost.key -out localhost.pem -days 365 -config localhost.conf -extensions v3_req",
     "dev": "deno run -A server/app/entry.ts",
+    "dev:https": "DEV_HTTPS=true deno run -A server/app/entry.ts",
     "build": "deno run -A node_modules/.bin/react-router build",
     "start": "NODE_ENV=production deno run -A server/app/entry.ts",
     "lint": "deno lint",
