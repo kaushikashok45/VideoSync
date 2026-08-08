@@ -21,7 +21,8 @@
     "fmt": "deno fmt",
     "check": "deno check --sloppy-imports app server",
     "test": "deno test -A --sloppy-imports",
-    "verify": "deno fmt --check && deno lint && deno check --sloppy-imports app server && deno test -A --sloppy-imports"
+    "verify": "deno fmt --check && deno lint && deno check --sloppy-imports app server && deno test -A --sloppy-imports",
+    "smoke": "deno task build && bash scripts/smoke.sh"
   },
   "fmt": {
     "exclude": [
@@ -54,6 +55,7 @@
     "contracts/": "./shared/contracts/",
     "react": "npm:react@^19.0.0",
     "react-dom": "npm:react-dom@^19.0.0",
+    "react-dom/server": "npm:react-dom@^19.0.0/server.node",
     "react-router": "npm:react-router@^7.13.0",
     "react-router-dom": "npm:react-router-dom@^7.13.0",
     "@react-router/express": "npm:@react-router/express@^7.13.0",
