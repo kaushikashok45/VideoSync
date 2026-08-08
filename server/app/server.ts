@@ -14,6 +14,7 @@ import { RoomHandler } from "../features/room/room-handler.ts";
 import { ChatHandler } from "../features/chat/chat-handler.ts";
 import { ReactionHandler } from "../features/reactions/reaction-handler.ts";
 import { SignalingHandler } from "../features/signaling/signaling-handler.ts";
+import { MetadataHandler } from "../features/metadata/metadata-handler.ts";
 
 export async function startServer(
   config: AppConfig,
@@ -36,6 +37,7 @@ export async function startServer(
   new RoomHandler({ io, rooms, logger }).attach();
   new ChatHandler({ io, logger }).attach();
   new ReactionHandler({ io, logger }).attach();
+  new MetadataHandler({ app, config, logger }).attach();
 
   app.get("/healthz", (_req, res) => {
     res.json({ ok: true });

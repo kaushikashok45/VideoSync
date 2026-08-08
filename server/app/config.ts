@@ -7,6 +7,9 @@ export interface AppConfig {
   corsOrigin: string;
   clientBuildPath: string;
   serverBuildPath: string;
+  metadataApiKey?: string;
+  metadataTtlMs: number;
+  metadataRateLimit: number;
 }
 
 function toInt(value: string | undefined, fallback: number): number {
@@ -24,5 +27,8 @@ export function loadConfig(
     corsOrigin: env.CORS_ORIGIN ?? "*",
     clientBuildPath: env.CLIENT_BUILD_PATH ?? "./build/client",
     serverBuildPath: env.SERVER_BUILD_PATH ?? "./build/server/index.js",
+    metadataApiKey: env.TMDB_API_KEY ?? env.METADATA_API_KEY,
+    metadataTtlMs: toInt(env.METADATA_TTL_MS, 60_000),
+    metadataRateLimit: toInt(env.METADATA_RATE_LIMIT, 30),
   };
 }

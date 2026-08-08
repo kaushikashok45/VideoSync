@@ -1,5 +1,6 @@
 import { AppError } from "../../../shared/contracts/app-error.ts";
 import type { Member } from "../../../shared/contracts/member.ts";
+import type { MovieMetadata } from "../../../shared/contracts/movie-metadata.ts";
 import type { PlaybackSnapshot } from "../../../shared/contracts/playback.ts";
 import type { RoomMeta } from "../../../shared/contracts/room-meta.ts";
 import type { Room } from "./room.ts";
@@ -12,12 +13,16 @@ export interface RoomStoreDeps {
   createCode?: (length: number) => string;
 }
 
+export interface CreateRoomOptions {
+  metadata?: MovieMetadata;
+}
+
 export class RoomStore {
   private rooms = new Map<string, Room>();
 
   constructor(private deps: RoomStoreDeps) {}
 
-  create(hostId: string, hostName: string): Room {
+  create(hostId: string, hostName: string, opts: CreateRoomOptions = {}): Room {
     const name = hostName?.trim() ?? "";
     if (name === "") throw new AppError("VALIDATION_NAME_EMPTY");
     const code = this.uniqueCode();
@@ -28,6 +33,7 @@ export class RoomStore {
       members: new Map(),
       mediaSource: null,
       playback: this.initialPlayback(),
+      metadata: opts.metadata,
       createdAt: this.deps.now(),
     };
     room.members.set(hostId, this.initialHostMember(hostId, name));
@@ -106,6 +112,7 @@ export class RoomStore {
       hostId: room.hostId,
       memberCount: room.members.size,
       maxMembers: this.deps.maxMembers,
+      metadata: room.metadata,
     };
   }
 }

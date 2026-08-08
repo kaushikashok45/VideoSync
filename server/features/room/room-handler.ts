@@ -36,7 +36,9 @@ export class RoomHandler {
   }
   private onCreate(socket: Socket, payload: RoomCreatePayload): void {
     try {
-      const room = this.deps.rooms.create(socket.id, payload?.name ?? "");
+      const room = this.deps.rooms.create(socket.id, payload?.name ?? "", {
+        metadata: payload?.metadata,
+      });
       socket.data.roomCode = room.code;
       void socket.join(room.code);
       socket.emit(SOCKET_EVENTS.ROOM_CREATED, {
@@ -119,9 +121,7 @@ export class RoomHandler {
     this.deps.io.to(room.code).emit(SOCKET_EVENTS.ROOM_ENDED, {});
     this.deps.io.in(room.code).socketsLeave(room.code);
     this.deps.rooms.delete(room.code);
-    this.deps.logger.info("room ended by host disconnect", {
-      code: room.code,
-    });
+    this.deps.logger.info("room ended by host disconnect", { code: room.code });
   }
   private findRoomFor(socket: Socket) {
     const code = socket.data.roomCode;
