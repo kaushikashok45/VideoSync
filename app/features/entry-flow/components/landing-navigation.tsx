@@ -1,7 +1,8 @@
+import type { JSX } from "react";
 import { Menu } from "lucide-react";
 import { Popover } from "~/shared/ui-kit/index.ts";
 
-export function LandingNavigation() {
+export function LandingNavigation(): JSX.Element {
   return (
     <Popover
       className="landing-nav-popover w-56"
