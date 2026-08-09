@@ -54,9 +54,33 @@
   display: flex;
   justify-content: space-between;
   gap: 16px;
-  padding-top: 18px;
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+  padding-top: 28px;
   color: rgb(var(--ink-muted-rgb));
   font: 0.75rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.landing-footer-brand,
+.landing-footer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.landing-footer-brand p,
+.landing-footer-links p {
+  margin: 0;
+}
+.landing-footer-wordmark {
+  color: rgb(var(--ink-rgb));
+  font-family: "Avenir Next", "Helvetica Neue", ui-sans-serif, system-ui,
+    sans-serif;
+  font-size: clamp(2.25rem, 5vw, 2.75rem);
+  font-weight: 600;
+  letter-spacing: -0.06em;
+}
+.landing-footer-wordmark span {
+  font-weight: 400;
 }
 .landing-footer nav {
   display: flex;
@@ -72,9 +96,12 @@
 }
 .landing-info-grid {
   display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 24px;
-  padding-top: 40px;
-  border-top: 1px solid var(--line);
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 40px 0 32px;
+  border-bottom: 1px solid var(--line);
   color: rgb(var(--ink-rgb));
 }
 .landing-info-grid section {
@@ -114,5 +141,12 @@
   }
   .landing-footer {
     flex-direction: column;
+    gap: 24px;
+  }
+  .landing-footer-links {
+    align-items: flex-start;
+  }
+  .landing-info-grid {
+    grid-template-columns: 1fr;
   }
 }

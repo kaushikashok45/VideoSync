@@ -151,8 +151,8 @@ export function LandingScreen() {
           </div>
         </div>
       </section>
-      <LandingFooter />
       <LandingInfo />
+      <LandingFooter />
     </EntryLayout>
   );
 }
