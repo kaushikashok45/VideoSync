@@ -26,6 +26,7 @@ import ControlBar from "./control-bar.tsx";
 import PlaybackSync, { type PlaybackSyncHandle } from "./playback-sync.tsx";
 import PlayerFeedback from "./player-feedback.tsx";
 import PlayerHeader from "./player-header.tsx";
+import ReactionTray from "~/widgets/reaction-overlay/ui/reaction-tray.tsx";
 
 const DRIFT_THRESHOLD_MS = 1500;
 
@@ -91,6 +92,8 @@ export default function PlayerShell({
   const [autoplayError, setAutoplayError] = useState<string | null>(null);
   const [volume, setVolume] = useState(1);
   const [hadRemoteStream, setHadRemoteStream] = useState(false);
+  const [cinemaMode, setCinemaMode] = useState(false);
+  const [reactionOpen, setReactionOpen] = useState(false);
   const src = useLocalFileSource(mode, file) ??
     ("mode" in media
       ? (media.mode === "url" ? media.url : undefined)
@@ -105,6 +108,9 @@ export default function PlayerShell({
     sourceReady,
     hadStream: hadRemoteStream,
   });
+  useEffect(() => {
+    if (snapshot?.status === "playing") setCinemaMode(true);
+  }, [snapshot?.status]);
   const handleStageKeyDown = (
     event: React.KeyboardEvent<HTMLDivElement>,
   ) => {
@@ -140,7 +146,9 @@ export default function PlayerShell({
       onPointerMove={reveal}
       onKeyDown={handleStageKeyDown}
       onClick={reveal}
-      className="relative h-dvh min-h-0 w-full max-w-none overflow-hidden rounded-none bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-text focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+      className={`player-stage relative min-h-0 max-w-none overflow-hidden bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-text focus-visible:ring-offset-2 focus-visible:ring-offset-bg ${
+        cinemaMode ? "is-cinema" : ""
+      }`}
     >
       <video
         ref={videoRef}
@@ -175,6 +183,28 @@ export default function PlayerShell({
         snapshot={snapshot}
         syncHandleRef={syncHandleRef}
       />
+      <div
+        className={`pointer-events-none absolute bottom-[clamp(7rem,12vh,9rem)] left-1/2 z-20 -translate-x-1/2 transition-[opacity,transform] duration-300 motion-reduce:transition-none ${
+          visible ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
+        }`}
+        aria-hidden={!visible || undefined}
+      >
+        <div className="pointer-events-auto">
+          <ReactionTray
+            open={reactionOpen}
+            onToggle={() => setReactionOpen((current) => !current)}
+            onReact={(emoji) => {
+              const senderName = me?.name ?? "You";
+              if (socket === null) {
+                reactionRef.current?.getState().send(emoji, senderName);
+              } else {
+                socket.sendReaction(emoji, senderName);
+              }
+              setReactionOpen(false);
+            }}
+          />
+        </div>
+      </div>
       <PlaybackSync
         mode={mode}
         store={store}

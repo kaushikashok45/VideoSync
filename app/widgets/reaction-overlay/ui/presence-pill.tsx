@@ -18,7 +18,7 @@ export default function PresencePill({ store }: PresencePillProps) {
       data-testid="presence-pill"
       role="status"
       aria-live="polite"
-      className="absolute left-md top-md inline-flex items-center gap-xs rounded-full border border-line bg-surface-raised/85 px-sm py-xxs font-mono text-xs font-semibold text-ink shadow-pop backdrop-blur"
+      className="absolute left-md top-16 inline-flex items-center gap-xs rounded-full border border-line bg-surface-raised/85 px-sm py-xxs font-mono text-xs font-semibold text-ink shadow-pop backdrop-blur"
     >
       <Users aria-hidden="true" className="size-3.5" />
       <span>{members.length} watching now</span>

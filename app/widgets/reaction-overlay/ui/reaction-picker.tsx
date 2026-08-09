@@ -7,7 +7,10 @@ export interface ReactionPickerProps {
 
 export default function ReactionPicker({ onReact }: ReactionPickerProps) {
   return (
-    <div className="flex items-center justify-center gap-xs">
+    <div
+      data-testid="reaction-picker"
+      className="flex items-center justify-center gap-xs"
+    >
       {REACTION_EMOJIS.map((emoji) => (
         <ReactionButton
           key={emoji}

@@ -29,20 +29,20 @@ export default function PlaybackControls({
   return (
     <div data-testid="playback-controls" className="flex items-center gap-xs">
       <IconButton
-        label={`Rewind ${SMALL_SEEK_SECONDS} seconds`}
-        disabled={!canControl}
-        onClick={command("rewind")}
-        className={BUTTON_CLASS}
-      >
-        <Rewind className="size-6" />
-      </IconButton>
-      <IconButton
         label={playing ? "Pause" : "Play"}
         disabled={!canControl}
         onClick={command(playing ? "pause" : "play")}
         className={`${BUTTON_CLASS} bg-brand text-onbrand hover:bg-brand-hover`}
       >
         {playing ? <Pause className="size-6" /> : <Play className="size-6" />}
+      </IconButton>
+      <IconButton
+        label={`Rewind ${SMALL_SEEK_SECONDS} seconds`}
+        disabled={!canControl}
+        onClick={command("rewind")}
+        className={BUTTON_CLASS}
+      >
+        <Rewind className="size-6" />
       </IconButton>
       <IconButton
         label={`Forward ${SMALL_SEEK_SECONDS} seconds`}

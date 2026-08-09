@@ -50,10 +50,42 @@
   html,
   body {
     @apply bg-bg text-ink font-sans;
+    font-family: "Avenir Next", "Helvetica Neue", ui-sans-serif, system-ui,
+      sans-serif;
     background: rgb(var(--bg-rgb));
     color: rgb(var(--ink-rgb));
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+
+  .font-sans,
+  .font-built {
+    font-family: "Avenir Next", "Helvetica Neue", ui-sans-serif, system-ui,
+      sans-serif;
+  }
+
+  .font-mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      monospace;
+  }
+
+  .player-stage {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    width: 100vw;
+    height: 100dvh;
+    transform: scale(0.96);
+    transform-origin: center;
+    border-radius: clamp(16px, 1.8vw, 28px);
+    transition:
+      transform 450ms cubic-bezier(0.32, 0.72, 0, 1),
+      border-radius 450ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .player-stage.is-cinema {
+    transform: scale(1);
+    border-radius: 0;
   }
 
   ::selection {
@@ -129,5 +161,29 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.12s !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Keep the product UI readable if a stale Tailwind font token is present in
+ * the generated utility layer. Metadata explicitly opts into mono below. */
+.font-sans,
+.font-built {
+  font-family: "Avenir Next", "Helvetica Neue", ui-sans-serif, system-ui,
+    sans-serif;
+}
+
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+@media (max-width: 640px) {
+  .player-stage {
+    transform: scale(0.985);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .player-stage {
+    transition: none;
   }
 }

@@ -49,21 +49,33 @@ export default function Seeker({
   const seekable = Number.isFinite(duration) && duration > 0;
   const max = seekable ? duration : 0;
   const value = Math.min(currentTime, max);
+  const progress = seekable ? Math.min(100, (value / duration) * 100) : 0;
   return (
     <>
       <style>{thumbStyles}</style>
-      <input
-        type="range"
-        min={0}
-        max={max}
-        step={0.1}
-        value={value}
-        disabled={disabled || !seekable}
-        onChange={(event) => onSeek(Number(event.target.value))}
-        aria-label="Seek"
-        data-testid="seeker"
-        className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-line-strong accent-brand"
-      />
+      <div
+        data-testid="seeker-track"
+        className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-line-strong"
+      >
+        <span
+          data-testid="seeker-completed"
+          aria-hidden="true"
+          style={{ width: `${progress}%` }}
+          className="absolute inset-y-0 left-0 bg-brand"
+        />
+        <input
+          type="range"
+          min={0}
+          max={max}
+          step={0.1}
+          value={value}
+          disabled={disabled || !seekable}
+          onChange={(event) => onSeek(Number(event.target.value))}
+          aria-label="Seek"
+          data-testid="seeker"
+          className="absolute inset-0 h-1.5 w-full cursor-pointer appearance-none bg-transparent accent-brand"
+        />
+      </div>
     </>
   );
 }

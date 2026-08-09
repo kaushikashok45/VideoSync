@@ -6,8 +6,8 @@ export interface SourcePickerProps {
 }
 
 const OPTIONS: Array<{ value: SourceKind; label: string }> = [
-  { value: "upload", label: "Upload file" },
-  { value: "url", label: "Paste URL" },
+  { value: "upload", label: "Upload a video" },
+  { value: "url", label: "Use a URL" },
 ];
 
 export default function SourcePicker({ source, onChange }: SourcePickerProps) {

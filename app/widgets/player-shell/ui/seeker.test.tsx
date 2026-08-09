@@ -25,6 +25,17 @@ Deno.test("clamps the value to the duration", () => {
   assertEquals(input.getAttribute("value"), "100");
 });
 
+Deno.test("renders the completed portion of the timeline", () => {
+  setupDom();
+  const { container } = render(
+    <Seeker currentTime={25} duration={100} onSeek={() => {}} />,
+  );
+  const completed = container.querySelector<HTMLElement>(
+    '[data-testid="seeker-completed"]',
+  );
+  assertEquals(completed?.style.width, "25%");
+});
+
 // Sad path: a seeker with no usable duration stays rendered but disabled.
 Deno.test("disables seeking when the duration is unavailable", () => {
   setupDom();

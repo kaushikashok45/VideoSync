@@ -24,6 +24,7 @@ export default function JoinForm() {
   return (
     <form
       onSubmit={handleSubmit}
+      data-testid="join-form"
       className="flex w-full flex-col gap-md"
     >
       <TextField

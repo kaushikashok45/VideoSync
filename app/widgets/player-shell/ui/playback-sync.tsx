@@ -125,6 +125,8 @@ export default function PlaybackSync({
     });
     const onLoaded = () => {
       seedSnapshot(video, store);
+      const snapshot = store.getState().getSnapshot();
+      if (snapshot) applySnapshotToVideo(video, snapshot);
       if (!autoplay) return;
       void video.play()
         .then(() => {

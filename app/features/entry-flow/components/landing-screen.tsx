@@ -21,6 +21,7 @@ export function LandingScreen() {
     SessionContext,
   );
   const [pending, setPending] = useState(false);
+  const [joinOpen, setJoinOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const startWatching = async () => {
@@ -107,7 +108,17 @@ export function LandingScreen() {
               same screening with the room context intact.
             </p>
           </div>
-          <JoinForm />
+          <button
+            type="button"
+            data-testid="reveal-join"
+            aria-expanded={joinOpen}
+            aria-controls="join-form"
+            onClick={() => setJoinOpen((current) => !current)}
+            className="self-start text-left font-built text-sm font-semibold text-brand-text underline-offset-4 hover:underline"
+          >
+            {joinOpen ? "Hide join form" : "Join a room"}
+          </button>
+          {joinOpen ? <JoinForm /> : null}
         </section>
       </div>
     </EntryLayout>

@@ -93,12 +93,12 @@ what can happen next.
 ## Brand Personality
 
 Warm, playful, cinematic, social, and trustworthy. The approved wordmark is an
-Avenir-style sans treatment: “Sync” carries the semibold emphasis while
-“Party” is lighter. The product UI uses a calm Apple/SF-style system sans so
-the brand can feel human without making controls decorative. The experience
-should feel like a shared movie night: inviting and human, but precise enough
-that room identity, playback, and recovery can be trusted. 3 words: **warm,
-cinematic, effortless.**
+Avenir-style sans treatment: “Sync” carries the semibold emphasis while “Party”
+is lighter. The product UI uses a calm Apple/SF-style system sans so the brand
+can feel human without making controls decorative. The experience should feel
+like a shared movie night: inviting and human, but precise enough that room
+identity, playback, and recovery can be trusted. 3 words: **warm, cinematic,
+effortless.**
 
 ## Anti-references
 

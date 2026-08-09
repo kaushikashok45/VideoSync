@@ -101,7 +101,7 @@ export default function RoomSidebar({
         aria-controls={panelId}
         aria-label={open ? "Close chat and members" : "Open chat and members"}
         onClick={() => (open ? close() : setOpen(true))}
-        className="absolute right-md top-md z-40 inline-flex h-11 w-11 items-center justify-center rounded-full border border-line bg-surface-raised/90 text-ink shadow-pop backdrop-blur transition-colors hover:text-brand-text focus-visible:ring-2 focus-visible:ring-brand-text focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+        className="absolute bottom-[clamp(2rem,5vh,3rem)] right-md z-40 inline-flex h-11 w-11 items-center justify-center rounded-full border border-line bg-surface-raised/90 text-ink shadow-pop backdrop-blur transition-colors hover:text-brand-text focus-visible:ring-2 focus-visible:ring-brand-text focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
       >
         <MessageSquareText className="size-5" />
       </button>

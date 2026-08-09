@@ -1,6 +1,7 @@
 import { fetchMetadata } from "~/shared/api/metadata-client.ts";
 import type { MediaSource } from "contracts/media-source.ts";
 import type { MovieMetadata } from "contracts/movie-metadata.ts";
+import { createLocalMetadata } from "./create-local-metadata.ts";
 
 export type SourceKind = "upload" | "url";
 export type FetchMetadataLike = typeof fetchMetadata;
@@ -70,7 +71,7 @@ function resolveUpload(file: File | null, roomId: string): SourceDecision {
     status: "navigating",
     route: buildHostRoute(roomId),
     source: { mode: "upload" },
-    metadata: null,
+    metadata: createLocalMetadata(file.name),
   };
 }
 

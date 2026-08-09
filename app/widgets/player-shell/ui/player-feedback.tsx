@@ -83,7 +83,7 @@ export default function PlayerFeedback({
             data-testid="player-connection-status"
             role="status"
             aria-live="polite"
-            className="pointer-events-none absolute right-16 top-md z-20 rounded-full border border-line bg-surface-raised/90 px-sm py-xxs font-built text-xs font-semibold text-ink shadow-pop"
+            className="pointer-events-none absolute bottom-24 right-md z-20 rounded-full border border-line bg-surface-raised/90 px-sm py-xxs font-built text-xs font-semibold text-ink shadow-pop"
           >
             {connectionLabel}
           </div>

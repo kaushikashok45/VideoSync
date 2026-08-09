@@ -123,6 +123,44 @@ Deno.test("renders a video element and the control bar for a url source", async 
   await flush(60);
 });
 
+Deno.test("player uses the centered Native TV control composition", async () => {
+  setupDom();
+  const { container } = shell({ idleMs: 50, me: host() });
+  assertEquals(stage(container).className.includes("player-stage"), true);
+  assertEquals(
+    container.querySelector('[data-testid="player-header"]')?.textContent
+      ?.includes("Sync Party"),
+    true,
+  );
+  assertEquals(
+    container.querySelector('[data-testid="control-bar"]')?.className.includes(
+      "justify-center",
+    ),
+    true,
+  );
+  const controls = [...container.querySelectorAll(
+    '[data-testid="playback-controls"] button',
+  )].map((button) => button.getAttribute("aria-label"));
+  assertEquals(controls, ["Play", "Rewind 5 seconds", "Forward 5 seconds"]);
+  assertEquals(
+    container.querySelector('[aria-label="Open reactions"]') !== null,
+    true,
+  );
+  assertEquals(
+    container.querySelector('[data-testid="reaction-tray"]')?.getAttribute(
+      "aria-hidden",
+    ),
+    "true",
+  );
+  click(container.querySelector('[aria-label="Open reactions"]') as Element);
+  assertEquals(
+    container.querySelector('[data-testid="reaction-tray"]')
+      ?.querySelectorAll('[aria-label^="React "]').length,
+    5,
+  );
+  await flush(60);
+});
+
 // 2. Sad/Edge: controls hide after idle with aria-hidden and reveal on interaction.
 Deno.test("controls hide after idle with aria-hidden and reveal on interaction", async () => {
   setupDom();

@@ -74,7 +74,8 @@ Deno.test("upload with a file: navigates without waiting for metadata", async ()
   assert(navigating(decision));
   assertEquals(decision.route, HOST_ROUTE);
   assertEquals(decision.source, { mode: "upload" });
-  assertEquals(decision.metadata, null);
+  assertEquals(decision.metadata?.title, "movie");
+  assertEquals(decision.metadata?.overview.includes("local video"), true);
 });
 
 // 2. Sad path

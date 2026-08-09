@@ -171,8 +171,8 @@ consume these roles instead of introducing one-off colors.
 
 ## Typography
 
-**Three roles: brand wordmark × Native TV UI × restricted monospace.**
-The Avenir-style sans treatment carries the brand mark; an Apple/SF-style system
+**Three roles: brand wordmark × Native TV UI × restricted monospace.** The
+Avenir-style sans treatment carries the brand mark; an Apple/SF-style system
 sans carries headings, body copy, labels, and controls; the monospace role is
 reserved for room codes, technical metadata, timestamps, and other values whose
 character alignment improves scanning. One role must not be substituted for

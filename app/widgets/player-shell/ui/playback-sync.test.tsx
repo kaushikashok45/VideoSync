@@ -93,3 +93,34 @@ Deno.test("receiver drift correction waits for an authoritative playing snapshot
   assertEquals(video.currentTime, 2);
   HTMLMediaElement.prototype.play = originalPlay;
 });
+
+Deno.test("host reapplies a playing snapshot when media metadata arrives", async () => {
+  setupDom();
+  const store = createPlaybackStore({ driftThresholdMs: 1500 });
+  const video = document.createElement("video");
+  const actionRef = createRef<PlaybackSyncHandle>();
+  const originalPlay = HTMLMediaElement.prototype.play;
+  let playCalls = 0;
+  HTMLMediaElement.prototype.play = () => {
+    playCalls += 1;
+    return Promise.resolve();
+  };
+  store.getState().applyServerSnapshot(paused(10));
+  store.getState().play();
+  render(
+    <PlaybackSync
+      mode="host"
+      store={store}
+      videoRef={{ current: video }}
+      actionRef={actionRef}
+      stream={null}
+      autoplay={false}
+    />,
+  );
+  await act(async () => {
+    video.dispatchEvent(new Event("loadedmetadata"));
+    await Promise.resolve();
+  });
+  assertEquals(playCalls, 1);
+  HTMLMediaElement.prototype.play = originalPlay;
+});
