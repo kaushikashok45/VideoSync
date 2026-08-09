@@ -45,3 +45,10 @@ Deno.test("join is progressively disclosed from the landing screen", () => {
   );
   assertEquals(container.querySelector("#join-form") !== null, true);
 });
+
+Deno.test("start party navigates hosts to source selection", () => {
+  const landingSource = LandingScreen.toString();
+
+  assertEquals(landingSource.includes("file-upload"), true);
+  assertEquals(landingSource.includes("SetupScreen"), false);
+});

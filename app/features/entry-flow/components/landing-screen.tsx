@@ -76,7 +76,7 @@ export function LandingScreen() {
       updateRoomId(room.code);
       updateRole(Role.HOST);
       updateUserName(hostName);
-      navigate(`/${room.code}/SetupScreen`);
+      navigate(`/${room.code}/file-upload`);
     } catch (caught) {
       setError(
         caught instanceof Error ? caught.message : "Could not start the room.",
