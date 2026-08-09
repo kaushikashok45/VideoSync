@@ -16,6 +16,7 @@ import { useMediaPreviewSource } from "../logic/use-media-preview-source.ts";
 import { EntryLayout } from "./entry-layout.tsx";
 import { MediaFrame } from "./media-frame.tsx";
 import { NowPlayingCard } from "./now-playing-card.tsx";
+import { SourceSpotlight } from "./source-spotlight.tsx";
 import { LandingNavigation } from "./landing-navigation.tsx";
 
 function previewSource(
@@ -183,6 +184,7 @@ export function SourceScreen() {
             </Button>
           </section>
           <NowPlayingCard details={details} metadata={null} />
+          <SourceSpotlight />
         </div>
       </div>
     </EntryLayout>

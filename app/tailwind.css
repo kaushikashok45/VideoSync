@@ -1,5 +1,6 @@
 @import "./features/entry-flow/components/landing-catalog.css";
 @import "./features/entry-flow/components/landing-catalog-art.css";
+@import "./features/entry-flow/components/source-spotlight.css";
 
 @tailwind base;
 @tailwind components;
