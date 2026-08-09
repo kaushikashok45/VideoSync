@@ -1,5 +1,4 @@
 import { useContext, useState } from "react";
-import { Menu } from "lucide-react";
 import { useNavigate } from "react-router";
 import Role from "~/context/Session/contracts/Role.ts";
 import SessionContext from "~/context/Session/logic/SessionContext.ts";
@@ -9,44 +8,13 @@ import {
   useAppStores,
   useOptionalSocketClient,
 } from "~/shared/api/socket-bridge.tsx";
-import { Button, Popover } from "~/shared/ui-kit/index.ts";
+import { Button } from "~/shared/ui-kit/index.ts";
 import { writeHostSessionRoom } from "../logic/host-session-room.ts";
 import { EntryLayout } from "./entry-layout.tsx";
 import { LandingFooter } from "./landing-footer.tsx";
 import { LandingInfo } from "./landing-info.tsx";
+import { LandingNavigation } from "./landing-navigation.tsx";
 import { LandingPosterWall } from "./landing-poster-wall.tsx";
-
-function LandingNavigation() {
-  return (
-    <Popover
-      className="landing-nav-popover w-56"
-      trigger={
-        <button
-          type="button"
-          aria-label="Open navigation"
-          className="grid min-h-11 min-w-11 place-items-center rounded-md border border-line bg-surface text-ink hover:bg-surface-raised"
-        >
-          <Menu size={18} aria-hidden="true" />
-        </button>
-      }
-    >
-      <nav aria-label="Site navigation" className="flex flex-col gap-xs">
-        <a
-          className="rounded-sm px-sm py-xs text-sm text-ink-muted hover:bg-brand-soft hover:text-brand-text"
-          href="#about"
-        >
-          About
-        </a>
-        <a
-          className="rounded-sm px-sm py-xs text-sm text-ink-muted hover:bg-brand-soft hover:text-brand-text"
-          href="#help"
-        >
-          Help
-        </a>
-      </nav>
-    </Popover>
-  );
-}
 
 export function LandingScreen() {
   const navigate = useNavigate();
