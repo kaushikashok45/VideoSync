@@ -5,13 +5,15 @@ import ThemeToggle from "~/widgets/brand-shell/ui/theme-toggle.tsx";
 
 export interface EntryLayoutProps {
   children: ReactNode;
+  headerActions?: ReactNode;
 }
 
-export function EntryLayout({ children }: EntryLayoutProps) {
+export function EntryLayout({ children, headerActions }: EntryLayoutProps) {
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-bg">
       <BackgroundAmbience />
-      <div className="absolute right-md top-md z-sticky">
+      <div className="absolute right-md top-md z-sticky flex items-center gap-xs">
+        {headerActions}
         <ThemeToggle />
       </div>
       <div className="mx-auto flex min-h-screen w-full flex-col gap-xl px-md py-lg md:gap-xxl md:px-[clamp(2rem,5vw,5rem)] md:py-[clamp(2rem,4vw,4rem)]">

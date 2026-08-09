@@ -68,7 +68,7 @@ export function Popover({ trigger, children, className = "" }: PopoverProps) {
         ? createPortal(
           <div
             ref={contentRef}
-            className={`fixed z-dropdown rounded-lg border border-line-strong bg-surface-raised p-md shadow-overlay animate-fade-in ${className}`}
+            className={`fixed z-dropdown rounded-lg border border-line-strong bg-surface-raised p-md shadow-overlay animate-fade-in motion-reduce:animate-none ${className}`}
           >
             {children}
           </div>,
