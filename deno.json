@@ -73,7 +73,7 @@
     "nanoid": "npm:nanoid@^5.1.6",
     "sonner": "npm:sonner@^2.0.6",
     "isbot": "npm:isbot@^4.1.0",
-    "@heroicons/react": "npm:@heroicons/react@^2.2.0",
+    "lucide-react": "npm:lucide-react@^0.541.0",
     "vite": "npm:vite@^6.0.0",
     "vite-tsconfig-paths": "npm:vite-tsconfig-paths@^6.0.5",
     "tailwindcss": "npm:tailwindcss@^3.4.4",

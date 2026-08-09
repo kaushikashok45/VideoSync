@@ -1,7 +1,4 @@
-import { useRef, useState, useSyncExternalStore } from "react";
-import type { MediaSource } from "contracts/media-source.ts";
-import type { Member } from "contracts/member.ts";
-import type { MovieMetadata } from "contracts/movie-metadata.ts";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { type ChatStore, createChatStore } from "~/entities/chat/chat-store.ts";
 import {
   createMembersStore,
@@ -17,37 +14,20 @@ import {
 } from "~/entities/reaction/reaction-store.ts";
 import RoomSidebar from "~/widgets/room-sidebar/ui/room-sidebar.tsx";
 import ReactionOverlay from "~/widgets/reaction-overlay/ui/reaction-overlay.tsx";
+import type { PlayerShellProps } from "../types/player-shell-props.ts";
 import { useIdleVisibility } from "../logic/use-idle-visibility.ts";
 import { useLocalFileSource } from "../logic/use-local-file-source.ts";
 import { useOptionalSocketClient } from "~/shared/api/socket-bridge.tsx";
+import { resolveRoomConnectionState } from "../logic/resolve-room-connection-state.ts";
+import { useSocketConnectionState } from "../logic/use-socket-connection-state.ts";
 import { usePeerMediaStream } from "../logic/use-peer-media-stream.ts";
+import { handleStagePlaybackShortcut } from "~/features/playback-control/model/handle-stage-playback-shortcut.ts";
 import ControlBar from "./control-bar.tsx";
 import PlaybackSync, { type PlaybackSyncHandle } from "./playback-sync.tsx";
 import PlayerFeedback from "./player-feedback.tsx";
-
-export interface PlayerShellProps {
-  mode: "host" | "receiver";
-  media: MediaSource | { url?: string };
-  metadata?: MovieMetadata | null;
-  me?: Member | null;
-  roomId?: string;
-  file?: File | null;
-  idleMs?: number;
-  playbackStore?: PlaybackStore;
-  membersStore?: MembersStore;
-  chatStore?: ChatStore;
-  reactionStore?: ReactionStore;
-}
+import PlayerHeader from "./player-header.tsx";
 
 const DRIFT_THRESHOLD_MS = 1500;
-
-function videoSource(media: PlayerShellProps["media"]): string | undefined {
-  if ("mode" in media) {
-    if (media.mode === "url") return media.url;
-    return undefined;
-  }
-  return media.url;
-}
 
 export default function PlayerShell({
   mode,
@@ -61,23 +41,31 @@ export default function PlayerShell({
   membersStore,
   chatStore,
   reactionStore,
+  onExit,
 }: PlayerShellProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const syncHandleRef = useRef<PlaybackSyncHandle>(null);
-  const storeRef = useRef<PlaybackStore | null>(playbackStore ?? null);
-  if (!storeRef.current) {
-    storeRef.current = createPlaybackStore({
-      driftThresholdMs: DRIFT_THRESHOLD_MS,
-    });
-  }
-  const membersRef = useRef<MembersStore | null>(membersStore ?? null);
-  if (!membersRef.current) membersRef.current = createMembersStore();
-  const chatRef = useRef<ChatStore | null>(chatStore ?? null);
-  if (!chatRef.current) chatRef.current = createChatStore();
-  const reactionRef = useRef<ReactionStore | null>(reactionStore ?? null);
-  if (!reactionRef.current) reactionRef.current = createReactionStore();
+  const storeRef = useRef<PlaybackStore | null>(null);
+  const membersRef = useRef<MembersStore | null>(null);
+  const chatRef = useRef<ChatStore | null>(null);
+  const reactionRef = useRef<ReactionStore | null>(null);
+  storeRef.current ??= playbackStore ??
+    createPlaybackStore({ driftThresholdMs: DRIFT_THRESHOLD_MS });
+  membersRef.current ??= membersStore ?? createMembersStore();
+  chatRef.current ??= chatStore ?? createChatStore();
+  reactionRef.current ??= reactionStore ?? createReactionStore();
   const store = storeRef.current;
   const socket = useOptionalSocketClient();
+  useEffect(() => {
+    if (mode !== "host" || me === null) return;
+    const hostId = socket?.getSocketId() ?? me.id;
+    const present = membersRef.current?.getState().members.some((member) =>
+      member.id === hostId
+    );
+    if (!present) {
+      membersRef.current?.getState().addMember({ ...me, id: hostId });
+    }
+  }, [me, mode, socket]);
   const remoteStream = usePeerMediaStream({
     mode,
     videoRef,
@@ -85,15 +73,63 @@ export default function PlayerShell({
     membersStore: membersRef.current,
   });
   const { visible, reveal } = useIdleVisibility(idleMs);
+  const socketState = useSocketConnectionState(socket);
   const snapshot = useSyncExternalStore(
     store.subscribe,
     () => store.getState().getSnapshot(),
     () => undefined,
   );
-
+  const hostPresent = useSyncExternalStore(
+    membersRef.current.subscribe,
+    () =>
+      membersRef.current?.getState().members.some((member) =>
+        member.role === "host"
+      ) ?? false,
+    () => false,
+  );
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
-  const src = useLocalFileSource(mode, file) ?? videoSource(media);
-  const awaitingSource = src === undefined && remoteStream === null;
+  const [autoplayError, setAutoplayError] = useState<string | null>(null);
+  const [volume, setVolume] = useState(1);
+  const [hadRemoteStream, setHadRemoteStream] = useState(false);
+  const src = useLocalFileSource(mode, file) ??
+    ("mode" in media
+      ? (media.mode === "url" ? media.url : undefined)
+      : media.url);
+  const sourceReady = Boolean(src) || (snapshot?.duration ?? 0) > 0;
+  const awaitingSource = !sourceReady && remoteStream === null;
+  const connection = resolveRoomConnectionState({
+    mode,
+    socketState,
+    hostPresent,
+    hasStream: remoteStream !== null,
+    sourceReady,
+    hadStream: hadRemoteStream,
+  });
+  const handleStageKeyDown = (
+    event: React.KeyboardEvent<HTMLDivElement>,
+  ) => {
+    reveal();
+    handleStagePlaybackShortcut(event, me, snapshot, store);
+  };
+  const handlePlayWithSound = async () => {
+    if (volume === 0) {
+      setVolume(1);
+      syncHandleRef.current?.setVolume(1);
+    }
+    const started = await syncHandleRef.current?.play();
+    setAutoplayBlocked(!started);
+    setAutoplayError(
+      started
+        ? null
+        : "Playback is still blocked. Use your browser’s play control and try again.",
+    );
+  };
+
+  useEffect(() => {
+    if (remoteStream !== null) {
+      setHadRemoteStream(true);
+    }
+  }, [remoteStream]);
 
   return (
     <div
@@ -102,14 +138,14 @@ export default function PlayerShell({
       aria-label={mode === "host" ? "Host player" : "Receiver player"}
       tabIndex={0}
       onPointerMove={reveal}
-      onKeyDown={reveal}
+      onKeyDown={handleStageKeyDown}
       onClick={reveal}
       className="relative h-dvh min-h-0 w-full max-w-none overflow-hidden rounded-none bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-text focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
     >
       <video
         ref={videoRef}
         src={src}
-        autoPlay={mode === "host" ? !autoplayBlocked : remoteStream !== null}
+        autoPlay={false}
         preload="metadata"
         playsInline
         className="h-full w-full bg-black object-contain"
@@ -117,38 +153,48 @@ export default function PlayerShell({
       />
       <PlayerFeedback
         mode={mode}
+        connectionState={connection.stage}
         src={src}
         hasStream={remoteStream !== null}
+        hostPresent={hostPresent}
         awaitingSource={awaitingSource}
         autoplayBlocked={autoplayBlocked}
+        autoplayError={autoplayError}
         visible={visible}
         metadata={metadata}
-        onPlayWithSound={() => {
-          setAutoplayBlocked(false);
-          store.getState().play();
-        }}
+        onPlay={handlePlayWithSound}
+        snapshot={snapshot}
       />
+      <PlayerHeader roomId={roomId} onExit={onExit} />
       <ControlBar
         hidden={!visible}
         me={me}
+        volume={volume}
+        onVolumeChange={setVolume}
         store={store}
         snapshot={snapshot}
         syncHandleRef={syncHandleRef}
       />
       <PlaybackSync
+        mode={mode}
         store={store}
         videoRef={videoRef}
         actionRef={syncHandleRef}
         stream={remoteStream}
-        autoplay={mode === "host" ? Boolean(src) : remoteStream !== null}
-        onAutoplayBlocked={() => setAutoplayBlocked(true)}
+        autoplay={mode === "receiver" && remoteStream !== null}
+        onAutoplayBlocked={() => {
+          setAutoplayBlocked(true);
+          setAutoplayError(null);
+        }}
       />
       <RoomSidebar
         roomId={roomId}
+        connectionLabel={connection.label}
         me={me}
         membersStore={membersRef.current}
         chatStore={chatRef.current}
         reactionStore={reactionRef.current}
+        socket={socket}
       />
       <ReactionOverlay
         reactionStore={reactionRef.current}

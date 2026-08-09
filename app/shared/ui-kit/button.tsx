@@ -12,11 +12,12 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClass: Record<ButtonVariant, string> = {
-  primary: "bg-brand text-onbrand hover:bg-brand-hover border-transparent",
+  primary:
+    "bg-brand text-onbrand border-brand hover:bg-brand-hover active:translate-y-px active:bg-brand",
   secondary:
-    "bg-surface text-ink border border-line-strong hover:border-ink-faint",
+    "bg-surface text-ink border-line-strong hover:bg-surface-raised hover:border-ink-faint active:translate-y-px",
   ghost:
-    "bg-transparent text-brand-text border-transparent hover:bg-brand-soft",
+    "bg-transparent text-brand-text border-transparent hover:bg-brand-soft active:bg-brand-muted",
 };
 
 const sizeClass: Record<ButtonSize, string> = {
@@ -26,7 +27,7 @@ const sizeClass: Record<ButtonSize, string> = {
 };
 
 const baseClass =
-  "inline-flex items-center justify-center gap-xs rounded-md border font-mono font-semibold transition-[color,background-color,border-color,transform] duration-200 hover:-translate-y-px focus-visible:ring-2 focus-visible:ring-brand-text focus-visible:ring-offset-2 focus-visible:ring-offset-bg disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:hover:translate-y-0 motion-reduce:transition-none";
+  "inline-flex min-h-11 items-center justify-center gap-xs rounded-md border font-built text-sm font-semibold transition-[color,background-color,border-color,transform] duration-200 hover:-translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-text focus-visible:ring-offset-2 focus-visible:ring-offset-bg disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:hover:translate-y-0 motion-reduce:transition-none";
 
 export function Button({
   variant = "primary",

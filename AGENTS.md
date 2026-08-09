@@ -169,6 +169,72 @@ and functions into a single file.
 - Fonts: `yesteryear`, `overpass`, `sans` are configured in
   `tailwind.config.ts`.
 
+### UI/UX implementation rules
+
+- **Hierarchy first.** Every screen and component must make the current
+  location, primary task, and next action visually obvious. Use size, weight,
+  position, spacing, and contrast intentionally; do not let secondary chrome
+  compete with the primary task.
+- **Reuse the system.** Before creating a token, primitive, component, type
+  role, spacing value, color variable, or motion utility, use the existing
+  design tokens and shared UI primitives defined in `DESIGN.md` and the existing
+  component library. A new abstraction is allowed only when the existing one
+  cannot express the requirement; document the concrete reason in the change and
+  make the new abstraction reusable.
+- **One canonical pattern.** Shared patterns such as buttons, fields, feedback,
+  overlays, cards, and player controls have one canonical implementation. Extend
+  or configure it rather than creating parallel local versions with different
+  behavior or styling.
+- **Complete interaction states.** Every interactive component must define the
+  applicable loading, disabled, hover, focus, pressed, success, error, and
+  reduced-motion behavior. States must be communicated with more than color
+  alone, and a disabled control must have an understandable reason or
+  prerequisite visible in context.
+- **Contextual feedback.** Every empty, loading, error, and success state must
+  explain the current state and the next available action. Put the message
+  beside the control or content that caused the state; use global notifications
+  only for events that have no useful local anchor.
+- **Accessible by construction.** Use semantic HTML, visible labels, unique
+  accessible names, keyboard support, visible focus states, adequate contrast,
+  and touch-friendly targets. Do not make an icon, placeholder, color, or
+  hover-only affordance carry meaning by itself.
+- **Responsive behavior is part of implementation.** Test layouts and key
+  interactions at mobile, tablet, and desktop widths, including long labels,
+  narrow room codes, zoomed text, and touch/keyboard input. Preserve hierarchy
+  and task completion rather than merely preventing overflow.
+- **Stable, calm surfaces.** Prevent overlapping text, unexpected layout shifts,
+  duplicated labels for the same concept, and decorative UI that competes with
+  the primary task. Reserve motion and emphasis for hierarchy, cause/effect,
+  progress, and state transition.
+- **Visual verification is required.** A design change is not complete after
+  typechecking and tests alone. Inspect the rendered result at the required
+  viewport widths and verify hierarchy, spacing, state coverage, responsive
+  composition, focus behavior, and reduced-motion behavior.
+
+### Minimality and reuse rules
+
+- **Make the smallest viable change.** Implement the requested behavior and its
+  necessary tests; do not add speculative features, wrappers, dependencies,
+  configuration, or unrelated cleanup.
+- **Search before creating.** Locate existing code, contracts, primitives,
+  utilities, and dependencies before adding new ones. Extend the current owner
+  when it already has the responsibility.
+- **Keep one source of truth.** Shared behavior, state transitions, constants,
+  and data transformations must have one canonical owner. Do not copy logic into
+  a second feature or create pass-through layers without a boundary reason.
+- **Use DRY with judgment.** Remove meaningful duplication, but do not create a
+  generic abstraction for code that is only coincidentally similar. A new
+  abstraction must have a current consumer and a documented reason.
+- **Prefer simple designs.** Follow KISS and YAGNI: choose direct, readable code
+  over cleverness, premature optimization, speculative extensibility, or
+  unnecessary indirection.
+- **Preserve scope and behavior.** Do not mix unrelated refactors, formatting
+  churn, renames, dependency changes, or architecture changes into a task.
+  Remove dead code only when it is directly made obsolete by the change.
+- **Review for excess.** Before completion, look specifically for duplicated
+  logic, unused code, pass-through wrappers, redundant state, unnecessary
+  branching, and files or dependencies that the change did not need.
+
 ### Coding standards & review
 
 - **`docs/CODING_STANDARDS.md` is authoritative.** It defines size/structure

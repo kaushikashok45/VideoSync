@@ -1,5 +1,5 @@
-import { XMarkIcon } from "@heroicons/react/24/solid";
 import type { AppErrorPayload } from "contracts/app-error-payload.ts";
+import { X } from "lucide-react";
 import { Button } from "./button.tsx";
 import { IconButton } from "./icon-button.tsx";
 
@@ -35,7 +35,7 @@ export function ErrorBanner(
           : null}
       </div>
       <IconButton label="Dismiss" onClick={onDismiss}>
-        <XMarkIcon className="h-5 w-5" />
+        <X className="h-5 w-5" />
       </IconButton>
     </div>
   );

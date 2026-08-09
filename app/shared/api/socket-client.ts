@@ -21,11 +21,17 @@ export interface SocketClientDeps {
   url: string;
 }
 
+export type SocketConnectionState =
+  | "connected"
+  | "reconnecting"
+  | "disconnected";
+
 export interface SocketClient {
   createRoom(name: string): Promise<RoomMeta>;
   joinRoom(code: string, name: string): Promise<RoomJoinedPayload>;
-  sendChat(text: string): void;
-  sendReaction(emoji: string): void;
+  leaveRoom(): void;
+  sendChat(text: string, senderName?: string): void;
+  sendReaction(emoji: string, senderName?: string): void;
   grantControl(targetId: string): void;
   revokeControl(targetId: string): void;
   sendSignal(to: string, signalData: unknown): void;
@@ -36,6 +42,10 @@ export interface SocketClient {
   onSignal(cb: (p: RelaySignalPayload) => void): void | (() => void);
   onRoomEnded(cb: () => void): void | (() => void);
   onAppError(cb: (p: AppErrorPayload) => void): void | (() => void);
+  onConnectionStateChange(
+    cb: (state: SocketConnectionState) => void,
+  ): void | (() => void);
+  getConnectionState(): SocketConnectionState;
   getSocketId(): string | undefined;
   disconnect(): void;
 }
@@ -49,6 +59,14 @@ export function createSocketClient(deps: SocketClientDeps): SocketClient {
     reconnectionDelay: 1000,
     reconnectionAttempts: 5,
   });
+  let connectionState: SocketConnectionState = socket.connected
+    ? "connected"
+    : "disconnected";
+  const connectionListeners = new Set<(state: SocketConnectionState) => void>();
+  const setConnectionState = (next: SocketConnectionState) => {
+    connectionState = next;
+    for (const listener of connectionListeners) listener(next);
+  };
 
   const pending = new Map<string, (payload: unknown) => void>();
   socket.on(SOCKET_EVENTS.ROOM_CREATED, (p: unknown) => {
@@ -64,6 +82,13 @@ export function createSocketClient(deps: SocketClientDeps): SocketClient {
     pending.clear();
     reject?.(new AppError(err.code as ErrorCode));
   });
+  socket.on("connect", () => setConnectionState("connected"));
+  socket.io.on("reconnect_attempt", () => setConnectionState("reconnecting"));
+  socket.on("connect_error", () => setConnectionState("reconnecting"));
+  socket.on("disconnect", (reason) =>
+    setConnectionState(
+      reason === "io client disconnect" ? "disconnected" : "reconnecting",
+    ));
 
   function request<T>(key: string, payload: unknown): Promise<T> {
     return new Promise<T>((resolve, reject) => {
@@ -85,11 +110,14 @@ export function createSocketClient(deps: SocketClientDeps): SocketClient {
       const payload: RoomJoinPayload = { code, name };
       return request<RoomJoinedPayload>("join", payload);
     },
-    sendChat(text) {
-      socket.emit(SOCKET_EVENTS.CHAT_SEND, { text, senderName: "" });
+    leaveRoom() {
+      socket.emit(SOCKET_EVENTS.ROOM_LEAVE);
     },
-    sendReaction(emoji) {
-      socket.emit(SOCKET_EVENTS.REACTION_SEND, { emoji, senderName: "" });
+    sendChat(text, senderName = "") {
+      socket.emit(SOCKET_EVENTS.CHAT_SEND, { text, senderName });
+    },
+    sendReaction(emoji, senderName = "") {
+      socket.emit(SOCKET_EVENTS.REACTION_SEND, { emoji, senderName });
     },
     grantControl(targetId) {
       const payload: ControlGrantPayload = { targetId };
@@ -131,6 +159,11 @@ export function createSocketClient(deps: SocketClientDeps): SocketClient {
       socket.on(SOCKET_EVENTS.APP_ERROR, cb);
       return () => socket.off(SOCKET_EVENTS.APP_ERROR, cb);
     },
+    onConnectionStateChange(cb) {
+      connectionListeners.add(cb);
+      return () => connectionListeners.delete(cb);
+    },
+    getConnectionState: () => connectionState,
     getSocketId: () => socket.id,
     disconnect: () => socket.disconnect(),
   };

@@ -4,6 +4,7 @@ import {
   createSyncEngineClient,
   type SyncEngineClient,
 } from "../../shared/api/sync-engine-client.ts";
+import { SMALL_SEEK_SECONDS } from "./seek-seconds.ts";
 
 export interface PlaybackStoreDeps {
   driftThresholdMs: number;
@@ -24,8 +25,6 @@ export interface PlaybackState {
     now: number,
   ): "in-sync" | "behind" | "ahead";
 }
-
-const SEEK_STEP_SECONDS = 10;
 
 export type PlaybackStore = StoreApi<PlaybackState>;
 
@@ -110,7 +109,7 @@ function forwardAction(
   const current = engine.getSnapshot();
   if (!current) return undefined;
   const position = engine.projectAt(Date.now())?.currentTime ?? 0;
-  return seekAction(set, engine, position + SEEK_STEP_SECONDS);
+  return seekAction(set, engine, position + SMALL_SEEK_SECONDS);
 }
 
 function rewindAction(
@@ -120,7 +119,7 @@ function rewindAction(
   const current = engine.getSnapshot();
   if (!current) return undefined;
   const position = engine.projectAt(Date.now())?.currentTime ?? 0;
-  return seekAction(set, engine, position - SEEK_STEP_SECONDS);
+  return seekAction(set, engine, position - SMALL_SEEK_SECONDS);
 }
 
 export function createPlaybackStore(deps: PlaybackStoreDeps): PlaybackStore {

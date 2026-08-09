@@ -25,6 +25,20 @@ Deno.test("clamps the value to the duration", () => {
   assertEquals(input.getAttribute("value"), "100");
 });
 
+// Sad path: a seeker with no usable duration stays rendered but disabled.
+Deno.test("disables seeking when the duration is unavailable", () => {
+  setupDom();
+  const { container } = render(
+    <Seeker currentTime={20} duration={0} onSeek={() => {}} />,
+  );
+  const input = container.querySelector<HTMLInputElement>(
+    '[data-testid="seeker"]',
+  );
+  if (!input) throw new Error("no seeker");
+  assertEquals(input.disabled, true);
+  assertEquals(input.getAttribute("max"), "0");
+});
+
 // Mutation: the seeker thumb grows on hover, and the reduced-motion block
 // neutralizes the HOVER scale too (same selectors) — a lower-specificity
 // transform:none alone would NOT win over :hover scale, so this pins the

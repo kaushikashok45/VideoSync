@@ -7,6 +7,10 @@
   font-display: swap;
 }
 
+/* Brand roles intentionally name the requested typefaces. The repository does
+ * not contain licensed Airone/Built binaries yet, so each role falls back to a
+ * metric-compatible local face until those files are supplied. */
+
 @font-face {
   font-family: 'Overpass';
   src: url('../../public/fonts/overpass/OverpassMono-Regular.ttf')

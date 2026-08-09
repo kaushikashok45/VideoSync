@@ -36,9 +36,11 @@ export default {
         },
       },
       fontFamily: {
-        sans: ["Overpass", "ui-monospace", "SFMono-Regular", "monospace"],
-        mono: ["Overpass", "ui-monospace", "SFMono-Regular", "monospace"],
-        script: ["Yesteryear", "cursive"],
+        airone: ["Airone", "Yesteryear", "cursive"],
+        built: ["Built", "ui-sans-serif", "system-ui", "sans-serif"],
+        sans: ["Built", "ui-sans-serif", "system-ui", "sans-serif"],
+        mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+        script: ["Airone", "Yesteryear", "cursive"],
       },
       spacing: {
         xxs: "4px",

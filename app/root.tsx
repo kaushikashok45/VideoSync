@@ -11,13 +11,13 @@ import {
 import fontsUrl from "./styles/fonts.css?url";
 import styles from "./tailwind.css?url";
 import { APP_NAME } from "./common/contracts/constants";
-import { Toast } from "./shared/ui-kit/toast.tsx";
+import { Toast } from "~/shared/ui-kit/toast.tsx";
 import favicon from "../public/thesyncpartyfavicon.png";
 import { Providers } from "./app/providers.tsx";
-import { toAppErrorPayload } from "./shared/api/error-bridge.ts";
-import { ErrorScreen } from "./shared/ui-kit/error-screen.tsx";
-import { ErrorSurface } from "./widgets/error-surface/ui/error-surface.tsx";
-import { useAppStores } from "./shared/api/socket-bridge.tsx";
+import { toAppErrorPayload } from "~/shared/api/error-bridge.ts";
+import { ErrorScreen } from "~/shared/ui-kit/error-screen.tsx";
+import { ErrorSurface } from "~/widgets/error-surface/ui/error-surface.tsx";
+import { useAppStores } from "~/shared/api/socket-bridge.tsx";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: fontsUrl },
@@ -37,7 +37,6 @@ function RootErrorSurface({ onHome }: { onHome: () => void }) {
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const navigate = useNavigate();
   return (
     <html lang="en">
       <head>
@@ -52,20 +51,23 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body className="bg-bg text-ink font-sans min-h-screen w-full flex flex-col">
-        <Providers>
-          <RootErrorSurface onHome={() => navigate("/")} />
-          <Toast position="top-right" richColors closeButton theme="dark" />
-          <main id="content-container" className="flex-1 w-full flex">
-            {children}
-          </main>
-          <ScrollRestoration />
-          <Scripts />
-        </Providers>
+        <main id="content-container" className="flex-1 w-full flex">
+          {children}
+        </main>
+        <ScrollRestoration />
+        <Scripts />
       </body>
     </html>
   );
 }
 
 export default function App() {
-  return <Outlet />;
+  const navigate = useNavigate();
+  return (
+    <Providers>
+      <RootErrorSurface onHome={() => navigate("/")} />
+      <Toast position="top-right" richColors closeButton theme="dark" />
+      <Outlet />
+    </Providers>
+  );
 }

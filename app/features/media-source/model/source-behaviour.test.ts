@@ -66,18 +66,17 @@ Deno.test("no-match metadata does not block navigation (enrichment only)", async
   assertEquals(decision.metadata, null);
 });
 
-Deno.test("upload with a file: navigates without any metadata lookup", async () => {
-  const count = { calls: 0 };
+Deno.test("upload with a file: navigates without waiting for metadata", async () => {
   const decision = await resolveSource(
     { mode: "upload", url: "", file: new File(["x"], "movie.mkv") },
-    { roomId: ROOM_ID, fetchMetadataLike: countingFetch(count, metadata) },
+    { roomId: ROOM_ID },
   );
   assert(navigating(decision));
   assertEquals(decision.route, HOST_ROUTE);
   assertEquals(decision.source, { mode: "upload" });
   assertEquals(decision.metadata, null);
-  assertEquals(count.calls, 0);
 });
+
 // 2. Sad path
 Deno.test("invalid protocol: inline error, no fetch, no navigation", async () => {
   const count = { calls: 0 };

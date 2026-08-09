@@ -1,5 +1,5 @@
-import { ExclamationTriangleIcon } from "@heroicons/react/24/solid";
 import type { ErrorCode } from "contracts/error-code.ts";
+import { TriangleAlert } from "lucide-react";
 
 export interface InlineErrorProps {
   message: string;
@@ -16,7 +16,7 @@ export function InlineError(
       data-testid="inline-error"
       className={`flex items-start gap-xs font-mono text-sm text-status-danger ${className}`}
     >
-      <ExclamationTriangleIcon className="mt-[2px] h-4 w-4 shrink-0" />
+      <TriangleAlert className="mt-[2px] h-4 w-4 shrink-0" />
       <span>
         <span className="block">{message}</span>
         {code

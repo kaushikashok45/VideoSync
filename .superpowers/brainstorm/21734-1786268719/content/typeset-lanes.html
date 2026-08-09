@@ -1,0 +1,183 @@
+<style>
+.type-grid {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 18px;
+  margin-top: 24px;
+}
+.type-card {
+  background: #10151d;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 18px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform .2s ease,border-color .2s ease;
+}
+.type-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255,255,255,.32);
+}
+.type-card.selected {
+  border-color: #ff5b5f;
+  box-shadow: 0 0 0 2px rgba(255,91,95,.18);
+}
+.type-preview {
+  min-height: 300px;
+  padding: 24px;
+  background: radial-gradient(circle at 90% 5%,rgba(217,48,54,.28),transparent
+    36%),linear-gradient(145deg,#101923,#080b10);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.type-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #b8c0cb;
+  font: 600 11px/1.2 ui-monospace,SFMono-Regular,monospace;
+  letter-spacing: .08em;
+}
+.type-brand {
+  font: 30px/1 Yesteryear,cursive;
+  letter-spacing: 0;
+  color: #ff686c;
+}
+.type-title {
+  max-width: 245px;
+  color: #f7f9fc;
+  font: 700 32px/1.02 Overpass,system-ui,sans-serif;
+  letter-spacing: -.055em;
+  text-wrap: balance;
+}
+.type-copy {
+  max-width: 34ch;
+  color: #aeb6c2;
+  font: 400 15px/1.55 Overpass,system-ui,sans-serif;
+  letter-spacing: .01em;
+}
+.type-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.type-button {
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 17px;
+  background: #f2f4f7;
+  color: #11151c;
+  font: 700 14px/1 Overpass,system-ui,sans-serif;
+}
+.type-link {
+  color: #e6e9ee;
+  font: 600 14px/1 Overpass,system-ui,sans-serif;
+  padding: 10px 0;
+}
+.type-meta {
+  padding: 16px 18px 18px;
+}
+.type-meta h3 {
+  margin: 0 0 6px;
+  color: #fff;
+  font-size: 17px;
+}
+.type-meta p {
+  margin: 0;
+  color: #a9b0bd;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.t2 .type-title {
+  font: 500 34px/1.06
+    -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  letter-spacing: -.045em;
+}
+.t2 .type-copy {
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+}
+.t2 .type-button {
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+}
+.t3 .type-title {
+  font: 600 30px/1.03 ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing: -.075em;
+}
+.t3 .type-copy {
+  font-family: ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size: 12px;
+  line-height: 1.65;
+}
+.t3 .type-button {
+  font-family: ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size: 12px;
+  border-radius: 9px;
+}
+@media (max-width:800px) {
+  .type-grid {
+    grid-template-columns: 1fr;
+  }
+  .type-preview {
+    min-height: 250px;
+  }
+}
+</style>
+<h2>A, with a more intentional type system</h2>
+<p
+  class="subtitle">The structure stays quiet and cinematic. This pass makes type do more of the navigation work: one clear statement, one supporting sentence, one unmistakable next action.</p>
+<div class="type-grid">
+  <div class="type-card t1" data-choice="overpass-led"
+    onclick="toggleSelect(this)">
+    <div class="type-preview">
+      <div
+        class="type-top"><span class="type-brand">Sync Party</span><span>ROOM · 4F7K</span></div>
+      <div>
+        <div class="type-title">A room for the moments you share.</div>
+        <p
+          class="type-copy">Start a watch party or join one with a code. Nothing else gets in the way.</p>
+      </div>
+      <div
+        class="type-actions"><button class="type-button">Start a party</button><span class="type-link">Join a room</span></div>
+    </div>
+    <div class="type-meta">
+      <h3>1 · Overpass-led</h3>
+      <p>Uses the existing system with stronger scale, line length, weight contrast, and a more deliberate action hierarchy.</p>
+    </div>
+  </div>
+  <div class="type-card t2" data-choice="native-tv"
+    onclick="toggleSelect(this)">
+    <div class="type-preview">
+      <div
+        class="type-top"><span class="type-brand">Sync Party</span><span>ROOM · 4F7K</span></div>
+      <div>
+        <div class="type-title">A room for the moments you share.</div>
+        <p
+          class="type-copy">Start a watch party or join one with a code. Nothing else gets in the way.</p>
+      </div>
+      <div
+        class="type-actions"><button class="type-button">Start a party</button><span class="type-link">Join a room</span></div>
+    </div>
+    <div class="type-meta">
+      <h3>2 · Native TV</h3>
+      <p>SF-style system typography, tuned like Apple TV: calm, legible, spatial, and almost invisible until hierarchy is needed.</p>
+    </div>
+  </div>
+  <div class="type-card t3" data-choice="signal-type"
+    onclick="toggleSelect(this)">
+    <div class="type-preview">
+      <div
+        class="type-top"><span class="type-brand">Sync Party</span><span>ROOM · 4F7K</span></div>
+      <div>
+        <div class="type-title">A room for the moments you share.</div>
+        <p
+          class="type-copy">Start a watch party or join one with a code. Nothing else gets in the way.</p>
+      </div>
+      <div
+        class="type-actions"><button class="type-button">Start a party</button><span class="type-link">Join a room</span></div>
+    </div>
+    <div class="type-meta">
+      <h3>3 · Signal type</h3>
+      <p>Monospace enters the primary hierarchy: more technical, more distinctive, and strongest for room-first navigation.</p>
+    </div>
+  </div>
+</div>

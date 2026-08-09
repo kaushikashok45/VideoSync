@@ -27,7 +27,7 @@ Deno.test("renders all metadata fields and the join action", () => {
   const text = container.textContent ?? "";
   assertEquals(text.includes(METADATA.title), true);
   assertEquals(text.includes(METADATA.ageRating), true);
-  assertEquals(text.includes(`${METADATA.runtime} min`), true);
+  assertEquals(text.includes("2 hr 28 mins"), true);
   assertEquals(text.includes(String(METADATA.releaseYear)), true);
   assertEquals(text.includes(METADATA.overview), true);
   for (const genre of METADATA.genres) {

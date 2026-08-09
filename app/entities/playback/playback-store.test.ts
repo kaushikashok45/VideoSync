@@ -34,11 +34,11 @@ Deno.test("projectedAt projects a playing snapshot forward from updatedAt", () =
   assertEquals(store.getState().projectedAt(102_000)?.currentTime, 32);
 });
 
-// Happy path: forward/rewind step by 10 seconds from the projected position
-Deno.test("forward and rewind step by 10 seconds", () => {
+// Happy path: forward/rewind step by 5 seconds from the projected position
+Deno.test("forward and rewind step by 5 seconds", () => {
   const store = createPlaybackStore({ driftThresholdMs: 1500 });
   store.getState().applyServerSnapshot(paused(30));
-  assertEquals(store.getState().forward()?.currentTime, 40);
+  assertEquals(store.getState().forward()?.currentTime, 35);
   assertEquals(store.getState().rewind()?.currentTime, 30);
 });
 

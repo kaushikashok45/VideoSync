@@ -8,7 +8,7 @@ export interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 const baseClass =
-  "w-full rounded-md border bg-surface-sunken px-md py-sm font-mono text-ink placeholder:text-ink-faint transition-colors duration-200 focus:border-brand-text focus:bg-surface focus:outline-none focus:ring-2 focus:ring-brand-text/50 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none";
+  "min-h-11 w-full rounded-md border bg-surface-sunken px-md py-sm font-built text-base text-ink placeholder:text-ink-muted transition-[color,background-color,border-color,box-shadow] duration-200 focus:bg-surface focus:outline-none focus:ring-2 focus:ring-brand-text/50 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none";
 
 export function TextField({
   label,
@@ -33,7 +33,7 @@ export function TextField({
         ? (
           <label
             htmlFor={fieldId}
-            className="font-mono text-sm font-medium text-ink-muted"
+            className="font-built text-sm font-semibold text-ink"
           >
             {label}
           </label>
@@ -50,7 +50,7 @@ export function TextField({
         ? (
           <p
             id={`${fieldId}-error`}
-            className="font-mono text-xs text-status-danger"
+            className="font-built text-sm text-status-danger"
           >
             {error}
           </p>

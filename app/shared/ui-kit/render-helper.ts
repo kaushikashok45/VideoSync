@@ -16,6 +16,8 @@ export function setupDom(): void {
   target.document = dom.window.document;
   target.navigator = dom.window.navigator;
   target.HTMLElement = dom.window.HTMLElement;
+  target.HTMLMediaElement = dom.window.HTMLMediaElement;
+  target.HTMLVideoElement = dom.window.HTMLVideoElement;
   target.HTMLButtonElement = dom.window.HTMLButtonElement;
   target.HTMLInputElement = dom.window.HTMLInputElement;
   target.Node = dom.window.Node;

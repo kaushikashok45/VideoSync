@@ -1,8 +1,9 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import SessionContext from "~/context/Session/logic/SessionContext.ts";
 import { useAppStores, useSocketClient } from "~/shared/api/socket-bridge.tsx";
 import { isHost } from "~/features/room-join/model/join-path.ts";
+import { resolveCanonicalRoomIdentity } from "~/features/room-join/model/room-identity.ts";
 import JoinPartyButton from "~/features/room-join/ui/join-party-button.tsx";
 import RoomCodeCopy from "~/features/room-join/ui/room-code-copy.tsx";
 import NowShowingCard from "~/widgets/movie-now-showing/ui/now-showing-card.tsx";
@@ -10,12 +11,21 @@ import NowShowingCard from "~/widgets/movie-now-showing/ui/now-showing-card.tsx"
 export default function SetupPage() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { role, userName } = useContext(SessionContext);
+  const { role, roomId: sessionRoomId, updateRoomId, userName } = useContext(
+    SessionContext,
+  );
   const socket = useSocketClient();
   const stores = useAppStores();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const roomId = id ?? "";
+  const roomIdentity = resolveCanonicalRoomIdentity(id, sessionRoomId);
+  const roomId = roomIdentity?.roomId ?? "";
+
+  useEffect(() => {
+    if (roomIdentity === null) return;
+    if (sessionRoomId === roomIdentity.roomId) return;
+    updateRoomId(roomIdentity.roomId);
+  }, [roomIdentity, sessionRoomId, updateRoomId]);
 
   const onJoin = async () => {
     setPending(true);

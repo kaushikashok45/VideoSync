@@ -38,10 +38,10 @@ export default function UploadDropzone({ onFile }: UploadDropzoneProps) {
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`flex flex-col items-center gap-sm rounded-lg border-2 border-dashed p-xl text-center transition-colors duration-200 motion-reduce:transition-none ${
+      className={`flex min-h-40 flex-col items-center justify-center gap-sm rounded-md border border-dashed p-lg text-center transition-[background-color,border-color] duration-200 motion-reduce:transition-none ${
         dragging
           ? "border-brand-text bg-brand-soft"
-          : "border-line-strong hover:border-ink-faint"
+          : "border-line-strong bg-surface-sunken hover:border-ink-faint hover:bg-surface-raised"
       }`}
     >
       <label

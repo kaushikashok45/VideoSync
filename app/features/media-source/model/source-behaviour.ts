@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { hostSourceStore } from "./host-source-store.ts";
 import { resolveSource } from "./source-resolver.ts";
+import { lookupLocalMetadata } from "./lookup-local-metadata.ts";
 import type { FetchMetadataLike, SourceKind } from "./source-resolver.ts";
 
 export type { SourceKind } from "./source-resolver.ts";
@@ -23,7 +24,13 @@ export function useSourceBehaviour({
   const [error, setError] = useState<string | null>(null);
 
   const switchSource = (next: SourceKind) => {
+    if (next === source) return;
     setError(null);
+    if (next === "upload") {
+      setUrl("");
+    } else {
+      setFile(null);
+    }
     setSource(next);
   };
   const updateUrl = (next: string) => {
@@ -48,10 +55,26 @@ export function useSourceBehaviour({
     } else {
       hostSourceStore.getState().commit({
         source: decision.source,
-        file,
+        file: decision.source.mode === "upload" ? file : null,
         metadata: decision.metadata,
       });
       onDone(decision.route);
+      if (decision.source.mode === "upload" && file !== null) {
+        void lookupLocalMetadata(file, fetchMetadataLike).then((metadata) => {
+          const current = hostSourceStore.getState();
+          if (
+            current.file !== file || current.source === null ||
+            metadata === null
+          ) {
+            return;
+          }
+          current.commit({
+            source: current.source,
+            file: current.file,
+            metadata,
+          });
+        });
+      }
     }
     setPending(false);
   };

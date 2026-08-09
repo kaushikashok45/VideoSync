@@ -4,7 +4,6 @@
     "jsr:@std/assert@*": "1.0.19",
     "jsr:@std/assert@^1.0.19": "1.0.19",
     "jsr:@std/internal@^1.0.12": "1.0.14",
-    "npm:@heroicons/react@^2.2.0": "2.2.0_react@19.2.8",
     "npm:@react-router/dev@^7.13.0": "7.18.2_react-router@7.18.2__react@19.2.8__react-dom@19.2.8___react@19.2.8_typescript@5.9.3_vite@6.4.3_react@19.2.8_react-dom@19.2.8__react@19.2.8",
     "npm:@react-router/express@^7.13.0": "7.18.2_express@4.20.0_react-router@7.18.2__react@19.2.8__react-dom@19.2.8___react@19.2.8_typescript@5.9.3_react@19.2.8_react-dom@19.2.8__react@19.2.8",
     "npm:@react-router/fs-routes@^7.13.0": "7.18.2_@react-router+dev@7.18.2__react-router@7.18.2___react@19.2.8___react-dom@19.2.8____react@19.2.8__typescript@5.9.3__vite@6.4.3__react@19.2.8__react-dom@19.2.8___react@19.2.8_typescript@5.9.3_react@19.2.8_react-dom@19.2.8__react@19.2.8_react-router@7.18.2__react@19.2.8__react-dom@19.2.8___react@19.2.8_vite@6.4.3",
@@ -21,6 +20,7 @@
     "npm:happy-dom@^20.11.1": "20.11.1",
     "npm:isbot@^4.1.0": "4.4.0",
     "npm:jsdom@^30.0.1": "30.0.1",
+    "npm:lucide-react@0.541": "0.541.0_react@19.2.8",
     "npm:nanoid@^5.1.6": "5.1.16",
     "npm:postcss@^8.4.38": "8.5.26",
     "npm:react-dom@19": "19.2.8_react@19.2.8",
@@ -464,12 +464,6 @@
     },
     "@exodus/bytes@1.15.1": {
       "integrity": "sha512-S6mL0yNB/Abt9Ei4tq8gDhcczc4S3+vQ4ra7vxnAf+YHC02srtqxKKZghx2Dq6p0e66THKwR6r8N6P95wEty7Q=="
-    },
-    "@heroicons/react@2.2.0_react@19.2.8": {
-      "integrity": "sha512-LMcepvRaS9LYHJGsF0zzmgKCUim/X3N/DQKc4jepAXJ7l8QxJ1PmxJzqplF2Z3FE4PqBAIGyJAQ/w4B5dsqbtQ==",
-      "dependencies": [
-        "react"
-      ]
     },
     "@jridgewell/gen-mapping@0.3.13": {
       "integrity": "sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==",
@@ -1537,6 +1531,12 @@
         "yallist"
       ]
     },
+    "lucide-react@0.541.0_react@19.2.8": {
+      "integrity": "sha512-s0Vircsu5WaGv2KoJZ5+SoxiAJ3UXV5KqEM3eIFDHaHkcLIFdIWgXtZ412+Gh02UsdS7Was+jvEpBvPCWQISlg==",
+      "dependencies": [
+        "react"
+      ]
+    },
     "lz-string@1.5.0": {
       "integrity": "sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ==",
       "bin": true
@@ -2333,7 +2333,6 @@
   "workspace": {
     "dependencies": [
       "jsr:@std/assert@^1.0.19",
-      "npm:@heroicons/react@^2.2.0",
       "npm:@react-router/dev@^7.13.0",
       "npm:@react-router/express@^7.13.0",
       "npm:@react-router/fs-routes@^7.13.0",
@@ -2350,6 +2349,7 @@
       "npm:happy-dom@^20.11.1",
       "npm:isbot@^4.1.0",
       "npm:jsdom@^30.0.1",
+      "npm:lucide-react@0.541",
       "npm:nanoid@^5.1.6",
       "npm:postcss@^8.4.38",
       "npm:react-dom@19",

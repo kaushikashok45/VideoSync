@@ -1,5 +1,5 @@
-import SetupPage from "~/pages/setup/setup-page.tsx";
+import { SetupScreen } from "~/features/entry-flow/components/setup-screen.tsx";
 
-export default function SetupScreenPage() {
-  return <SetupPage />;
+export default function SetupScreenRoute() {
+  return <SetupScreen />;
 }

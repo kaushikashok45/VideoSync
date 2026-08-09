@@ -86,13 +86,17 @@ export class RoomStore {
 
   addMember(room: Room, member: Member): void {
     if (room.members.has(member.id)) return;
+    this.assertCanAdd(room, member);
+    room.members.set(member.id, member);
+  }
+
+  assertCanAdd(room: Room, member: Member): void {
     if (room.members.size >= this.deps.maxMembers) {
       throw new AppError("ROOM_FULL");
     }
     if (room.locked && member.role !== "host") {
       throw new AppError("ROOM_LOCKED");
     }
-    room.members.set(member.id, member);
   }
 
   removeMember(room: Room, memberId: string): Member | undefined {

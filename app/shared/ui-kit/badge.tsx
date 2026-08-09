@@ -9,14 +9,16 @@ export interface BadgeProps {
 }
 
 const variantClass: Record<BadgeVariant, string> = {
-  default: "bg-surface text-ink-muted border border-line-strong",
-  brand: "bg-brand text-onbrand",
-  success: "bg-status-success/15 text-status-success",
-  danger: "bg-status-danger/15 text-status-danger",
+  default: "border border-line-strong bg-surface-raised text-ink-muted",
+  brand: "bg-brand-muted text-brand-text border border-brand-text/20",
+  success:
+    "border border-status-success/25 bg-status-success/15 text-status-success",
+  danger:
+    "border border-status-danger/25 bg-status-danger/15 text-status-danger",
 };
 
 const baseClass =
-  "inline-flex items-center rounded-full px-sm py-xxs font-mono text-xs font-semibold";
+  "inline-flex items-center rounded-full px-sm py-xs font-built text-xs font-semibold";
 
 export function Badge(
   { children, variant = "default", className = "" }: BadgeProps,

@@ -35,16 +35,39 @@ function viewer(): Member {
 function host(): Member {
   return { id: "host", name: "H", role: "host", canControl: true, joinedAt: 0 };
 }
+
+function paused(currentTime: number, duration = 120) {
+  return {
+    status: "paused" as const,
+    currentTime,
+    duration,
+    rate: 1,
+    updatedAt: 100_000,
+  };
+}
+
+function playing(currentTime: number, updatedAt: number, duration = 120) {
+  return {
+    status: "playing" as const,
+    currentTime,
+    duration,
+    rate: 1,
+    updatedAt,
+  };
+}
+
 function shell(
   opts: {
     idleMs?: number;
     media?: MediaSource;
     me?: Member | null;
     file?: File | null;
+    playbackStore?: ReturnType<typeof createPlaybackStore>;
   } = {},
 ) {
-  const store = createPlaybackStore({ driftThresholdMs: 1500 });
-  return render(
+  const store = opts.playbackStore ??
+    createPlaybackStore({ driftThresholdMs: 1500 });
+  const result = render(
     <PlayerShell
       mode="host"
       media={opts.media ?? URL_MEDIA}
@@ -54,6 +77,7 @@ function shell(
       playbackStore={store}
     />,
   );
+  return { ...result, store };
 }
 
 function flush(ms: number): Promise<void> {
@@ -68,6 +92,17 @@ function stage(container: HTMLElement): Element {
 
 function bar(container: HTMLElement): HTMLElement | null {
   return container.querySelector('[data-testid="control-bar"]');
+}
+
+function key(
+  element: Element,
+  init: KeyboardEventInit,
+): void {
+  act(() => {
+    element.dispatchEvent(
+      new KeyboardEvent("keydown", { bubbles: true, ...init }),
+    );
+  });
 }
 
 // 1. Happy path: the video element and control bar render for a URL source.
@@ -146,7 +181,7 @@ Deno.test("host upload with a local file gets a video src and no waiting frame",
   );
   if (!video) throw new Error("no video element");
   assertEquals(video.getAttribute("src")?.startsWith("blob:"), true);
-  assertEquals(video.autoplay, true);
+  assertEquals(video.autoplay, false);
   assertEquals(video.muted, false);
   assertEquals(video.volume, 1);
   return flush(15);
@@ -173,6 +208,14 @@ Deno.test("the host gets enabled transport buttons", () => {
   return flush(15);
 });
 
+Deno.test("host presence stays visible in the top chrome without opening the room panel", () => {
+  setupDom();
+  const { container } = shell({ idleMs: 10, me: host() });
+  const pill = container.querySelector('[data-testid="presence-pill"]');
+  assertEquals(pill !== null, true);
+  assertEquals(pill?.textContent?.includes("1 watching now"), true);
+});
+
 // 4. Limits: the idle boundary is just-before visible, at/beyond hidden.
 Deno.test("idle boundary: visible before the deadline, hidden at and beyond it", async () => {
   setupDom();
@@ -183,4 +226,51 @@ Deno.test("idle boundary: visible before the deadline, hidden at and beyond it",
   assertEquals(bar(container)?.getAttribute("aria-hidden"), null);
   await flush(15);
   assertEquals(bar(container)?.getAttribute("aria-hidden"), "true");
+});
+
+Deno.test("keyboard seek uses 5-second and 30-second host steps", () => {
+  setupDom();
+  const store = createPlaybackStore({ driftThresholdMs: 1500 });
+  store.getState().applyServerSnapshot(paused(10));
+  const { container } = shell({ idleMs: 30, me: host(), playbackStore: store });
+  const playerStage = stage(container);
+  key(playerStage, { key: "ArrowRight" });
+  assertEquals(store.getState().snapshot?.currentTime, 15);
+  key(playerStage, { key: "ArrowRight", shiftKey: true });
+  assertEquals(store.getState().snapshot?.currentTime, 45);
+});
+
+Deno.test("keyboard seek clamps home and end to the media boundaries", () => {
+  setupDom();
+  const store = createPlaybackStore({ driftThresholdMs: 1500 });
+  store.getState().applyServerSnapshot(paused(40));
+  const { container } = shell({ idleMs: 30, me: host(), playbackStore: store });
+  const playerStage = stage(container);
+  key(playerStage, { key: "Home" });
+  assertEquals(store.getState().snapshot?.currentTime, 0);
+  key(playerStage, { key: "End" });
+  assertEquals(store.getState().snapshot?.currentTime, 120);
+});
+
+Deno.test("keyboard seek uses the projected live position while playing", () => {
+  setupDom();
+  const store = createPlaybackStore({ driftThresholdMs: 1500 });
+  const originalNow = Date.now;
+  const originalPlay = HTMLMediaElement.prototype.play;
+  try {
+    Date.now = () => 110_000;
+    HTMLMediaElement.prototype.play = () => Promise.resolve();
+    store.getState().applyServerSnapshot(playing(10, 100_000));
+    const { container } = shell({
+      idleMs: 30,
+      me: host(),
+      playbackStore: store,
+    });
+    const playerStage = stage(container);
+    key(playerStage, { key: "ArrowRight" });
+    assertEquals(store.getState().snapshot?.currentTime, 25);
+  } finally {
+    Date.now = originalNow;
+    HTMLMediaElement.prototype.play = originalPlay;
+  }
 });

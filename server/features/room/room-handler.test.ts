@@ -334,3 +334,86 @@ Deno.test("viewer leave broadcasts MEMBER_LEFT and keeps the room", async () => 
     await new Promise<void>((r) => h.httpServer.close(() => r()));
   }
 });
+
+Deno.test("creating a new room leaves the previous room behind", async () => {
+  const h = await makeHarness();
+  try {
+    const host = await h.connect();
+    const firstCreated = h.waitFor<{ room: { code: string } }>(
+      host,
+      SOCKET_EVENTS.ROOM_CREATED,
+    );
+    host.emit(SOCKET_EVENTS.ROOM_CREATE, { name: "Alice" });
+    const firstRoom = (await firstCreated).room;
+
+    const secondCreated = h.waitFor<{ room: { code: string } }>(
+      host,
+      SOCKET_EVENTS.ROOM_CREATED,
+    );
+    host.emit(SOCKET_EVENTS.ROOM_CREATE, { name: "Alice" });
+    const secondRoom = (await secondCreated).room;
+
+    assertEquals(h.rooms.get(firstRoom.code), undefined);
+    assertEquals(secondRoom.code === firstRoom.code, false);
+    host.disconnect();
+  } finally {
+    h.io.close();
+    await new Promise<void>((r) => h.httpServer.close(() => r()));
+  }
+});
+
+Deno.test("failed join keeps the viewer in the current room", async () => {
+  const h = await makeHarness();
+  try {
+    const host = await h.connect();
+    const createdP = h.waitFor<{ room: { code: string } }>(
+      host,
+      SOCKET_EVENTS.ROOM_CREATED,
+    );
+    host.emit(SOCKET_EVENTS.ROOM_CREATE, { name: "Alice" });
+    const { room } = await createdP;
+    const viewer = await h.connect();
+    const joinedP = h.waitFor<Record<string, unknown>>(
+      viewer,
+      SOCKET_EVENTS.ROOM_JOINED,
+    );
+    viewer.emit(SOCKET_EVENTS.ROOM_JOIN, { code: room.code, name: "Bob" });
+    await joinedP;
+
+    const errP = h.waitFor<{ code: string }>(viewer, SOCKET_EVENTS.APP_ERROR);
+    viewer.emit(SOCKET_EVENTS.ROOM_JOIN, { code: "zzzzz", name: "Bob" });
+    const err = await errP;
+
+    assertEquals(err.code, "ROOM_NOT_FOUND");
+    assertEquals(h.rooms.memberCount(h.rooms.getOrThrow(room.code)), 2);
+    host.disconnect();
+    viewer.disconnect();
+  } finally {
+    h.io.close();
+    await new Promise<void>((r) => h.httpServer.close(() => r()));
+  }
+});
+
+Deno.test("failed create keeps the host room alive", async () => {
+  const h = await makeHarness();
+  try {
+    const host = await h.connect();
+    const createdP = h.waitFor<{ room: { code: string } }>(
+      host,
+      SOCKET_EVENTS.ROOM_CREATED,
+    );
+    host.emit(SOCKET_EVENTS.ROOM_CREATE, { name: "Alice" });
+    const { room } = await createdP;
+
+    const errP = h.waitFor<{ code: string }>(host, SOCKET_EVENTS.APP_ERROR);
+    host.emit(SOCKET_EVENTS.ROOM_CREATE, { name: "   " });
+    const err = await errP;
+
+    assertEquals(err.code, "VALIDATION_NAME_EMPTY");
+    assertEquals(h.rooms.get(room.code) !== undefined, true);
+    host.disconnect();
+  } finally {
+    h.io.close();
+    await new Promise<void>((r) => h.httpServer.close(() => r()));
+  }
+});

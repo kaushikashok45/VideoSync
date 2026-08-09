@@ -6,30 +6,21 @@ export default function SessionContextProvider(
   { children }: { children?: ReactNode },
 ) {
   const [context, setContext] = useState({
-    roomId: "room142",
-    userName: "anonymous user",
+    roomId: "",
+    userName: "",
     role: Role.GUEST,
   });
 
   const updateRoomId = (roomId: string) => {
-    setContext({
-      ...context,
-      roomId,
-    });
+    setContext((current) => ({ ...current, roomId }));
   };
 
   const updateUserName = (userName: string) => {
-    setContext({
-      ...context,
-      userName,
-    });
+    setContext((current) => ({ ...current, userName }));
   };
 
   const updateRole = (role: Role) => {
-    setContext({
-      ...context,
-      role,
-    });
+    setContext((current) => ({ ...current, role }));
   };
 
   return (

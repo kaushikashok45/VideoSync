@@ -1,0 +1,195 @@
+<style>
+:root {
+  --ink: #f5f7fb;
+  --muted: #a9b0bd;
+  --line: rgba(255,255,255,.12);
+}
+.lane-grid {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 18px;
+  margin-top: 24px;
+}
+.lane {
+  background: #11151c;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform .2s ease,border-color .2s ease;
+}
+.lane:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255,255,255,.32);
+}
+.lane.selected {
+  border-color: #ff5b5f;
+  box-shadow: 0 0 0 2px rgba(255,91,95,.18);
+}
+.preview {
+  min-height: 270px;
+  padding: 18px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.lane-a .preview {
+  background: radial-gradient(circle at 82% 15%,rgba(225,52,60,.28),transparent
+    34%),linear-gradient(145deg,#101923,#080b10);
+}
+.lane-b .preview {
+  background: linear-gradient(135deg,#271d18,#13100f 52%,#090b0d);
+}
+.lane-c .preview {
+  background: linear-gradient(155deg,#111827,#0c0e13 60%,#160f13);
+}
+.mini-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font: 600 11px/1.2 ui-monospace,monospace;
+  color: #cbd2dd;
+}
+.mini-brand {
+  font: 28px/1 Yesteryear,cursive;
+  color: #ff686c;
+}
+.mini-title {
+  max-width: 220px;
+  font: 700 26px/1.03 Overpass,system-ui,sans-serif;
+  letter-spacing: -.04em;
+  color: #fff;
+}
+.mini-copy {
+  max-width: 220px;
+  font: 12px/1.45 Overpass,system-ui,sans-serif;
+  color: var(--muted);
+}
+.mini-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.mini-button {
+  border: 0;
+  border-radius: 999px;
+  padding: 9px 13px;
+  background: #f4f6fa;
+  color: #151820;
+  font: 700 11px Overpass,system-ui,sans-serif;
+}
+.mini-button.dark {
+  background: rgba(255,255,255,.09);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.18);
+}
+.mini-input {
+  width: 78px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.16);
+  background: rgba(0,0,0,.22);
+}
+.lane-b .mini-brand {
+  color: #f0bd86;
+}
+.lane-b .mini-button {
+  background: #f0bd86;
+}
+.lane-b .mini-title {
+  font: 400 30px/1.02 Georgia,serif;
+  letter-spacing: -.03em;
+}
+.lane-c .mini-brand {
+  color: #d9e4ff;
+}
+.lane-c .mini-button {
+  background: #d9e4ff;
+}
+.lane-c .mini-title {
+  font-size: 24px;
+  letter-spacing: -.055em;
+}
+.lane-meta {
+  padding: 16px 18px 18px;
+}
+.lane-meta h3 {
+  margin: 0 0 5px;
+  color: #fff;
+  font-size: 17px;
+}
+.lane-meta p {
+  margin: 0;
+  color: #a9b0bd;
+  line-height: 1.45;
+  font-size: 13px;
+}
+@media (max-width:800px) {
+  .lane-grid {
+    grid-template-columns: 1fr;
+  }
+  .preview {
+    min-height: 220px;
+  }
+}
+</style>
+<h2>Choose the brand lane</h2>
+<p
+  class="subtitle">All three keep the video as the stage. Pick the emotional temperature and interaction density you want the complete journey to inherit.</p>
+<div class="lane-grid">
+  <div class="lane lane-a" data-choice="quiet-cinema"
+    onclick="toggleSelect(this)">
+    <div class="preview">
+      <div
+        class="mini-top"><span class="mini-brand">Sync Party</span><span>ROOM · 4F7K</span></div>
+      <div>
+        <div class="mini-title">A room for the moments you share.</div>
+        <p
+          class="mini-copy">Start a watch party or join one with a code. Nothing else gets in the way.</p>
+      </div>
+      <div
+        class="mini-actions"><button class="mini-button">Start a party</button><button class="mini-button dark">Join</button></div>
+    </div>
+    <div class="lane-meta">
+      <h3>A · Quiet cinema</h3>
+      <p>Closest to Apple TV: expansive dark stage, restrained chrome, warm red identity, progressive disclosure through focus and motion.</p>
+    </div>
+  </div>
+  <div class="lane lane-b" data-choice="living-room"
+    onclick="toggleSelect(this)">
+    <div class="preview">
+      <div
+        class="mini-top"><span class="mini-brand">Sync Party</span><span>FRIENDS · 4 ONLINE</span></div>
+      <div>
+        <div class="mini-title">Come in, we saved you a seat.</div>
+        <p
+          class="mini-copy">A warmer, more editorial welcome that makes the social context visible before the user commits.</p>
+      </div>
+      <div
+        class="mini-actions"><button class="mini-button">Create room</button><span class="mini-input"></span><button class="mini-button dark">Enter</button></div>
+    </div>
+    <div class="lane-meta">
+      <h3>B · Living room</h3>
+      <p>More human and intimate: serif-led welcome copy, tactile surfaces, visible presence, and a little more context at each step.</p>
+    </div>
+  </div>
+  <div class="lane lane-c" data-choice="focus-mode"
+    onclick="toggleSelect(this)">
+    <div class="preview">
+      <div
+        class="mini-top"><span class="mini-brand">Sync Party</span><span>READY TO WATCH</span></div>
+      <div>
+        <div class="mini-title">The shortest path to together.</div>
+        <p
+          class="mini-copy">A focused, almost spatial UI where the active decision occupies the room and everything else stays quiet.</p>
+      </div>
+      <div
+        class="mini-actions"><button class="mini-button">Continue</button><button class="mini-button dark">More options</button></div>
+    </div>
+    <div class="lane-meta">
+      <h3>C · Focus mode</h3>
+      <p>Most minimal: high contrast, fewer visible choices, stronger states, and the clearest Norman affordances for remote-first navigation.</p>
+    </div>
+  </div>
+</div>

@@ -10,10 +10,13 @@ import PlaybackControls from "~/features/playback-control/ui/playback-controls.t
 import Seeker from "./seeker.tsx";
 import UtilityControls from "./utility-controls.tsx";
 import type { PlaybackSyncHandle } from "./playback-sync.tsx";
+import { formatPlaybackTime } from "./format-playback-time.ts";
 
 export interface ControlBarProps {
   hidden: boolean;
   me: Member | null;
+  volume: number;
+  onVolumeChange: (volume: number) => void;
   store: PlaybackStore;
   snapshot: PlaybackSnapshot | undefined;
   syncHandleRef: RefObject<PlaybackSyncHandle | null>;
@@ -22,6 +25,8 @@ export interface ControlBarProps {
 export default function ControlBar({
   hidden,
   me,
+  volume,
+  onVolumeChange,
   store,
   snapshot,
   syncHandleRef,
@@ -37,7 +42,7 @@ export default function ControlBar({
       data-testid="control-bar"
       aria-hidden={hidden || undefined}
       inert={hidden}
-      className={`absolute inset-x-0 bottom-0 z-10 flex flex-col gap-sm px-md pb-md pt-xl transition-all duration-300 motion-reduce:transition-none ${
+      className={`absolute inset-x-0 bottom-0 z-10 flex flex-col gap-sm bg-gradient-to-t from-bg via-bg/80 to-transparent px-md pb-md pt-xxl font-built transition-[opacity,transform] duration-300 motion-reduce:transition-none ${
         hidden
           ? "pointer-events-none translate-y-6 opacity-0"
           : "translate-y-0 opacity-100"
@@ -49,9 +54,17 @@ export default function ControlBar({
         disabled={!canSeek}
         onSeek={seek}
       />
+      <div className="flex items-center justify-between gap-md font-mono text-xs tabular-nums text-ink-muted">
+        <span>{formatPlaybackTime(currentTime)}</span>
+        <span>{formatPlaybackTime(duration)}</span>
+      </div>
       <div className="flex items-center justify-between gap-md">
         <PlaybackControls me={me} playing={playing} store={state} />
-        <UtilityControls syncHandleRef={syncHandleRef} />
+        <UtilityControls
+          syncHandleRef={syncHandleRef}
+          volume={volume}
+          onVolumeChange={onVolumeChange}
+        />
       </div>
     </div>
   );

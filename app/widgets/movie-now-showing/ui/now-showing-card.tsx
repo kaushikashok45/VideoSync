@@ -1,4 +1,5 @@
 import type { MovieMetadata } from "contracts/movie-metadata.ts";
+import { formatRuntime } from "~/common/logic/format-runtime.ts";
 import {
   Avatar,
   Badge,
@@ -68,7 +69,7 @@ export default function NowShowingCard({
                 {metadata.releaseYear}
               </span>
               <span className="font-mono text-sm text-ink-muted">
-                {metadata.runtime} min
+                {formatRuntime(metadata.runtime * 60)}
               </span>
             </div>
           </header>

@@ -1,8 +1,8 @@
-import { SpeakerWaveIcon, SpeakerXMarkIcon } from "@heroicons/react/24/solid";
 import { useEffect, useRef, useState } from "react";
 import Popover from "../../../common/components/Popover";
 import ButtonComponent from "./VideoPlayerButtonComponent";
 import VolumeControlProps from "../types/VolumeControlProps";
+import { Volume2, VolumeX } from "lucide-react";
 
 function SpeakerWithSoundBar({ videoRef }: VolumeControlProps) {
   const audioIconRef = useRef<HTMLDivElement>(null);
@@ -12,7 +12,7 @@ function SpeakerWithSoundBar({ videoRef }: VolumeControlProps) {
   return (
     <div className="relative" ref={audioIconRef}>
       <ButtonComponent>
-        <SpeakerWaveIcon className="size-6"></SpeakerWaveIcon>
+        <Volume2 className="size-6" />
       </ButtonComponent>
       <Popover
         triggerElementRef={audioIconRef}
@@ -48,7 +48,7 @@ function VolumeMutedIcon() {
   return (
     <>
       <ButtonComponent>
-        <SpeakerXMarkIcon className="size-6"></SpeakerXMarkIcon>
+        <VolumeX className="size-6" />
       </ButtonComponent>
     </>
   );

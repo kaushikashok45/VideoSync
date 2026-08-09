@@ -3,8 +3,8 @@ import type { SessionData } from "../contracts/Session";
 import Role from "../contracts/Role";
 
 const SessionContext = createContext<SessionData>({
-  roomId: "room142",
-  userName: "anonymous user",
+  roomId: "",
+  userName: "",
   role: Role.GUEST,
   updateRoomId: (roomId: string) => {
     console.log(roomId);

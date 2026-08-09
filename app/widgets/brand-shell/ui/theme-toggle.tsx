@@ -1,7 +1,7 @@
-import { MoonIcon, SunIcon } from "@heroicons/react/24/solid";
 import { useEffect, useState } from "react";
 import { useTheme } from "~/app/theme-provider.tsx";
 import { IconButton } from "~/shared/ui-kit/icon-button.tsx";
+import { Moon, Sun } from "lucide-react";
 
 export default function ThemeToggle() {
   const { theme, toggle } = useTheme();
@@ -15,8 +15,8 @@ export default function ThemeToggle() {
     <IconButton label={label} onClick={toggle}>
       {mounted
         ? isDark
-          ? <SunIcon className="h-5 w-5" aria-hidden="true" />
-          : <MoonIcon className="h-5 w-5" aria-hidden="true" />
+          ? <Sun className="h-5 w-5" aria-hidden="true" />
+          : <Moon className="h-5 w-5" aria-hidden="true" />
         : <span className="h-5 w-5" aria-hidden="true" />}
     </IconButton>
   );

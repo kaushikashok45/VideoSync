@@ -5,8 +5,8 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
-import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/solid";
 import type { Member } from "contracts/member.ts";
+import type { SocketClient } from "~/shared/api/socket-client.ts";
 import type { ChatStore } from "~/entities/chat/chat-store.ts";
 import type { MembersStore } from "~/entities/member/members-store.ts";
 import type { ReactionStore } from "~/entities/reaction/reaction-store.ts";
@@ -16,23 +16,29 @@ import HostTools from "~/features/room-controls/ui/host-tools.tsx";
 import MemberList from "~/widgets/member-list/ui/member-list.tsx";
 import ReactionRow from "./reaction-row.tsx";
 import SidebarTabButton from "./sidebar-tab-button.tsx";
+import { MessageSquareText, Users, X } from "lucide-react";
+import { IconButton } from "~/shared/ui-kit/index.ts";
 
 export interface RoomSidebarProps {
   roomId: string;
+  connectionLabel?: string;
   me: Member | null;
   membersStore: MembersStore;
   chatStore: ChatStore;
   reactionStore: ReactionStore;
+  socket?: SocketClient | null;
 }
 
 type SidebarTab = "chat" | "members";
 
 export default function RoomSidebar({
   roomId,
+  connectionLabel = "In sync",
   me,
   membersStore,
   chatStore,
   reactionStore,
+  socket = null,
 }: RoomSidebarProps) {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<SidebarTab>("chat");
@@ -68,6 +74,12 @@ export default function RoomSidebar({
   );
   const senderName = me?.name ?? "You";
   const close = () => closeRef.current();
+  const participantSummary = members.length === 1
+    ? "1 participant"
+    : `${members.length} participants`;
+  const chatLabel = messages.length === 0
+    ? "Chat"
+    : `Chat (${messages.length})`;
 
   return (
     <>
@@ -76,7 +88,7 @@ export default function RoomSidebar({
           <div
             data-testid="sidebar-scrim"
             aria-hidden="true"
-            className="absolute inset-0 z-20 bg-bg/75 animate-fade-in"
+            className="fixed inset-0 z-30 bg-bg/80 backdrop-blur-sm"
             onClick={close}
           />
         )
@@ -89,9 +101,9 @@ export default function RoomSidebar({
         aria-controls={panelId}
         aria-label={open ? "Close chat and members" : "Open chat and members"}
         onClick={() => (open ? close() : setOpen(true))}
-        className="absolute right-md top-md z-40 inline-flex h-10 w-10 items-center justify-center rounded-md bg-surface/80 text-ink-muted shadow-pop backdrop-blur transition-colors hover:text-ink focus-visible:ring-2 focus-visible:ring-brand-text focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+        className="absolute right-md top-md z-40 inline-flex h-11 w-11 items-center justify-center rounded-full border border-line bg-surface-raised/90 text-ink shadow-pop backdrop-blur transition-colors hover:text-brand-text focus-visible:ring-2 focus-visible:ring-brand-text focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
       >
-        <ChatBubbleLeftRightIcon className="size-5" />
+        <MessageSquareText className="size-5" />
       </button>
       <aside
         id={panelId}
@@ -100,17 +112,44 @@ export default function RoomSidebar({
         tabIndex={-1}
         inert={!open}
         aria-hidden={!open || undefined}
-        className={`absolute z-30 flex flex-col bg-surface-raised shadow-overlay transition-transform duration-300 motion-reduce:transition-none inset-x-0 bottom-0 max-h-[75vh] rounded-t-lg border-t border-line md:inset-x-auto md:inset-y-0 md:right-0 md:max-h-none md:w-[340px] md:rounded-none md:rounded-l-lg md:border-l md:border-t-0 ${
+        role="dialog"
+        aria-label="Room details"
+        className={`fixed inset-x-0 bottom-0 z-40 flex max-h-[78vh] flex-col rounded-t-[28px] border-t border-line bg-surface-raised shadow-overlay transition-transform duration-300 motion-reduce:transition-none md:inset-x-auto md:bottom-md md:right-0 md:top-md md:max-h-[calc(100dvh-2rem)] md:w-[380px] md:rounded-[28px] md:border md:border-line ${
           open
             ? "translate-y-0 md:translate-x-0"
-            : "translate-y-full md:translate-y-0 md:translate-x-full"
+            : "translate-y-full md:translate-y-0 md:translate-x-[calc(100%+1rem)]"
         }`}
       >
-        <header className="flex items-center gap-xs border-b border-line px-md py-sm">
+        <header className="border-b border-line px-md py-md">
+          <div className="flex items-start justify-between gap-sm">
+            <div className="flex flex-col gap-xxs">
+              <p className="font-mono text-xs uppercase tracking-[0.24em] text-ink-faint">
+                Room {roomId}
+              </p>
+              <p
+                role="status"
+                aria-live="polite"
+                className="font-mono text-sm text-ink-muted"
+              >
+                {connectionLabel}
+              </p>
+            </div>
+            <IconButton label="Close room panel" onClick={close}>
+              <X className="size-4.5" />
+            </IconButton>
+          </div>
+          <div className="mt-sm flex items-center gap-sm text-ink-muted">
+            <span className="inline-flex items-center gap-xs font-mono text-xs">
+              <Users aria-hidden="true" className="size-3.5" />
+              {participantSummary}
+            </span>
+          </div>
+        </header>
+        <div className="flex items-center gap-xs border-b border-line px-md py-sm">
           <SidebarTabButton
             active={tab === "chat"}
             testId="chat-tab"
-            label="Chat"
+            label={chatLabel}
             onClick={() => setTab("chat")}
           />
           <SidebarTabButton
@@ -119,7 +158,7 @@ export default function RoomSidebar({
             label="Members"
             onClick={() => setTab("members")}
           />
-        </header>
+        </div>
         <div className="flex min-h-0 flex-1 flex-col">
           {tab === "chat"
             ? (
@@ -127,9 +166,15 @@ export default function RoomSidebar({
                 <MessageStream messages={messages} />
                 <ReactionRow
                   onReact={(emoji) =>
-                    reactionStore.getState().send(emoji, senderName)}
+                    socket === null
+                      ? reactionStore.getState().send(emoji, senderName)
+                      : socket.sendReaction(emoji, senderName)}
                 />
-                <ChatBox store={chatStore} senderName={senderName} />
+                <ChatBox
+                  store={chatStore}
+                  senderName={senderName}
+                  socket={socket}
+                />
               </>
             )
             : (

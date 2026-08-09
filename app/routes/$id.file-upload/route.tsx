@@ -1,5 +1,5 @@
-import UploadPage from "~/pages/upload/upload-page.tsx";
+import { SourceScreen } from "~/features/entry-flow/components/source-screen.tsx";
 
-export default function FileUploadPage() {
-  return <UploadPage />;
+export default function FileUploadRoute() {
+  return <SourceScreen />;
 }

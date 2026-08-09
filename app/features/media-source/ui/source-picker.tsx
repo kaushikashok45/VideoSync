@@ -15,7 +15,7 @@ export default function SourcePicker({ source, onChange }: SourcePickerProps) {
     <div
       role="radiogroup"
       aria-label="Video source"
-      className="flex w-full max-w-md gap-xxs rounded-md bg-surface-sunken p-xxs"
+      className="flex w-full gap-xxs rounded-md border border-line bg-surface-sunken p-xxs"
     >
       {OPTIONS.map((option) => {
         const active = source === option.value;
@@ -27,10 +27,10 @@ export default function SourcePicker({ source, onChange }: SourcePickerProps) {
             aria-checked={active}
             data-testid={`source-${option.value}`}
             onClick={() => onChange(option.value)}
-            className={`flex-1 rounded-md px-md py-sm font-mono text-sm font-semibold transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-brand-text motion-reduce:transition-none ${
+            className={`flex-1 rounded-md px-md py-sm font-built text-sm font-semibold transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-brand-text motion-reduce:transition-none ${
               active
-                ? "bg-brand text-onbrand"
-                : "bg-transparent text-ink-muted hover:bg-brand-soft hover:text-ink"
+                ? "bg-brand text-onbrand shadow-sm"
+                : "bg-transparent text-ink-muted hover:bg-surface-raised hover:text-ink"
             }`}
           >
             {option.label}

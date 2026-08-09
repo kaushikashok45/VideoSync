@@ -103,6 +103,26 @@ Deno.test("switching sources clears the previous error", async () => {
   assertEquals(findByTestId(container, "error").textContent, "none");
 });
 
+Deno.test("switching away from upload clears the stale file handoff", async () => {
+  setupDom();
+  hostSourceStore.getState().clear();
+  const { container } = render(
+    <Harness
+      fetchMetadataLike={() => Promise.resolve(METADATA)}
+    />,
+  );
+  click(findByTestId(container, "set-file"));
+  click(findByTestId(container, "toggle-url"));
+  click(findByTestId(container, "set-url"));
+  click(findByTestId(container, "submit"));
+  await act(async () => {});
+  assertEquals(hostSourceStore.getState().source, {
+    mode: "url",
+    url: "https://example.com/movie",
+  });
+  assertEquals(hostSourceStore.getState().file, null);
+});
+
 // Mutation: the pending guard swallows a second submit while one is in flight
 Deno.test("a second submit while pending does not double-navigate", async () => {
   setupDom();

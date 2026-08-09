@@ -36,7 +36,12 @@ export class RoomHandler {
   }
   private onCreate(socket: Socket, payload: RoomCreatePayload): void {
     try {
-      const room = this.deps.rooms.create(socket.id, payload?.name ?? "", {
+      const name = payload?.name ?? "";
+      if (name.trim() === "") {
+        throw new AppError("VALIDATION_NAME_EMPTY");
+      }
+      this.removeMember(socket);
+      const room = this.deps.rooms.create(socket.id, name, {
         metadata: payload?.metadata,
       });
       socket.data.roomCode = room.code;
@@ -61,6 +66,8 @@ export class RoomHandler {
         throw new AppError("ROOM_LOCKED");
       }
       const member = this.buildViewer(socket, name);
+      this.deps.rooms.assertCanAdd(room, member);
+      this.removeMember(socket);
       this.deps.rooms.addMember(room, member);
       socket.data.roomCode = room.code;
       void socket.join(room.code);
@@ -110,10 +117,15 @@ export class RoomHandler {
     if (!room) return;
     if (room.hostId === socket.id) {
       this.endRoom(room);
+      socket.data.roomCode = undefined;
       return;
     }
     const member = this.deps.rooms.removeMember(room, socket.id);
     if (!member) return;
+    void socket.leave(room.code);
+    if (socket.data.roomCode === room.code) {
+      socket.data.roomCode = undefined;
+    }
     const memberLeft: MemberLeftPayload = { memberId: member.id };
     this.deps.io.to(room.code).emit(SOCKET_EVENTS.MEMBER_LEFT, memberLeft);
   }

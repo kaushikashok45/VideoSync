@@ -46,7 +46,8 @@ export default function Seeker({
   disabled = false,
   onSeek,
 }: SeekerProps) {
-  const max = duration > 0 ? duration : 0;
+  const seekable = Number.isFinite(duration) && duration > 0;
+  const max = seekable ? duration : 0;
   const value = Math.min(currentTime, max);
   return (
     <>
@@ -57,7 +58,7 @@ export default function Seeker({
         max={max}
         step={0.1}
         value={value}
-        disabled={disabled}
+        disabled={disabled || !seekable}
         onChange={(event) => onSeek(Number(event.target.value))}
         aria-label="Seek"
         data-testid="seeker"

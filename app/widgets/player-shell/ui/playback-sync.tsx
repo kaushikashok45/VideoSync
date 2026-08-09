@@ -6,9 +6,11 @@ import type { PlaybackStore } from "~/entities/playback/playback-store.ts";
 export interface PlaybackSyncHandle {
   setVolume(volume: number): void;
   toggleFullscreen(): void;
+  play(): Promise<boolean>;
 }
 
 export interface PlaybackSyncProps {
+  mode: "host" | "receiver";
   store: PlaybackStore;
   videoRef: RefObject<HTMLVideoElement | null>;
   actionRef: RefObject<PlaybackSyncHandle | null>;
@@ -51,13 +53,14 @@ function correctDrift(
   video: HTMLVideoElement,
   projected: PlaybackSnapshot | undefined,
 ): void {
-  if (!projected) return;
+  if (!projected || projected.status !== "playing") return;
   if (Math.abs(video.currentTime - projected.currentTime) > DRIFT_SECONDS) {
     video.currentTime = projected.currentTime;
   }
 }
 
 export default function PlaybackSync({
+  mode,
   store,
   videoRef,
   actionRef,
@@ -68,7 +71,9 @@ export default function PlaybackSync({
   const setVolume = (volume: number) => {
     const video = videoRef.current;
     if (!video) return;
-    video.volume = Math.max(0, Math.min(1, volume));
+    const nextVolume = Math.max(0, Math.min(1, volume));
+    video.volume = nextVolume;
+    if (nextVolume > 0) video.muted = false;
   };
   const toggleFullscreen = () => {
     const video = videoRef.current;
@@ -76,23 +81,40 @@ export default function PlaybackSync({
     if (document.fullscreenElement) void document.exitFullscreen();
     else void video.requestFullscreen();
   };
-  useImperativeHandle(actionRef, () => ({ setVolume, toggleFullscreen }), [
-    videoRef,
-  ]);
+  const play = async () => {
+    const video = videoRef.current;
+    if (!video) return false;
+    video.muted = false;
+    try {
+      await video.play();
+      if (mode === "host") store.getState().play();
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  useImperativeHandle(
+    actionRef,
+    () => ({ setVolume, toggleFullscreen, play }),
+    [mode, store, videoRef],
+  );
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+    const playStream = () => {
+      if (!stream || !autoplay) return;
+      video.muted = true;
+      void video.play().catch(() => onAutoplayBlocked?.());
+    };
+    video.addEventListener("loadedmetadata", playStream);
     video.srcObject = stream;
-    if (stream && autoplay) {
-      void video.play()
-        .then(() => store.getState().play())
-        .catch(() => onAutoplayBlocked?.());
-    }
+    playStream();
     return () => {
+      video.removeEventListener("loadedmetadata", playStream);
       if (video.srcObject === stream) video.srcObject = null;
     };
-  }, [stream, autoplay, onAutoplayBlocked, store, videoRef]);
+  }, [autoplay, onAutoplayBlocked, stream, videoRef]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -105,7 +127,9 @@ export default function PlaybackSync({
       seedSnapshot(video, store);
       if (!autoplay) return;
       void video.play()
-        .then(() => store.getState().play())
+        .then(() => {
+          if (mode === "host") store.getState().play();
+        })
         .catch(() => onAutoplayBlocked?.());
     };
     const onTime = () => {
@@ -119,7 +143,7 @@ export default function PlaybackSync({
       video.removeEventListener("loadedmetadata", onLoaded);
       video.removeEventListener("timeupdate", onTime);
     };
-  }, [autoplay, onAutoplayBlocked, store, videoRef]);
+  }, [autoplay, mode, onAutoplayBlocked, store, videoRef]);
 
   return null;
 }

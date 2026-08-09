@@ -1,4 +1,3 @@
-import { PauseIcon, PlayIcon } from "@heroicons/react/24/solid";
 import { useEffect, useState } from "react";
 import ButtonComponent from "./VideoPlayerButtonComponent";
 import PausePlayControlProps from "../types/PausePlayControlProps";
@@ -6,6 +5,7 @@ import {
   pausedPlaybackMessage,
   resumedPlaybackMessage,
 } from "~/features/toastMessages/logic/toastMessageLibrary";
+import { Pause, Play } from "lucide-react";
 
 export default function PausePlayControls({
   videoRef,
@@ -87,9 +87,7 @@ export default function PausePlayControls({
         onClick={handlePlayPauseClick}
         allowSpacebarPress
       >
-        {isPlaying
-          ? <PauseIcon className="size-6"></PauseIcon>
-          : <PlayIcon className="size-6"></PlayIcon>}
+        {isPlaying ? <Pause className="size-6" /> : <Play className="size-6" />}
       </ButtonComponent>
     </>
   );

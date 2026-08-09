@@ -1,9 +1,3 @@
-import {
-  BackwardIcon,
-  ForwardIcon,
-  PauseIcon,
-  PlayIcon,
-} from "@heroicons/react/24/solid";
 import type { Member } from "contracts/member.ts";
 import { IconButton } from "~/shared/ui-kit/index.ts";
 import {
@@ -12,6 +6,8 @@ import {
   type PlaybackAction,
   type PlaybackCommandStore,
 } from "../model/playback-behaviour.ts";
+import { SMALL_SEEK_SECONDS } from "~/entities/playback/seek-seconds.ts";
+import { FastForward, Pause, Play, Rewind } from "lucide-react";
 
 export interface PlaybackControlsProps {
   me: Member | null;
@@ -33,12 +29,12 @@ export default function PlaybackControls({
   return (
     <div data-testid="playback-controls" className="flex items-center gap-xs">
       <IconButton
-        label="Rewind 10 seconds"
+        label={`Rewind ${SMALL_SEEK_SECONDS} seconds`}
         disabled={!canControl}
         onClick={command("rewind")}
         className={BUTTON_CLASS}
       >
-        <BackwardIcon className="size-6" />
+        <Rewind className="size-6" />
       </IconButton>
       <IconButton
         label={playing ? "Pause" : "Play"}
@@ -46,17 +42,15 @@ export default function PlaybackControls({
         onClick={command(playing ? "pause" : "play")}
         className={`${BUTTON_CLASS} bg-brand text-onbrand hover:bg-brand-hover`}
       >
-        {playing
-          ? <PauseIcon className="size-6" />
-          : <PlayIcon className="size-6" />}
+        {playing ? <Pause className="size-6" /> : <Play className="size-6" />}
       </IconButton>
       <IconButton
-        label="Forward 10 seconds"
+        label={`Forward ${SMALL_SEEK_SECONDS} seconds`}
         disabled={!canControl}
         onClick={command("forward")}
         className={BUTTON_CLASS}
       >
-        <ForwardIcon className="size-6" />
+        <FastForward className="size-6" />
       </IconButton>
     </div>
   );

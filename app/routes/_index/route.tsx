@@ -1,4 +1,5 @@
-import HomePage from "~/pages/home/home-page.tsx";
+import { LandingScreen } from "~/features/entry-flow/components/landing-screen.tsx";
+
 export default function IndexRoute() {
-  return <HomePage />;
+  return <LandingScreen />;
 }

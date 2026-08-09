@@ -16,8 +16,9 @@ type Peer = SimplePeer.Instance;
 function capture(video: HTMLVideoElement): MediaStream | null {
   const element = video as HTMLVideoElement & {
     captureStream?: () => MediaStream;
+    mozCaptureStream?: () => MediaStream;
   };
-  return element.captureStream?.() ?? null;
+  return element.captureStream?.() ?? element.mozCaptureStream?.() ?? null;
 }
 
 export function usePeerMediaStream({
@@ -28,6 +29,7 @@ export function usePeerMediaStream({
 }: PeerMediaStreamProps): MediaStream | null {
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+  const [peerRevision, setPeerRevision] = useState(0);
   const members = useSyncExternalStore(
     membersStore.subscribe,
     () => membersStore.getState().members,
@@ -59,6 +61,7 @@ export function usePeerMediaStream({
     return () => {
       video.removeEventListener("playing", update);
       current?.getTracks().forEach((track) => track.stop());
+      setLocalStream(null);
     };
   }, [mode, videoRef]);
 
@@ -74,25 +77,48 @@ export function usePeerMediaStream({
       const peer = new SimplePeer({ initiator, trickle: false });
       peer.on("signal", (data) => socket.sendSignal(peerId, data));
       peer.on("stream", (remote) => setRemoteStream(remote));
+      const recover = () => {
+        if (peers.get(peerId) !== peer) return;
+        peers.delete(peerId);
+        setRemoteStream(null);
+        setPeerRevision((revision) => revision + 1);
+      };
+      peer.on("close", recover);
+      peer.on("error", recover);
       const stream = localStreamRef.current;
       if (stream) peer.addStream(stream);
       peers.set(peerId, peer);
     };
-    if (mode === "host") {
-      members.filter((member) => member.role !== "host").forEach((member) =>
-        create(member.id, true)
-      );
-    }
-    if (mode === "receiver" && hostId) create(hostId, false);
+    const desiredPeerIds = new Set(
+      mode === "host"
+        ? members.filter((member) => member.role !== "host").map((member) =>
+          member.id
+        )
+        : hostId
+        ? [hostId]
+        : [],
+    );
+    peers.forEach((peer, peerId) => {
+      if (desiredPeerIds.has(peerId)) return;
+      peer.destroy();
+      peers.delete(peerId);
+      setRemoteStream(null);
+    });
+    desiredPeerIds.forEach((peerId) => create(peerId, mode === "host"));
+  }, [hostId, members, mode, peerRevision, socket]);
+
+  useEffect(() => {
+    if (!socket) return;
     const removeSignal = socket.onSignal(({ peerId, signalData }) => {
-      peers.get(peerId)?.signal(signalData as SimplePeer.SignalData);
+      peersRef.current.get(peerId)?.signal(signalData as SimplePeer.SignalData);
     });
     return () => {
       if (typeof removeSignal === "function") removeSignal();
-      peers.forEach((peer) => peer.destroy());
-      peers.clear();
+      peersRef.current.forEach((peer) => peer.destroy());
+      peersRef.current.clear();
+      setRemoteStream(null);
     };
-  }, [hostId, members, mode, socket]);
+  }, [socket]);
 
   // Attach the latest local stream to every live peer, including peers that
   // connected before the host started playing.

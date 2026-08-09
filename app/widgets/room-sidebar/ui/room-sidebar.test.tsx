@@ -7,6 +7,7 @@ import {
   type MembersStore,
 } from "~/entities/member/members-store.ts";
 import { createReactionStore } from "~/entities/reaction/reaction-store.ts";
+import { FakeSocketClient } from "~/shared/api/fake-socket-client.ts";
 import { click, render, setupDom } from "~/shared/ui-kit/render-helper.ts";
 import RoomSidebar from "./room-sidebar.tsx";
 
@@ -35,14 +36,19 @@ function stubMembers(): MembersStore {
   );
   return store;
 }
-function sidebar(me: Member | null = ME) {
+function sidebar(
+  me: Member | null = ME,
+  socket: FakeSocketClient | null = null,
+) {
   const { container } = render(
     <RoomSidebar
       roomId="abc23"
+      connectionLabel="Waiting for host"
       me={me}
       membersStore={stubMembers()}
       chatStore={createChatStore()}
       reactionStore={createReactionStore()}
+      socket={socket}
     />,
   );
   return container;
@@ -74,14 +80,19 @@ Deno.test("opens on toggle click and shows the Chat tab", () => {
     container.querySelector('[data-testid="chat-stream"]') !== null,
     true,
   );
+  const panel = document.querySelector('[data-testid="room-sidebar"]');
+  assertEquals(panel?.textContent?.includes("abc23"), true);
+  assertEquals(panel?.textContent?.includes("Waiting for host"), true);
 });
 // 2. Sad/Edge: closed means aria-expanded=false and the panel is hidden.
 Deno.test("closed: aria-expanded is false and the panel is hidden", () => {
   setupDom();
   const container = sidebar();
   assertEquals(toggle(container).getAttribute("aria-expanded"), "false");
-  assertEquals(aside(container)?.getAttribute("aria-hidden"), "true");
-  assertEquals(aside(container)?.hasAttribute("inert"), true);
+  assertEquals(
+    aside(document.body as unknown as HTMLElement)?.getAttribute("aria-hidden"),
+    "true",
+  );
 });
 // 3. Mutation: switching tabs swaps the visible panel content.
 Deno.test("switching tabs swaps the visible panel content", () => {
@@ -109,9 +120,14 @@ Deno.test("closing via the backdrop returns focus to the toggle", () => {
   setupDom();
   const container = sidebar();
   openSidebar(container);
-  click(container.querySelector('[data-testid="sidebar-scrim"]') as Element);
+  click(document.querySelector('[data-testid="sidebar-scrim"]') as Element);
   assertEquals(toggle(container).getAttribute("aria-expanded"), "false");
-  assertEquals(aside(container)?.getAttribute("aria-hidden"), "true");
+  assertEquals(
+    document.querySelector('[data-testid="room-sidebar"]')?.getAttribute(
+      "aria-hidden",
+    ),
+    "true",
+  );
   assertEquals(document.activeElement, toggle(container));
 });
 // 4b. Limits: Escape also closes the sidebar.
@@ -147,4 +163,43 @@ Deno.test("viewer sees the sidebar without host tools", () => {
     container.querySelector('[data-testid="host-tools"]') === null,
     true,
   );
+});
+
+Deno.test("panel uses a fixed overlay so opening it does not resize the player stage", () => {
+  setupDom();
+  const container = sidebar();
+  openSidebar(container);
+  const panel = document.querySelector('[data-testid="room-sidebar"]');
+  assertEquals(panel?.className.includes("fixed"), true);
+  assertEquals(panel?.className.includes("md:right-0"), true);
+});
+
+Deno.test("chat and reaction actions use the active socket when one is provided", () => {
+  setupDom();
+  const socket = new FakeSocketClient();
+  let sentChat = "";
+  let sentReaction = "";
+  socket.sendChat = (text: string) => {
+    sentChat = text;
+  };
+  socket.sendReaction = (emoji: string) => {
+    sentReaction = emoji;
+  };
+  const container = sidebar(ME, socket);
+  openSidebar(container);
+  const field = container.querySelector(
+    "input[aria-label='Chat message']",
+  ) as HTMLInputElement;
+  const setValue = Object.getOwnPropertyDescriptor(
+    HTMLInputElement.prototype,
+    "value",
+  )?.set;
+  act(() => {
+    setValue?.call(field, "hello room");
+    field.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  click(container.querySelector("button[type='submit']") as Element);
+  click(container.querySelector('[aria-label^="React "]') as Element);
+  assertEquals(sentChat, "hello room");
+  assertEquals(sentReaction, "👍");
 });

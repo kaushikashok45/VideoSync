@@ -24,7 +24,7 @@ export default function JoinForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex w-full max-w-sm flex-col gap-md"
+      className="flex w-full flex-col gap-md"
     >
       <TextField
         label="Your name"
@@ -35,7 +35,8 @@ export default function JoinForm() {
       />
       <TextField
         label="Room code"
-        placeholder="e.g. abc23"
+        placeholder="e.g. GLOW-42"
+        autoCapitalize="characters"
         value={code}
         error={codeError ?? undefined}
         onChange={(event) => setCode(event.target.value)}

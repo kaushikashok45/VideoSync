@@ -17,6 +17,7 @@ import { createErrorStore } from "./error-store.ts";
 import { createMembersStore } from "../../entities/member/members-store.ts";
 import { createReactionStore } from "../../entities/reaction/reaction-store.ts";
 import { createRoomStore } from "../../entities/room/room-store.ts";
+import { AppError } from "contracts/app-error.ts";
 
 export interface SocketBridgeStores {
   room: RoomStore;
@@ -31,6 +32,14 @@ export interface SocketBridgeDeps {
   stores: SocketBridgeStores;
 }
 
+export function resetRoomScopedStores(stores: SocketBridgeStores): void {
+  stores.room.getState().clearRoom();
+  stores.members.setState({ members: [], me: null, controlRequests: [] });
+  stores.chat.setState({ messages: [] });
+  stores.reaction.getState().expireAll();
+  stores.error.getState().clearError();
+}
+
 export function createSocketBridge(deps: SocketBridgeDeps): void {
   const { socket, stores } = deps;
   socket.onMemberJoined((p) => stores.members.getState().addMember(p.member));
@@ -39,7 +48,10 @@ export function createSocketBridge(deps: SocketBridgeDeps): void {
   );
   socket.onChatMessage((m) => stores.chat.getState().append(m));
   socket.onReaction((r) => stores.reaction.getState().burst(r));
-  socket.onRoomEnded(() => stores.room.getState().clearRoom());
+  socket.onRoomEnded(() => {
+    resetRoomScopedStores(stores);
+    stores.error.getState().setError(new AppError("ROOM_ENDED").toJSON());
+  });
   socket.onSignal(() => {});
   socket.onAppError((e) => stores.error.getState().setError(e));
 }
@@ -47,28 +59,47 @@ export function createSocketBridge(deps: SocketBridgeDeps): void {
 const SocketContext = createContext<SocketClient | null>(null);
 const StoresContext = createContext<SocketBridgeStores | null>(null);
 
+let fallbackRuntime:
+  | { client: SocketClient | null; stores: SocketBridgeStores }
+  | undefined;
+
+function getFallbackRuntime(): {
+  client: SocketClient | null;
+  stores: SocketBridgeStores;
+} {
+  if (fallbackRuntime) return fallbackRuntime;
+  const client = typeof globalThis.location === "undefined"
+    ? null
+    : createSocketClient({ url: globalThis.location.origin });
+  const stores = {
+    room: createRoomStore(),
+    members: createMembersStore(),
+    chat: createChatStore(),
+    reaction: createReactionStore(),
+    error: createErrorStore(),
+  };
+  if (client) createSocketBridge({ socket: client, stores });
+  fallbackRuntime = { client, stores };
+  return fallbackRuntime;
+}
+
 export function useSocketClient(): SocketClient {
-  const client = useContext(SocketContext);
-  if (client === null) {
-    throw new Error("useSocketClient must be used within SocketProvider");
-  }
-  return client;
+  return useContext(SocketContext) ?? getFallbackRuntime().client ??
+    (() => {
+      throw new Error("Socket client is unavailable during server rendering");
+    })();
 }
 
 export function useAppStores(): SocketBridgeStores {
-  const stores = useContext(StoresContext);
-  if (stores === null) {
-    throw new Error("useAppStores must be used in Providers");
-  }
-  return stores;
+  return useContext(StoresContext) ?? getFallbackRuntime().stores;
 }
 
 export function useOptionalAppStores(): SocketBridgeStores | null {
-  return useContext(StoresContext);
+  return useContext(StoresContext) ?? getFallbackRuntime().stores;
 }
 
 export function useOptionalSocketClient(): SocketClient | null {
-  return useContext(SocketContext);
+  return useContext(SocketContext) ?? getFallbackRuntime().client;
 }
 
 export function SocketProvider({ children }: { children?: ReactNode }) {

@@ -1,10 +1,7 @@
-import {
-  ArrowsPointingInIcon,
-  ArrowsPointingOutIcon,
-} from "@heroicons/react/24/solid";
 import { useState } from "react";
 import ButtonComponent from "./VideoPlayerButtonComponent";
 import FullScreenToggleProps from "../types/FullScreenToggleProps";
+import { Maximize2, Minimize2 } from "lucide-react";
 
 export default function FullScreenToggleComponent({
   videoWrapperRef,
@@ -24,8 +21,8 @@ export default function FullScreenToggleComponent({
     <>
       <ButtonComponent onClick={handleScreenResize}>
         {isFullScreen
-          ? <ArrowsPointingInIcon className="size-6"></ArrowsPointingInIcon>
-          : <ArrowsPointingOutIcon className="size-6"></ArrowsPointingOutIcon>}
+          ? <Minimize2 className="size-6" />
+          : <Maximize2 className="size-6" />}
       </ButtonComponent>
     </>
   );

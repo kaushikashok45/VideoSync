@@ -1,32 +1,33 @@
-import { useState } from "react";
+import { useRef } from "react";
 import type { RefObject } from "react";
-import {
-  ArrowsPointingOutIcon,
-  ShareIcon,
-  SpeakerWaveIcon,
-  SpeakerXMarkIcon,
-} from "@heroicons/react/24/solid";
 import { IconButton } from "~/shared/ui-kit/index.ts";
 import type { PlaybackSyncHandle } from "./playback-sync.tsx";
+import { Maximize2, Share2, Volume2, VolumeX } from "lucide-react";
 
 export interface UtilityControlsProps {
   syncHandleRef: RefObject<PlaybackSyncHandle | null>;
+  volume: number;
+  onVolumeChange: (volume: number) => void;
   onShare?: () => void;
 }
 
-const BUTTON_CLASS = "h-14 w-14";
+const BUTTON_CLASS = "h-11 w-11";
 
 export default function UtilityControls({
   syncHandleRef,
+  volume,
+  onVolumeChange,
   onShare,
 }: UtilityControlsProps) {
-  const [volume, setVolume] = useState(1);
+  const lastAudibleVolumeRef = useRef(1);
   const muted = volume === 0;
   const applyVolume = (next: number) => {
-    setVolume(next);
+    if (next > 0) lastAudibleVolumeRef.current = next;
+    onVolumeChange(next);
     syncHandleRef.current?.setVolume(next);
   };
-  const toggleMute = () => applyVolume(muted ? 1 : 0);
+  const toggleMute = () =>
+    applyVolume(muted ? lastAudibleVolumeRef.current : 0);
   return (
     <div data-testid="utility-controls" className="flex items-center gap-xs">
       <IconButton
@@ -35,8 +36,8 @@ export default function UtilityControls({
         className={BUTTON_CLASS}
       >
         {muted
-          ? <SpeakerXMarkIcon className="size-6" />
-          : <SpeakerWaveIcon className="size-6" />}
+          ? <VolumeX className="size-6" />
+          : <Volume2 className="size-6" />}
       </IconButton>
       <input
         type="range"
@@ -44,21 +45,20 @@ export default function UtilityControls({
         max={1}
         step={0.05}
         value={volume}
-        onChange={(event) =>
-          applyVolume(Number(event.target.value))}
+        onInput={(event) => applyVolume(Number(event.currentTarget.value))}
+        onChange={(event) => applyVolume(Number(event.target.value))}
         aria-label="Volume"
         className="w-24 accent-brand"
       />
       <IconButton
         label="Fullscreen"
-        onClick={() =>
-          syncHandleRef.current?.toggleFullscreen()}
+        onClick={() => syncHandleRef.current?.toggleFullscreen()}
         className={BUTTON_CLASS}
       >
-        <ArrowsPointingOutIcon className="size-6" />
+        <Maximize2 className="size-6" />
       </IconButton>
       <IconButton label="Share" onClick={onShare} className={BUTTON_CLASS}>
-        <ShareIcon className="size-6" />
+        <Share2 className="size-6" />
       </IconButton>
     </div>
   );

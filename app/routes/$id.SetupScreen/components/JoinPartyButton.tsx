@@ -1,19 +1,20 @@
-import { Link, useLocation } from "react-router";
+import { Link, useParams } from "react-router";
 import { useContext } from "react";
 import UnifiedButton from "~/common/components/UnifiedButton";
 import SessionContext from "../../../context/Session/logic/SessionContext";
+import { resolveCanonicalRoomIdentity } from "~/features/room-join/model/room-identity.ts";
 
 export default function HostPartyButton() {
-  const { updateRoomId } = useContext(SessionContext);
-  const location = useLocation();
-  const pathName = location.pathname;
-  const inferredRoomId = pathName.split("/")[1];
+  const { id } = useParams();
+  const { roomId: sessionRoomId, updateRoomId } = useContext(SessionContext);
+  const roomIdentity = resolveCanonicalRoomIdentity(id, sessionRoomId);
+  const inferredRoomId = roomIdentity?.roomId ?? sessionRoomId;
 
   return (
     <Link
       to={`/${inferredRoomId}/RecieverVideoPlayerNew`}
       onClick={() => {
-        updateRoomId(inferredRoomId);
+        if (inferredRoomId) updateRoomId(inferredRoomId);
       }}
     >
       <UnifiedButton

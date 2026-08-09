@@ -7,17 +7,26 @@ import type { Reaction } from "contracts/reaction.ts";
 import type { RelaySignalPayload } from "contracts/payloads/relay-signal-payload.ts";
 import type { RoomJoinedPayload } from "contracts/payloads/room-joined-payload.ts";
 import type { RoomMeta } from "contracts/room-meta.ts";
-import type { SocketClient } from "./socket-client.ts";
+import type { SocketClient, SocketConnectionState } from "./socket-client.ts";
 
 type Handler = (payload: unknown) => void;
 
 export class FakeSocketClient implements SocketClient {
   private handlers = new Map<string, Handler[]>();
+  private connectionState: SocketConnectionState = "connected";
+  private connectionListeners = new Set<
+    (state: SocketConnectionState) => void
+  >();
 
   emit(event: string, payload?: unknown): void {
     for (const handler of this.handlers.get(event) ?? []) {
       handler(payload);
     }
+  }
+
+  setConnectionState(state: SocketConnectionState): void {
+    this.connectionState = state;
+    for (const listener of this.connectionListeners) listener(state);
   }
 
   private on(event: string, handler: Handler): void {
@@ -54,6 +63,17 @@ export class FakeSocketClient implements SocketClient {
     this.on(SOCKET_EVENTS.APP_ERROR, cb as Handler);
   }
 
+  onConnectionStateChange(
+    cb: (state: SocketConnectionState) => void,
+  ): () => void {
+    this.connectionListeners.add(cb);
+    return () => this.connectionListeners.delete(cb);
+  }
+
+  getConnectionState(): SocketConnectionState {
+    return this.connectionState;
+  }
+
   createRoom(_name: string): Promise<RoomMeta> {
     return Promise.reject(new Error("not implemented"));
   }
@@ -62,9 +82,11 @@ export class FakeSocketClient implements SocketClient {
     return Promise.reject(new Error("not implemented"));
   }
 
-  sendChat(_text: string): void {}
+  leaveRoom(): void {}
 
-  sendReaction(_emoji: string): void {}
+  sendChat(_text: string, _senderName?: string): void {}
+
+  sendReaction(_emoji: string, _senderName?: string): void {}
 
   grantControl(_targetId: string): void {}
 
