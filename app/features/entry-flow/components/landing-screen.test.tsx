@@ -23,6 +23,8 @@ Deno.test("join is progressively disclosed from the landing screen", () => {
       </SessionContext.Provider>
     </MemoryRouter>,
   );
+  assertEquals(container.textContent?.includes("No account needed"), false);
+  assertEquals(container.textContent?.includes("Have an invite?"), false);
   assertEquals(container.querySelector('[data-testid="join-form"]'), null);
   click(container.querySelector('[data-testid="reveal-join"]') as Element);
   assertEquals(
@@ -35,4 +37,11 @@ Deno.test("join is progressively disclosed from the landing screen", () => {
     ),
     "true",
   );
+  assertEquals(
+    container.querySelector('[data-testid="reveal-join"]')?.getAttribute(
+      "aria-controls",
+    ),
+    "join-form",
+  );
+  assertEquals(container.querySelector("#join-form") !== null, true);
 });

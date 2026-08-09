@@ -1,0 +1,61 @@
+.landing-hero {
+  position: relative;
+  min-height: min(72dvh, 720px);
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: 16px;
+  background: rgb(var(--surface-sunken-rgb));
+  box-shadow: 0 28px 80px -32px rgba(0, 0, 0, 0.85);
+}
+
+.landing-hero-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  min-height: min(72dvh, 720px);
+  max-width: 620px;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(32px, 6vw, 80px);
+}
+
+.landing-hero-title {
+  max-width: 9ch;
+  margin: 12px 0 16px;
+  letter-spacing: -0.05em;
+}
+.landing-hero-note {
+  position: absolute;
+  top: 24px;
+  right: 32px;
+  z-index: 3;
+}
+.landing-join-row {
+  position: absolute;
+  right: 32px;
+  bottom: 20px;
+  left: 32px;
+  z-index: 3;
+}
+
+@media (max-width: 640px) {
+  .landing-hero {
+    min-height: 680px;
+  }
+  .landing-hero-content {
+    min-height: 680px;
+    justify-content: flex-end;
+    padding: 24px 24px 140px;
+  }
+  .landing-hero-note {
+    top: 20px;
+    right: 24px;
+  }
+  .landing-join-row {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    margin: -120px 24px 24px;
+  }
+}

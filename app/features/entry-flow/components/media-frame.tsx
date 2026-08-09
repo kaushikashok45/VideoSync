@@ -12,7 +12,7 @@ export interface MediaFrameProps {
 function FallbackArtwork() {
   return (
     <div className="absolute inset-0 flex flex-col justify-between bg-brand-soft p-lg md:p-xl">
-      <span className="font-mono text-sm text-ink-muted">
+      <span className="hidden font-mono text-sm text-ink-muted md:block">
         The screen is ready when you are.
       </span>
     </div>
