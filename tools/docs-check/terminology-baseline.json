@@ -1,0 +1,19 @@
+{
+  "admin": 0,
+  "attendee": 0,
+  "audience": 0,
+  "content": 1,
+  "guest": 4,
+  "lobby": 0,
+  "media": 18,
+  "owner": 0,
+  "participant": 1,
+  "party": 27,
+  "presenter": 0,
+  "receiver": 12,
+  "reciever*": 15,
+  "role": 89,
+  "user": 10,
+  "video file": 3,
+  "watcher": 0
+}

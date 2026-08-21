@@ -131,6 +131,47 @@ Deno.test("missing emoji is ignored", async () => {
   }
 });
 
+// Room isolation (ROOM-INV-11 / REACTION-INV-5): a reaction reaches no member outside the sender's room
+Deno.test("reaction in one room reaches no member of another room", async () => {
+  const h = await makeHarness();
+  try {
+    const roomA = await h.joinPair();
+    const roomB = await h.joinPair();
+
+    let roomBHostReceived = false;
+    let roomBViewerReceived = false;
+    roomB.host.on(SOCKET_EVENTS.REACTION, () => {
+      roomBHostReceived = true;
+    });
+    roomB.viewer.on(SOCKET_EVENTS.REACTION, () => {
+      roomBViewerReceived = true;
+    });
+
+    const reactionOnAHost = h.waitFor<{ emoji: string }>(
+      roomA.host,
+      SOCKET_EVENTS.REACTION,
+    );
+    roomA.viewer.emit(SOCKET_EVENTS.REACTION_SEND, {
+      emoji: "🔥",
+      senderName: "Bob",
+    });
+    const reaction = await reactionOnAHost;
+    assertEquals(reaction.emoji, "🔥");
+
+    await new Promise((r) => setTimeout(r, 200));
+    assertEquals(roomBHostReceived, false);
+    assertEquals(roomBViewerReceived, false);
+
+    roomA.host.disconnect();
+    roomA.viewer.disconnect();
+    roomB.host.disconnect();
+    roomB.viewer.disconnect();
+  } finally {
+    h.io.close();
+    await new Promise<void>((r) => h.httpServer.close(() => r()));
+  }
+});
+
 // Edge: reaction before joining is dropped
 Deno.test("reaction before joining is dropped", async () => {
   const h = await makeHarness();

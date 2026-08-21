@@ -174,6 +174,47 @@ Deno.test("chat rate limiter allows the window budget and rejects beyond", async
   }
 });
 
+// Room isolation (ROOM-INV-11 / CHAT-INV-6): a message reaches no member outside the sender's room
+Deno.test("chat in one room reaches no member of another room", async () => {
+  const h = await makeHarness();
+  try {
+    const roomA = await h.joinPair();
+    const roomB = await h.joinPair();
+
+    let roomBHostReceived = false;
+    let roomBViewerReceived = false;
+    roomB.host.on(SOCKET_EVENTS.CHAT_MESSAGE, () => {
+      roomBHostReceived = true;
+    });
+    roomB.viewer.on(SOCKET_EVENTS.CHAT_MESSAGE, () => {
+      roomBViewerReceived = true;
+    });
+
+    const msgOnAHost = h.waitFor<{ text: string }>(
+      roomA.host,
+      SOCKET_EVENTS.CHAT_MESSAGE,
+    );
+    roomA.viewer.emit(SOCKET_EVENTS.CHAT_SEND, {
+      text: "room A secret",
+      senderName: "Bob",
+    });
+    const msg = await msgOnAHost;
+    assertEquals(msg.text, "room A secret");
+
+    await new Promise((r) => setTimeout(r, 200));
+    assertEquals(roomBHostReceived, false);
+    assertEquals(roomBViewerReceived, false);
+
+    roomA.host.disconnect();
+    roomA.viewer.disconnect();
+    roomB.host.disconnect();
+    roomB.viewer.disconnect();
+  } finally {
+    h.io.close();
+    await new Promise<void>((r) => h.httpServer.close(() => r()));
+  }
+});
+
 // Edge: a chat message sent before joining a room is dropped
 Deno.test("chat before joining is dropped", async () => {
   const h = await makeHarness();

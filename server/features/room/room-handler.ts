@@ -68,12 +68,12 @@ export class RoomHandler {
       const member = this.buildViewer(socket, name);
       this.deps.rooms.assertCanAdd(room, member);
       this.removeMember(socket);
-      this.deps.rooms.addMember(room, member);
-      socket.data.roomCode = room.code;
-      void socket.join(room.code);
-      this.announceJoin(socket, room, member);
+      const joined = this.deps.rooms.addMember(room, member);
+      socket.data.roomCode = joined.code;
+      void socket.join(joined.code);
+      this.announceJoin(socket, joined, member);
       this.deps.logger.info("member joined", {
-        code: room.code,
+        code: joined.code,
         memberId: socket.id,
       });
     } catch (err) {
@@ -103,7 +103,7 @@ export class RoomHandler {
       if (room.hostId !== socket.id) {
         throw new AppError("ROOM_PERMISSION_DENIED");
       }
-      room.locked = locked;
+      this.applyLock(room, locked);
       this.deps.io.to(room.code).emit(
         locked ? SOCKET_EVENTS.ROOM_LOCKED : SOCKET_EVENTS.ROOM_UNLOCKED,
         {},
@@ -111,6 +111,13 @@ export class RoomHandler {
     } catch (err) {
       this.emitError(socket, err);
     }
+  }
+  private applyLock(room: Room, locked: boolean): void {
+    if (locked) {
+      this.deps.rooms.lockRoom(room);
+      return;
+    }
+    this.deps.rooms.unlockRoom(room);
   }
   private removeMember(socket: Socket): void {
     const room = this.findRoomFor(socket);

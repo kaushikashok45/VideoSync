@@ -7,7 +7,8 @@
     "lib": [
       "dom",
       "dom.iterable",
-      "deno.ns"
+      "deno.ns",
+      "deno.unstable"
     ],
     "strict": true,
     "skipLibCheck": true
@@ -22,6 +23,21 @@
     "fmt": "deno fmt",
     "check": "deno check --sloppy-imports app server",
     "test": "deno test -A --sloppy-imports",
+    "check:structural": "deno run -A tools/cli/check-structural.ts",
+    "check:boundary": "deno run -A tools/cli/check-boundary.ts",
+    "check:dumb-ui": "deno run -A tools/cli/check-dumb-ui.ts",
+    "check:semantics": "deno run -A tools/cli/check-semantics.ts",
+    "graph:build": "deno test -A --sloppy-imports tools/graph/collect-edges.harness.ts",
+    "graph:cycles": "deno run -A tools/cli/print-cycles.ts",
+    "baseline:regen": "deno test -A --sloppy-imports tools/baseline/regen.harness.ts --",
+    "erd:check": "deno run -A tools/docs-check/erd-check.ts",
+    "pipeline:check": "deno run -A tools/docs-check/pipeline-check.ts",
+    "terminology:check": "deno run -A tools/docs-check/terminology-check.ts",
+    "mutate": "deno test -A --sloppy-imports tools/mutate/run-mutation.harness.ts --",
+    "mutate:ci": "deno test -A --sloppy-imports tools/mutate/run-mutation.harness.ts -- --all",
+    "coverage:floor": "deno run -A tools/coverage/floor.ts",
+    "precommit": "deno run -A tools/cli/precommit.ts",
+    "setup-hooks": "deno run -A tools/cli/install-hooks.ts",
     "verify": "deno fmt --check && deno lint && deno check --sloppy-imports app server && deno test -A --sloppy-imports",
     "smoke": "deno task build && bash scripts/smoke.sh"
   },
@@ -31,7 +47,15 @@
       "build",
       ".react-router",
       ".superpowers",
-      "docs"
+      "docs",
+      "LLD.md",
+      "FLOW.md",
+      "DECISION.md",
+      ".claude",
+      ".agents",
+      ".opencode",
+      ".github/agents",
+      ".github/prompts"
     ]
   },
   "lint": {
@@ -39,6 +63,12 @@
       "node_modules",
       "build",
       ".react-router"
+    ],
+    "plugins": [
+      "./tools/lint-plugins/entries/structural.ts",
+      "./tools/lint-plugins/entries/boundary.ts",
+      "./tools/lint-plugins/entries/dumb-ui.ts",
+      "./tools/lint-plugins/entries/semantics.ts"
     ],
     "rules": {
       "tags": [

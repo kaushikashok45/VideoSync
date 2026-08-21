@@ -1,10 +1,20 @@
 import { AppError } from "../../../shared/contracts/app-error.ts";
 import type { Member } from "../../../shared/contracts/member.ts";
 import type { MovieMetadata } from "../../../shared/contracts/movie-metadata.ts";
-import type { PlaybackSnapshot } from "../../../shared/contracts/playback.ts";
 import type { RoomMeta } from "../../../shared/contracts/room-meta.ts";
+import { addMember as addMemberTransition } from "./add-member.ts";
+import { createRoom } from "./create-room.ts";
+import { lockRoom as lockRoomTransition } from "./lock-room.ts";
+import { removeMember as removeMemberTransition } from "./remove-member.ts";
+import {
+  generateRoomCode,
+  isValidRoomCode,
+  parseRoomCode,
+  type RoomCode,
+} from "./room-code.ts";
 import type { Room } from "./room.ts";
-import { generateRoomCode, isValidRoomCode } from "./room-code.ts";
+import { unlockRoom as unlockRoomTransition } from "./unlock-room.ts";
+import { withMetadata } from "./with-metadata.ts";
 
 export interface RoomStoreDeps {
   maxMembers: number;
@@ -17,61 +27,38 @@ export interface CreateRoomOptions {
   metadata?: MovieMetadata;
 }
 
+const DEFAULT_CODE_LENGTH = 5;
+
+/**
+ * Thin lookup table over immutable `Room` values (`docs/DECISIONS.md#ad-012`).
+ * Every write path replaces the map entry with the transition function's
+ * result; none ever assigns to a `Room` field.
+ */
 export class RoomStore {
-  private rooms = new Map<string, Room>();
+  private rooms = new Map<RoomCode, Room>();
 
   constructor(private deps: RoomStoreDeps) {}
 
   create(hostId: string, hostName: string, opts: CreateRoomOptions = {}): Room {
-    const name = hostName?.trim() ?? "";
-    if (name === "") throw new AppError("VALIDATION_NAME_EMPTY");
     const code = this.uniqueCode();
-    const room: Room = {
-      code,
-      hostId,
-      locked: false,
-      members: new Map(),
-      mediaSource: null,
-      playback: this.initialPlayback(),
-      metadata: opts.metadata,
-      createdAt: this.deps.now(),
-    };
-    room.members.set(hostId, this.initialHostMember(hostId, name));
-    this.rooms.set(code, room);
-    return room;
+    const room = createRoom(code, hostId, hostName, this.deps.now());
+    const withMeta = withMetadata(room, opts.metadata);
+    this.rooms.set(code, withMeta);
+    return withMeta;
   }
 
-  private initialPlayback(): PlaybackSnapshot {
-    return {
-      status: "paused",
-      currentTime: 0,
-      duration: 0,
-      rate: 1,
-      updatedAt: this.deps.now(),
-    };
-  }
-
-  private initialHostMember(hostId: string, name: string): Member {
-    return {
-      id: hostId,
-      name,
-      role: "host",
-      canControl: true,
-      joinedAt: this.deps.now(),
-    };
-  }
-
-  private uniqueCode(): string {
-    const length = this.deps.codeLength ?? 5;
+  private uniqueCode(): RoomCode {
+    const length = this.deps.codeLength ?? DEFAULT_CODE_LENGTH;
     const generate = this.deps.createCode ?? generateRoomCode;
-    let code = generate(length);
-    while (this.rooms.has(code)) code = generate(length);
+    let code = parseRoomCode(generate(length), length);
+    while (this.rooms.has(code)) code = parseRoomCode(generate(length), length);
     return code;
   }
 
   get(code: string): Room | undefined {
-    if (!isValidRoomCode(code, this.deps.codeLength ?? 5)) return undefined;
-    return this.rooms.get(code);
+    const length = this.deps.codeLength ?? DEFAULT_CODE_LENGTH;
+    if (!isValidRoomCode(code, length)) return undefined;
+    return this.rooms.get(parseRoomCode(code, length));
   }
 
   getOrThrow(code: string): Room {
@@ -80,29 +67,37 @@ export class RoomStore {
     return room;
   }
 
-  delete(code: string): void {
+  delete(code: RoomCode): void {
     this.rooms.delete(code);
   }
 
-  addMember(room: Room, member: Member): void {
-    if (room.members.has(member.id)) return;
-    this.assertCanAdd(room, member);
-    room.members.set(member.id, member);
+  addMember(room: Room, member: Member): Room {
+    const next = addMemberTransition(room, member, this.deps.maxMembers);
+    this.rooms.set(next.code, next);
+    return next;
   }
 
+  /** Validates without committing -- lets a caller check before evicting a socket's prior membership. */
   assertCanAdd(room: Room, member: Member): void {
-    if (room.members.size >= this.deps.maxMembers) {
-      throw new AppError("ROOM_FULL");
-    }
-    if (room.locked && member.role !== "host") {
-      throw new AppError("ROOM_LOCKED");
-    }
+    addMemberTransition(room, member, this.deps.maxMembers);
   }
 
   removeMember(room: Room, memberId: string): Member | undefined {
-    const member = room.members.get(memberId);
-    room.members.delete(memberId);
-    return member;
+    const { room: next, removed } = removeMemberTransition(room, memberId);
+    this.rooms.set(next.code, next);
+    return removed;
+  }
+
+  lockRoom(room: Room): Room {
+    const next = lockRoomTransition(room);
+    this.rooms.set(next.code, next);
+    return next;
+  }
+
+  unlockRoom(room: Room): Room {
+    const next = unlockRoomTransition(room);
+    this.rooms.set(next.code, next);
+    return next;
   }
 
   memberCount(room: Room): number {

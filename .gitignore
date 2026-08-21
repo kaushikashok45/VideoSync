@@ -12,3 +12,16 @@ vite.config.ts.timestamp*
 *.csr
 *.gz
 .gstack/
+.agents/review-receipts/*.json
+.claude/review-receipts/*.json
+.opencode/review-receipts/*.json
+tools/graph/.cache/
+tools/graph/edges.jsonl
+.superpowers/
+.impeccable/
+LLD.md
+FLOW.md
+DECISION.md
+
+.coverage-floor/
+.coverage/

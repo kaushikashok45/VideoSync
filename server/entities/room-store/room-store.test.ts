@@ -1,4 +1,4 @@
-import { assertEquals, assertRejects } from "@std/assert";
+import { assert, assertEquals, assertRejects } from "@std/assert";
 import { RoomStore } from "./room-store.ts";
 import { AppError } from "../../../shared/contracts/app-error.ts";
 import type { Member } from "../../../shared/contracts/member.ts";
@@ -41,8 +41,10 @@ Deno.test("get returns undefined for unknown or malformed codes", () => {
 // Logical limit: exactly at capacity passes, beyond throws
 Deno.test("addMember enforces the exact capacity boundary", () => {
   const store = new RoomStore(opts);
-  const room = store.create("host", "H");
-  for (let i = 0; i < 14; i++) store.addMember(room, viewer(`v${i}`, `v${i}`));
+  let room = store.create("host", "H");
+  for (let i = 0; i < 14; i++) {
+    room = store.addMember(room, viewer(`v${i}`, `v${i}`));
+  }
   assertEquals(store.memberCount(room), 15); // at limit
   assertRejects(
     () =>
@@ -55,36 +57,39 @@ Deno.test("addMember enforces the exact capacity boundary", () => {
 // Sad path + mutation: locking must reject new viewers but allow host
 Deno.test("addMember rejects joining a locked room as a viewer, allows host", () => {
   const store = new RoomStore(opts);
-  const room = store.create("host", "H");
-  room.locked = true;
+  let room = store.create("host", "H");
+  room = store.lockRoom(room);
   assertRejects(
     () =>
       Promise.resolve().then(() => store.addMember(room, viewer("v1", "V"))),
     AppError,
     "locked",
   );
-  store.addMember(room, { ...viewer("h2", "H2"), role: "host" });
+  room = store.addMember(room, { ...viewer("h2", "H2"), role: "host" });
   assertEquals(store.memberCount(room), 2);
 });
 
 // Edge: re-adding an existing member is a no-op (no double count)
 Deno.test("addMember is idempotent for an existing member id", () => {
   const store = new RoomStore(opts);
-  const room = store.create("host", "H");
+  let room = store.create("host", "H");
   const v = viewer("v1", "V");
-  store.addMember(room, v);
-  store.addMember(room, v);
+  room = store.addMember(room, v);
+  room = store.addMember(room, v);
   assertEquals(store.memberCount(room), 2);
 });
 
 // Happy path + edge: remove returns the removed member; removing unknown is undefined
 Deno.test("removeMember removes and returns the member; unknown id returns undefined", () => {
   const store = new RoomStore(opts);
-  const room = store.create("host", "H");
-  store.addMember(room, viewer("v1", "V"));
-  assertEquals(store.removeMember(room, "v1")?.id, "v1");
-  assertEquals(store.memberCount(room), 1);
-  assertEquals(store.removeMember(room, "v1"), undefined);
+  let room = store.create("host", "H");
+  room = store.addMember(room, viewer("v1", "V"));
+  const removed = store.removeMember(room, "v1");
+  assertEquals(removed?.id, "v1");
+  const updated = store.get(room.code);
+  assert(updated !== undefined);
+  assertEquals(store.memberCount(updated), 1);
+  assertEquals(store.removeMember(updated, "v1"), undefined);
 });
 
 // Mutation case: delete removes the room from lookup
@@ -98,9 +103,9 @@ Deno.test("delete removes the room entirely", () => {
 // Mutation case: toMeta reflects the exact membership and flags
 Deno.test("toMeta reflects membership count, lock, host, and capacity", () => {
   const store = new RoomStore(opts);
-  const room = store.create("host", "H");
-  store.addMember(room, viewer("v1", "V"));
-  room.locked = true;
+  let room = store.create("host", "H");
+  room = store.addMember(room, viewer("v1", "V"));
+  room = store.lockRoom(room);
   const meta = store.toMeta(room);
   assertEquals(meta.hostId, "host");
   assertEquals(meta.memberCount, 2);
@@ -131,4 +136,27 @@ Deno.test("toMeta omits metadata when none was provided", () => {
   const store = new RoomStore(opts);
   const room = store.create("host", "H");
   assertEquals(store.toMeta(room).metadata, undefined);
+});
+
+// Mutation case: an illegal transition throws without mutating its input
+Deno.test("addMember throws on an illegal transition without mutating its input", () => {
+  const store = new RoomStore(opts);
+  let room = store.create("host", "H");
+  room = store.lockRoom(room);
+  const before = { ...room, members: new Map(room.members) };
+  assertRejects(
+    () =>
+      Promise.resolve().then(() => store.addMember(room, viewer("v1", "V"))),
+    AppError,
+    "locked",
+  );
+  assertEquals(room.locked, before.locked);
+  assertEquals(room.members.size, before.members.size);
+});
+
+// Edge: a freshly created room is frozen at runtime, not just readonly in types
+Deno.test("create returns a runtime-frozen room", () => {
+  const store = new RoomStore(opts);
+  const room = store.create("host", "H");
+  assertEquals(Object.isFrozen(room), true);
 });

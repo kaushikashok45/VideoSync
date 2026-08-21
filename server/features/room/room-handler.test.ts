@@ -1,4 +1,4 @@
-import { assertEquals } from "@std/assert";
+import { assert, assertEquals } from "@std/assert";
 import { createServer } from "node:http";
 import type { Server } from "node:http";
 import { Server as SocketIOServer } from "socket.io";
@@ -39,6 +39,37 @@ async function makeHarness() {
   }
 
   return { io, httpServer, connect, waitFor, rooms };
+}
+
+async function makeRoom(
+  h: Awaited<ReturnType<typeof makeHarness>>,
+  hostName: string,
+  viewerName: string,
+) {
+  const host = await h.connect();
+  const createdP = h.waitFor<{ room: { code: string } }>(
+    host,
+    SOCKET_EVENTS.ROOM_CREATED,
+  );
+  host.emit(SOCKET_EVENTS.ROOM_CREATE, { name: hostName });
+  const { room } = await createdP;
+  const viewer = await h.connect();
+  const joinedP = h.waitFor<Record<string, unknown>>(
+    viewer,
+    SOCKET_EVENTS.ROOM_JOINED,
+  );
+  // Also await the host's MEMBER_JOINED. The server emits ROOM_JOINED to the
+  // joiner and MEMBER_JOINED to the rest of the room; awaiting only the former
+  // leaves the latter in flight, so a later listener on this host would catch
+  // this room's own join event and read as a cross-room leak.
+  const memberSeenP = h.waitFor<Record<string, unknown>>(
+    host,
+    SOCKET_EVENTS.MEMBER_JOINED,
+  );
+  viewer.emit(SOCKET_EVENTS.ROOM_JOIN, { code: room.code, name: viewerName });
+  await joinedP;
+  await memberSeenP;
+  return { host, viewer, code: room.code };
 }
 
 // Happy path
@@ -412,6 +443,263 @@ Deno.test("failed create keeps the host room alive", async () => {
     assertEquals(err.code, "VALIDATION_NAME_EMPTY");
     assertEquals(h.rooms.get(room.code) !== undefined, true);
     host.disconnect();
+  } finally {
+    h.io.close();
+    await new Promise<void>((r) => h.httpServer.close(() => r()));
+  }
+});
+
+// Room isolation (ROOM-INV-11): a member joining one room sends no MEMBER_JOINED to another room's members
+Deno.test("a member joining one room reaches no member of another room", async () => {
+  const h = await makeHarness();
+  try {
+    const roomA = await makeRoom(h, "Alice", "Bob");
+    const roomB = await makeRoom(h, "Carol", "Dave");
+
+    let roomBHostReceived = false;
+    let roomBViewerReceived = false;
+    roomB.host.on(SOCKET_EVENTS.MEMBER_JOINED, () => {
+      roomBHostReceived = true;
+    });
+    roomB.viewer.on(SOCKET_EVENTS.MEMBER_JOINED, () => {
+      roomBViewerReceived = true;
+    });
+
+    const joinedOnAHost = h.waitFor<{ member: { name: string } }>(
+      roomA.host,
+      SOCKET_EVENTS.MEMBER_JOINED,
+    );
+    const newViewer = await h.connect();
+    const joinedP = h.waitFor<Record<string, unknown>>(
+      newViewer,
+      SOCKET_EVENTS.ROOM_JOINED,
+    );
+    newViewer.emit(SOCKET_EVENTS.ROOM_JOIN, {
+      code: roomA.code,
+      name: "Eve",
+    });
+    await joinedP;
+    const memberEvent = await joinedOnAHost;
+    assertEquals(memberEvent.member.name, "Eve");
+
+    await new Promise((r) => setTimeout(r, 200));
+    assertEquals(roomBHostReceived, false);
+    assertEquals(roomBViewerReceived, false);
+
+    roomA.host.disconnect();
+    roomA.viewer.disconnect();
+    newViewer.disconnect();
+    roomB.host.disconnect();
+    roomB.viewer.disconnect();
+  } finally {
+    h.io.close();
+    await new Promise<void>((r) => h.httpServer.close(() => r()));
+  }
+});
+
+// Room isolation (ROOM-INV-11): a member leaving one room sends no MEMBER_LEFT to another room's members
+Deno.test("a member leaving one room reaches no member of another room", async () => {
+  const h = await makeHarness();
+  try {
+    const roomA = await makeRoom(h, "Alice", "Bob");
+    const roomB = await makeRoom(h, "Carol", "Dave");
+
+    let roomBHostReceived = false;
+    let roomBViewerReceived = false;
+    roomB.host.on(SOCKET_EVENTS.MEMBER_LEFT, () => {
+      roomBHostReceived = true;
+    });
+    roomB.viewer.on(SOCKET_EVENTS.MEMBER_LEFT, () => {
+      roomBViewerReceived = true;
+    });
+
+    const leftOnAHost = h.waitFor<{ memberId: string }>(
+      roomA.host,
+      SOCKET_EVENTS.MEMBER_LEFT,
+    );
+    const viewerAId = roomA.viewer.id;
+    roomA.viewer.disconnect();
+    const left = await leftOnAHost;
+    assertEquals(left.memberId, viewerAId);
+
+    await new Promise((r) => setTimeout(r, 200));
+    assertEquals(roomBHostReceived, false);
+    assertEquals(roomBViewerReceived, false);
+
+    roomA.host.disconnect();
+    roomB.host.disconnect();
+    roomB.viewer.disconnect();
+  } finally {
+    h.io.close();
+    await new Promise<void>((r) => h.httpServer.close(() => r()));
+  }
+});
+
+// Room isolation (ROOM-INV-11): a room ending on host disconnect leaves another room and its members untouched
+Deno.test("a room ending on host disconnect reaches no member of another room and leaves it running", async () => {
+  const h = await makeHarness();
+  try {
+    const roomA = await makeRoom(h, "Alice", "Bob");
+    const roomB = await makeRoom(h, "Carol", "Dave");
+
+    let roomBHostReceived = false;
+    let roomBViewerReceived = false;
+    roomB.host.on(SOCKET_EVENTS.ROOM_ENDED, () => {
+      roomBHostReceived = true;
+    });
+    roomB.viewer.on(SOCKET_EVENTS.ROOM_ENDED, () => {
+      roomBViewerReceived = true;
+    });
+
+    const endedOnAViewer = h.waitFor<Record<string, never>>(
+      roomA.viewer,
+      SOCKET_EVENTS.ROOM_ENDED,
+    );
+    roomA.host.disconnect();
+    await endedOnAViewer;
+    assertEquals(h.rooms.get(roomA.code), undefined);
+
+    await new Promise((r) => setTimeout(r, 200));
+    assertEquals(roomBHostReceived, false);
+    assertEquals(roomBViewerReceived, false);
+    assertEquals(h.rooms.get(roomB.code) !== undefined, true);
+
+    roomA.viewer.disconnect();
+    roomB.host.disconnect();
+    roomB.viewer.disconnect();
+  } finally {
+    h.io.close();
+    await new Promise<void>((r) => h.httpServer.close(() => r()));
+  }
+});
+
+// Room isolation (ROOM-INV-11): supplying another room's code to a mutating op has no effect on that room
+Deno.test("locking a room ignores a foreign room code supplied by the client and does not affect that other room", async () => {
+  const h = await makeHarness();
+  try {
+    const roomA = await makeRoom(h, "Alice", "Bob");
+    const roomB = await makeRoom(h, "Carol", "Dave");
+
+    let roomBLockedReceived = false;
+    roomB.host.on(SOCKET_EVENTS.ROOM_LOCKED, () => {
+      roomBLockedReceived = true;
+    });
+    roomB.viewer.on(SOCKET_EVENTS.ROOM_LOCKED, () => {
+      roomBLockedReceived = true;
+    });
+
+    const lockedOnAViewer = h.waitFor<Record<string, never>>(
+      roomA.viewer,
+      SOCKET_EVENTS.ROOM_LOCKED,
+    );
+    // roomA's host is only ever a member of roomA server-side; a client-supplied
+    // "code" for roomB must not redirect the mutation there.
+    roomA.host.emit(SOCKET_EVENTS.ROOM_LOCK, { code: roomB.code });
+    await lockedOnAViewer;
+
+    assertEquals(h.rooms.get(roomA.code)?.locked, true);
+    assertEquals(h.rooms.get(roomB.code)?.locked, false);
+
+    await new Promise((r) => setTimeout(r, 200));
+    assertEquals(roomBLockedReceived, false);
+
+    roomA.host.disconnect();
+    roomA.viewer.disconnect();
+    roomB.host.disconnect();
+    roomB.viewer.disconnect();
+  } finally {
+    h.io.close();
+    await new Promise<void>((r) => h.httpServer.close(() => r()));
+  }
+});
+
+// ROOM-INV-10: a room that has ended accepts no new member and cannot be re-opened
+Deno.test("a room that has ended accepts no new member and cannot be re-opened", async () => {
+  const h = await makeHarness();
+  try {
+    const host = await h.connect();
+    const createdP = h.waitFor<{ room: { code: string } }>(
+      host,
+      SOCKET_EVENTS.ROOM_CREATED,
+    );
+    host.emit(SOCKET_EVENTS.ROOM_CREATE, { name: "Alice" });
+    const { room } = await createdP;
+
+    const viewer = await h.connect();
+    const joinedP = h.waitFor<Record<string, unknown>>(
+      viewer,
+      SOCKET_EVENTS.ROOM_JOINED,
+    );
+    viewer.emit(SOCKET_EVENTS.ROOM_JOIN, { code: room.code, name: "Bob" });
+    await joinedP;
+
+    const endedP = h.waitFor<Record<string, never>>(
+      viewer,
+      SOCKET_EVENTS.ROOM_ENDED,
+    );
+    host.disconnect();
+    await endedP;
+    assertEquals(h.rooms.get(room.code), undefined);
+
+    // First attempt to rejoin the ended room's code
+    const errP1 = h.waitFor<{ code: string }>(viewer, SOCKET_EVENTS.APP_ERROR);
+    viewer.emit(SOCKET_EVENTS.ROOM_JOIN, { code: room.code, name: "Bob" });
+    const err1 = await errP1;
+    assertEquals(err1.code, "ROOM_NOT_FOUND");
+    assertEquals(h.rooms.get(room.code), undefined);
+
+    // Second attempt, later — the room must never be resurrected
+    const errP2 = h.waitFor<{ code: string }>(viewer, SOCKET_EVENTS.APP_ERROR);
+    viewer.emit(SOCKET_EVENTS.ROOM_JOIN, { code: room.code, name: "Bob" });
+    const err2 = await errP2;
+    assertEquals(err2.code, "ROOM_NOT_FOUND");
+    assertEquals(h.rooms.get(room.code), undefined);
+
+    viewer.disconnect();
+  } finally {
+    h.io.close();
+    await new Promise<void>((r) => h.httpServer.close(() => r()));
+  }
+});
+
+// MEMBER-INV-7: a client-asserted role or canControl in the join payload is not trusted
+Deno.test("a client-asserted role or canControl in the join payload is not trusted by the server", async () => {
+  const h = await makeHarness();
+  try {
+    const host = await h.connect();
+    const createdP = h.waitFor<{ room: { code: string } }>(
+      host,
+      SOCKET_EVENTS.ROOM_CREATED,
+    );
+    host.emit(SOCKET_EVENTS.ROOM_CREATE, { name: "Alice" });
+    const { room } = await createdP;
+
+    const viewer = await h.connect();
+    const joinedP = h.waitFor<
+      { members: Array<{ id: string; role: string; canControl: boolean }> }
+    >(viewer, SOCKET_EVENTS.ROOM_JOINED);
+    // A malicious client asserts a role and control it was never granted.
+    viewer.emit(SOCKET_EVENTS.ROOM_JOIN, {
+      code: room.code,
+      name: "Eve",
+      role: "host",
+      canControl: true,
+    });
+    const joined = await joinedP;
+    const eve = joined.members.find((m) => m.id === viewer.id);
+    assertEquals(eve?.role, "viewer");
+    assertEquals(eve?.canControl, false);
+
+    // Server-side room state agrees: there is still exactly one host, the original.
+    const storedRoom = h.rooms.getOrThrow(room.code);
+    assertEquals(storedRoom.hostId, host.id);
+    const viewerId = viewer.id;
+    assert(viewerId, "viewer socket must be connected to have an id");
+    assertEquals(storedRoom.members.get(viewerId)?.role, "viewer");
+    assertEquals(storedRoom.members.get(viewerId)?.canControl, false);
+
+    host.disconnect();
+    viewer.disconnect();
   } finally {
     h.io.close();
     await new Promise<void>((r) => h.httpServer.close(() => r()));

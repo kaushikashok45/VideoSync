@@ -8,7 +8,7 @@ on:
 
 jobs:
   verify:
-    name: Verify (fmt + lint + check + test + build)
+    name: Verify (fmt + lint + check + test) + mutate + build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,17 +20,11 @@ jobs:
       - name: Install dependencies
         run: deno install
 
-      - name: Format check
-        run: deno fmt --check
+      - name: Verify (fmt + lint + check app/server + test)
+        run: deno task verify
 
-      - name: Lint
-        run: deno lint
-
-      - name: Typecheck
-        run: deno check --sloppy-imports app server.js
-
-      - name: Test
-        run: deno test -A --sloppy-imports
+      - name: Mutation testing (full repo)
+        run: deno task mutate:ci
 
       - name: Build
         run: deno task build

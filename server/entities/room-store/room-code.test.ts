@@ -1,5 +1,10 @@
-import { assertEquals } from "@std/assert";
-import { generateRoomCode, isValidRoomCode } from "./room-code.ts";
+import { assertEquals, assertThrows } from "@std/assert";
+import {
+  generateRoomCode,
+  isValidRoomCode,
+  parseRoomCode,
+} from "./room-code.ts";
+import { AppError } from "../../../shared/contracts/app-error.ts";
 
 // Happy path
 Deno.test("generateRoomCode returns a code of the requested length", () => {
@@ -43,4 +48,16 @@ Deno.test("isValidRoomCode accepts exactly-at-length and rejects beyond", () => 
 Deno.test("isValidRoomCode rejects codes with whitespace", () => {
   assertEquals(isValidRoomCode("abc e"), false);
   assertEquals(isValidRoomCode("abcde "), false);
+});
+
+// Happy path
+Deno.test("parseRoomCode returns the code unchanged when well-formed", () => {
+  assertEquals(parseRoomCode("abcde"), "abcde");
+});
+
+// Sad path: the one throwing construction boundary
+Deno.test("parseRoomCode throws AppError on a malformed code", () => {
+  assertThrows(() => parseRoomCode("ABCDE"), AppError, "code");
+  assertThrows(() => parseRoomCode("abcd"), AppError, "code");
+  assertThrows(() => parseRoomCode(""), AppError, "code");
 });

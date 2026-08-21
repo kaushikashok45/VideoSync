@@ -40,36 +40,38 @@ or `tsc` — Deno replaces all of these.
 
 ## Architecture
 
-Feature-based modules with a strict **UI / logic / contract** separation:
+> **Authoritative source: PRD §3 (Feature-Sliced Design).** The FSD target tree,
+> layer direction, and slice internals (`ui/ model/ api/ lib/`) are defined in
+> `docs/specs/2026-08-08-sync-party-v2-prd.md` §3. This section no longer
+> restates the tree; it records only the two facts §3 omits and the enforcement
+> pointer.
+
+**Layer order (enforced by `deno task check:boundary`):**
 
 ```
-app/
-  common/                 cross-cutting shared code (components, logic, contracts, constants)
-    components/           presentational UI (Header, Footer, Popover, TextField, UnifiedButton)
-    contracts/            .d.ts namespace contracts (Button, Fields, Popover) + constants.ts
-    logic/                hooks & pure logic (useButtonBehaviour, usePopoverBehaviour, generateRoomID)
-  context/Session/        global session state (roomId, userName, role)
-    components/           SessionContextProvider
-    contracts/            Session.d.ts, Role.ts
-    logic/                SessionContext
-  features/               feature-scoped modules
-    toastMessages/        sonner-based toast library + view
-    videoPlayback/        video player UI, controls, seeker, volume, share, fullscreen
-    webRTC/               simple-peer managers (Base/Host/Reciever PeerManager)
-    webSocket/            socket.io managers (Base/Host/Reciever SocketManager)
-  routes/                 React Router flat routes
-    _index/               home page (name entry + room id inference)
-    $id.SetupScreen/      host/join party choice
-    $id.file-upload/      host video upload
-    $id.HostVideoPlayerNew.tsx      host playback route
-    $id.RecieverVideoPlayerNew.tsx  receiver playback route
-  utils/                  shared helper contracts (peerRegistry, peerSignal, videoPlayerUtils)
-server/
-  app/                    server bootstrap (config, entry, Express + Socket.IO wiring)
-  entities/               domain stores (room-store)
-  features/               feature handlers (room, chat, reactions, signaling)
-  shared/                 server-side shared code (logger, socket-utils)
+app/     shared(0) ← entities(1) ← features(2) ← widgets(3) ← pages(4) ← app(5)
+server/  shared(0) ← entities(1) ← features(2) ← app(3)
 ```
+
+A module may import its own layer and lower-numbered layers only. Cross-slice
+imports at the same layer must go through the target slice's `index.ts` public
+entry — never a deep import into its internals.
+
+**`shared/contracts/` is a layer −1 protocol root.** It sits at the repo root as
+a sibling of `app/` and `server/` (not nested under either), aliased as
+`contracts/` in `deno.json`. It holds **only** the wire protocol — socket
+events, data-channel payloads, and the shared `AppError` model — shared by both
+roots. Both `app/` and `server/` may import from it; it imports from neither.
+Anything UI-only or server-only does not belong here.
+
+**Historical note.** The pre-FSD `components/ logic/ contracts/ types/` layout
+is frozen as a **legacy zone** (directory list in `docs/GOVERNANCE.md`): exempt
+from the boundary checker, ratcheted so it may only shrink, and migrated
+slice-by-slice toward the FSD layout in PRD §3. Do not add new files there.
+
+**How every rule in this file is enforced:** see `docs/GOVERNANCE.md` — the
+single map of rule → owning document → enforcing `deno task` → blocking or
+advisory.
 
 ### Data flow
 
@@ -91,15 +93,30 @@ server/
 
 ### Module layout (mandatory)
 
-Every feature/route/context folder keeps the pattern:
+Every **slice** (a folder under `entities/`, `features/`, `widgets/`, `pages/`)
+keeps the FSD internal split. Each part is enforced:
 
-- `components/` — UI only. No business logic. Props come from `types/` or
-  `contracts/`.
-- `logic/` — business logic: hooks (`useXBehaviour`) and class managers. No JSX.
-- `contracts/` — `.d.ts` files using `declare namespace X { ... } export = X`
-  for type contracts, plus `constants.ts` for string enums/event names.
-- `types/` — small prop/type definitions for components (when not in a
-  contract).
+- `ui/` — presentation only. **Props-only**: no store/`model/`/`api/` import, no
+  `useState`/`useEffect`/`useReducer`. All state and callbacks arrive as props,
+  so a `ui/` component renders in a test with no providers.
+  (`deno task check:dumb-ui`)
+- `model/` — behaviour: stores, state transitions, invariant-enforcing entity
+  code. No JSX. Domain code here may not import a concrete transport
+  (`socket.io`, `simple-peer`, `express`). (`deno task check:semantics`)
+- `api/` — the transport edge: the only place a concrete socket/peer client is
+  named. External data is parsed here (parse-don't-validate).
+- `lib/` — slice-private pure functions. Unreachable from outside the slice by
+  construction (`deep-import` rule), so it is where extracted helpers live —
+  **never** a `utils.ts`/`helpers.ts` bag. (`deno task check:boundary`)
+- `contracts/` — shared type shapes (`.d.ts` namespace contracts) and
+  `constants.ts` for event names. The only cross-slice-importable types.
+- `index.ts` — the slice's **only** public entry. Cross-slice imports target
+  this and nothing deeper; its public-export cap is defined in
+  `docs/GOVERNANCE.md` (`public-surface-cap`). Authored **before**
+  implementation (contract-first). (`deno task check:boundary`)
+
+The legacy `components/ logic/ types/` split survives only in the legacy zone
+(see Architecture). Do not create new slices with it.
 
 ### File segregation (mandatory)
 
@@ -237,21 +254,26 @@ and functions into a single file.
 
 ### Coding standards & review
 
-- **`docs/CODING_STANDARDS.md` is authoritative.** It defines size/structure
-  limits (function body ≤ 20 lines, file ≤ 150 lines, ≤ 2 indentation levels
-  past the body, cyclomatic complexity ≤ 8, ≤ 4 params) and a list of code
-  smells.
-- `deno lint` uses the recommended tag as errors. `no-undef` is deliberately off
-  (noise on browser/Node globals); the reviewer catches undefined identifiers
-  instead.
-- **Every completed task is reviewed by a secondary reviewer agent** before it
-  is accepted: a fresh, independent pass that checks size limits, smells, FSD
-  layer rules, Tell-Don't-Ask, SOLID, error-model compliance, and test coverage
-  depth (all five categories). Blocking findings must be fixed; non-blocking
-  ones are logged.
-- **PRs are feature-sized and small enough to review in one sitting.** A PR is
-  rejected if it exceeds ~300 changed lines or ~6 files, or mixes unrelated
-  concerns. Oversized work must be split before review.
+- **`docs/CODING_STANDARDS.md` is authoritative** for size/structure limits, and
+  **`docs/GOVERNANCE.md` is authoritative for _how_ each rule is enforced** —
+  the task, plugin, or panel that checks it. No rule is enforced by hoping an
+  agent read this file; every limit below is a machine check, a lint plugin, or
+  a named reviewer lens.
+- Structural limits — cyclomatic complexity, body length, file length, nesting
+  depth, param count — are defined **only** in `CODING_STANDARDS.md §1` and are
+  machine-enforced by `deno task check:structural`. The numbers are not repeated
+  here. New and changed code is hard-blocked on any violation; existing
+  violations are frozen by the ratchet baseline and may only decrease.
+- `deno lint` runs the recommended tag as errors plus the four project plugins
+  (`structural`, `boundary`, `dumb-ui`, `semantics`). `no-undef` stays off
+  (noise on browser/Node globals); `reviewer-correctness` catches genuine
+  undefined identifiers instead.
+- **Every commit is gated by a cold reviewer panel of four fresh, independent
+  subagents.** See `docs/CODING_STANDARDS.md §5` for the panel roster, lenses,
+  and aggregation rule. Run it with `/review-now`.
+- **PRs are feature-sized and small enough to review in one sitting.** See
+  `docs/CODING_STANDARDS.md §6` for the size limits. Oversized work must be
+  split before review.
 - Every PR must pass `deno task verify` before review.
 
 ## Testing
