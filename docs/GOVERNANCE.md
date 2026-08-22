@@ -251,7 +251,7 @@ aggregation) is specified in **CODING_STANDARDS.md §5** and built in
 | Contract semantic drift since kickoff | `reviewer-contracts-tests` | requires intent comparison |
 | Logic bugs, off-by-one, error/edge paths | `reviewer-correctness` | requires reasoning about behaviour |
 | Boundary validation, races, capacity, socket-payload trust | `reviewer-security-concurrency` | requires threat/timing reasoning |
-| Design fidelity — does the built feature match the approved prototype | `reviewer-design-fidelity` | requires driving two running artifacts and comparing them; no stored baselines |
+| Design fidelity — does the built feature match the approved Figma design | `reviewer-design-fidelity` | requires inspecting the Figma design and driving the running implementation and comparing them; no stored baselines |
 | Visual verification against brand intent | human | not a code property |
 
 ---

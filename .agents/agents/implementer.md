@@ -22,7 +22,7 @@ stage.** Escalating is correct behaviour, not failure.
 | Document | What binds you |
 |---|---|
 | `docs/features/<slug>/01-prd.md` | capabilities `CAP-<n>`, acceptance criteria `AC-<n>.<m>`, failure modes |
-| `02a-design.md` + `mockups/**` | the prototype — an **executable specification**, and the state matrix |
+| `02a-design.md` + its **Figma file reference** | the design specification — load the Figma file (`figma-design-to-code` skill, then `get_design_context`) for exact values, and read the state matrix from `02a-design.md` |
 | `02b-motion.md` | the motion token table and reduced-motion behaviour |
 | `02c-critique.md` | must be `PASS` |
 | `03-hld.md` | slices, layers, contracts, state ownership, `ARCH` compliance, **complexity budget**, superseded assets, ERD delta |

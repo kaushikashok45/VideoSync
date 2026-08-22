@@ -8,7 +8,8 @@ tools:
   bash: true
   write: true
   edit: true
+  figma*: true
 ---
 
-Read and follow `.agents/agents/implementer.md`. That canonical workflow is authoritative; use the enabled OpenCode tools for implementation, testing, and repository inspection.
+Read and follow `.agents/agents/implementer.md`. That canonical workflow is authoritative; use the enabled OpenCode tools for implementation, testing, repository inspection, and reading exact values from the approved Figma file via whatever Figma MCP connector this environment has configured.
 

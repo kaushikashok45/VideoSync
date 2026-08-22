@@ -16,10 +16,19 @@ real uncertainty unresolved has failed at its job, however good the artifact loo
        ⟂ decision gate — every BLOCKING assumption and contradiction resolved
     1. pm-analyst      (cold subagent)              → 01-prd.md
        ⟂ approval gate
+    1b. brand-strategist (cold subagent)            → docs/BRAND-STRATEGY.md (once)
+                                                        + 01b-brand-alignment.md (per feature)
+       ⟂ approval gate — CLEAR required before stage 1c
+    1c. page-strategist  (cold subagent)            → 01c-page-strategy.md
+       ⟂ approval gate
+    1d. creative-director (cold subagent)           → 01d-creative-direction.md
+       ⟂ approval gate
+    1e. visual-designer  (cold subagent)            → 01e-visual-identity.md
+       ⟂ approval gate — required before stage 2
     2. Design triad    (cold subagents)
-       2a. design-lead    → 02a-design.md + mockups/   (screens, IA, states, change inventory)
+       2a. design-lead    → 02a-design.md + Figma file (screens, IA, states, change inventory)
        2b. motion-lead    → 02b-motion.md              (motion language for the change inventory)
-       2c. design-critic  → 02c-critique.md            (drives the prototype; tries to break it)
+       2c. design-critic  → 02c-critique.md            (inspects the Figma file; tries to break it)
            ↺ revise while BLOCKING findings remain, hard cap 4 critique rounds
        ⟂ approval gate
     3. architect       (cold subagent)              → 03-hld.md
@@ -212,6 +221,118 @@ is the architect's decision and naming it is out of lane. Reversibility is judge
 on product commitment (a user-visible contract, a data shape people come to rely
 on), not on how hard the code is to delete.
 
+## Stage 1b — Brand Strategist
+
+`brand-strategist` sits between the approved PRD and the design triad. It owns
+**what the brand means** — positioning, promise, personality, territory — never
+what it looks like, says verbatim, or how it is built. `design-lead` inherits its
+output as a standing constraint the same way it inherits `DESIGN.md`.
+
+**Two modes, chosen by the agent, not the orchestrator**, based on whether
+`docs/BRAND-STRATEGY.md` exists yet:
+
+- **Mode A (first run only)** — no `docs/BRAND-STRATEGY.md` exists. The agent runs
+  the full strategic-definition workflow (evidence audit → audience → competitive
+  landscape → strategic territories → positioning → brand core → personality →
+  tensions → anti-positioning → voice & tone → guardrails → invariants →
+  downstream contract → acceptance test) and writes `docs/BRAND-STRATEGY.md` at
+  the repo root, `Status: DRAFT` or `REVIEW`. It never self-approves to
+  `APPROVED`.
+- **Mode B (every subsequent feature)** — `docs/BRAND-STRATEGY.md` already exists
+  and is the standing brand contract, alongside `PRODUCT.md` and `DESIGN.md`. The
+  agent checks this feature's `01-prd.md` capabilities against the strategy's
+  **Strategic Invariants** and **Associations to Avoid**, and writes
+  `docs/features/<slug>/01b-brand-alignment.md` with a `CLEAR` or `BLOCKED`
+  verdict. A `BLOCKED` verdict names the specific invariant in conflict and
+  requires a human decision before stage 2 runs — the agent never resolves it
+  silently, the same discipline stage 0 applies to contradictions.
+
+**The gate**: `design-lead` may not start until the relevant artifact for this
+feature (`01b-brand-alignment.md` in Mode B, or an `APPROVED` `docs/BRAND-STRATEGY.md`
+in Mode A) says `CLEAR`/`APPROVED`. A brand conflict discovered here is far cheaper
+than one a design critic or a human notices after a full prototype exists.
+
+`docs/BRAND-STRATEGY.md` is a **standing document**, not a per-feature artifact —
+it is not written to `docs/features/<slug>/`, is not overwritten on every run, and
+changes only through a confirmed Decision Log entry, never a silent rewrite.
+
+## Stage 1c — Page Strategist
+
+`page-strategist` runs after `brand-strategist` clears and before the design
+triad. It owns the **experience** — concept, narrative arc, scene/section flow,
+persistence, information relationships, composition logic, interaction and scroll
+intent, navigation model, and the concrete Design Brief and Motion Brief that
+`design-lead` and `motion-lead` execute against. It owns none of the **execution**
+— no typography, colour, layout, component, choreography, timing, or transition
+mechanic. The boundary is the same shape as PM/architecture: this stage names
+*what the experience must be*, never *how it looks or moves*.
+
+Its first job is choosing an **experience mode** (conventional, editorial, product
+demonstration, cinematic, immersive, spatial, interactive, experimental, hybrid)
+and justifying it — `conventional` is this product's default given its five-route,
+low-commitment, real-time shape, so anything else must state explicitly what it
+communicates that a conventional page cannot.
+
+**Output**: `docs/features/<slug>/01c-page-strategy.md`, gated on `01-prd.md`
+being `**Approved**: yes` and `01b-brand-alignment.md`'s verdict being `CLEAR`.
+`creative-director` may not start until this artifact itself carries
+`**Approved**: yes` — a design built against an unresolved experience concept is
+a prototype the critic will send back for the wrong reason.
+
+## Stage 1d — Creative Director
+
+`creative-director` runs after `page-strategist` and before the design triad. It
+owns the **creative interpretation** of the page strategy — thesis, layout and
+composition direction, typography and colour direction, image/media/3D
+direction, and the executable briefs `design-lead` and `motion-lead` consume. It
+owns none of the **exact execution** — no hex values, spacing, grid, component
+design, timing, or easing.
+
+**This product already has a committed creative system in `DESIGN.md`** (dark
+cinema, red-as-only-saturated-colour, Avenir-style type). The stage's default
+posture is interpreting that system for this page's experience concept, not
+inventing a new one — genuine creative-territory alternatives are generated only
+when the page's experience mode is something `DESIGN.md` does not yet resolve.
+Manufacturing divergence to look thorough is the specific failure this stage
+exists to avoid, mirrored from the same anti-padding discipline `pm-analyst` and
+`brand-strategist` already apply.
+
+Two structural tests gate everything it proposes: the **remove-the-effects
+test** (does the idea survive with every gradient, blur, and animation
+stripped?) and the **AI-slop test** (does it reduce to "premium + cinematic +
+minimal + immersive + 3D + gradient + glass," or is it specific to this
+product?).
+
+**Output**: `docs/features/<slug>/01d-creative-direction.md`, gated on
+`01c-page-strategy.md` being `**Approved**: yes`. `visual-designer` may not
+start until this artifact itself carries `**Approved**: yes`.
+
+## Stage 1e — Brand Visual Designer
+
+`visual-designer` runs after `creative-director` and before the design triad. It
+owns the **reproducible visual grammar** — typographic system, colour system,
+composition grammar, shape/surface/depth rules, iconography, tokens, and
+governance classification — that translates the creative thesis into rules
+`design-lead` can apply consistently across screens this stage never sees. It
+owns none of the **page-specific execution** — no screen layout, no component
+design, no motion timing.
+
+**`DESIGN.md` already is this product's visual-identity document** — committed
+tokens, typography, motion language. This stage's default is confirming the
+feature's creative direction is already expressible with those tokens, and
+proposing a narrow, explicitly-governed extension (§21 `DESIGN.md` Delta) only
+when it genuinely isn't. It never edits `DESIGN.md` itself — a human confirms
+any delta the same way `brand-strategist`'s Decision Log entries are confirmed
+before `docs/BRAND-STRATEGY.md` changes.
+
+Every rule it states is classified `INVARIANT` / `CORE` / `CONTEXTUAL` /
+`EXPERIMENTAL` / `PROHIBITED`, so `design-lead` can tell a law from a suggestion
+without asking.
+
+**Output**: `docs/features/<slug>/01e-visual-identity.md`, gated on
+`01d-creative-direction.md` being `**Approved**: yes`. `design-lead` may not
+start until this artifact itself carries `**Approved**: yes`.
+
 ## Stage 2 — the design triad
 
 Three agents with different postures, because one agent holding all three collapses
@@ -220,9 +341,9 @@ design-critic tries to break it.**
 
 | Agent | Consumes | Produces |
 |---|---|---|
-| `design-lead` | `01-prd.md`, `DESIGN.md`, `PRODUCT.md`, `PRODUCT-MODEL.md` | `02a-design.md` + `mockups/` |
-| `motion-lead` | `02a-design.md`'s **change inventory**, `DESIGN.md` §Motion | `02b-motion.md` |
-| `design-critic` | the **running prototype**, `01-prd.md`, `DESIGN.md`, `PRODUCT-MODEL.md` | `02c-critique.md` |
+| `design-lead` | `01-prd.md` through `01e-visual-identity.md`, `DESIGN.md`, `PRODUCT.md`, `PRODUCT-MODEL.md` | `02a-design.md` + the Figma file |
+| `motion-lead` | `02a-design.md`'s **change inventory**, `01c-page-strategy.md` §18/`01d-creative-direction.md` §16 Motion Briefs, `DESIGN.md` §Motion | `02b-motion.md` |
+| `design-critic` | the **Figma file**, `01-prd.md`, `DESIGN.md`, `PRODUCT-MODEL.md` | `02c-critique.md` |
 
 ### The change inventory — why motion cannot decorate
 
@@ -236,17 +357,27 @@ nothing to explain, so it cannot be justified. Motion placed after design withou
 this contract becomes decoration, which is the failure mode the split exists to
 prevent.
 
-### The prototype is the specification
+### The Figma file is the specification
 
-Mockups are **self-contained runnable HTML** under `docs/features/<slug>/mockups/`
-— no CDN, no external fonts, everything inlined. **Every state in the state matrix
-must be reachable through visible controls**, including the real-time states. A state
-matrix whose states cannot be reached is a checklist someone ticked.
+`design-lead`'s primary deliverable is an actual Figma design, built via the
+connected Figma MCP — not a prose description of one, and, as of this stage's
+Figma-first rewrite, no longer a self-contained HTML prototype. `02a-design.md`
+is the companion spec: information architecture, the state matrix, the change
+inventory, and a reference (file link/key, frame names) to the Figma screens.
+**Every state in the state matrix must exist as a named frame or variant**,
+including the real-time states. A state matrix with no corresponding frame is a
+checklist someone ticked.
 
-The critic **drives** the prototype in a browser: tabs through it to check focus
-order, triggers failure states, resizes to mobile, toggles reduced motion, reads the
-accessibility tree. Most feedback and accessibility defects are invisible in HTML
-source, so source review alone would systematically miss them.
+The critic **loads and inspects** the Figma frame tree (`get_design_context` or
+the platform's equivalent): frame completeness against the matrix, naming and
+organisation, colour/type against the actual token values, and any Figma
+prototype-link flow. **A static design cannot be tab-tested, console-tested, or
+measured under `prefers-reduced-motion`** — the critic says so explicitly rather
+than implying coverage it doesn't have. Those checks move to
+`reviewer-design-fidelity`, later, against the actual built implementation. If
+the Figma MCP is not authorized in a given environment, `design-lead` stops and
+reports stage 2a blocked rather than substituting a prototype the rest of the
+triad is no longer built to consume.
 
 ### The state matrix — including this product's real states
 
@@ -414,13 +545,14 @@ no session history, aggregated **OR-blocking**:
 | `reviewer-architecture` | Tier 3 only — ISP, premature abstraction, whether a name is *correct*, `useRef`-as-state |
 | `reviewer-contracts-tests` | contract fidelity, the five coverage categories, mutation adequacy, whether a named test *proves* its invariant |
 | `reviewer-security-concurrency` | `ARCH-004` room isolation, `ARCH-005` trust boundaries, races, capacity, payload trust |
-| **`reviewer-design-fidelity`** | **does the built feature match the approved prototype** — states, behaviour, accessibility, and visual divergence, checked by driving both in a browser |
+| **`reviewer-design-fidelity`** | **does the built feature match the approved Figma design** — states, behaviour, accessibility, and visual divergence, checked by inspecting the design and driving the implementation |
 
-`reviewer-design-fidelity` closes the Design→Code loop. It loads the approved
-prototype and the running implementation at matching viewports and reports divergence
-by inspection. **There are no stored screenshot baselines** — the comparison is
-browser-driven and human-legible, not pixel-exact, and it is honest about that rather
-than pretending to a precision it does not have.
+`reviewer-design-fidelity` closes the Design→Code loop. It loads the approved Figma
+design and drives the running implementation at matching viewports and reports
+divergence by inspection — an asymmetric comparison, since one side is now a static
+design artifact and the other a live program. **There are no stored screenshot
+baselines** — the comparison is inspection-driven and human-legible, not pixel-exact,
+and it is honest about that rather than pretending to a precision it does not have.
 
 ## `pipeline:check`
 

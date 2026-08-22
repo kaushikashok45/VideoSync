@@ -160,6 +160,61 @@ Halt after stage 1 completes. Each subsequent stage needs its own approval; do n
 chain them. Confirm the drafted `PD-<n>` entries with the requester and append them
 to `docs/DECISIONS.md` yourself — an agent never appends there unilaterally.
 
+## Step 11 — Brand alignment, before the design triad
+
+Once `01-prd.md` is approved, spawn `brand-strategist` (stage 1b) the same cold
+way. It runs one of two modes on its own: if `docs/BRAND-STRATEGY.md` does not yet
+exist, it defines the standing brand strategy first; otherwise it checks this
+feature's PRD against the existing strategy's invariants.
+
+Show the requester its verdict. On `CLEAR`, or `docs/BRAND-STRATEGY.md` reaching
+`APPROVED`, proceed to `page-strategist`. On `BLOCKED`, the conflict names a
+specific strategic invariant — get a human decision the same way stage 0 resolves
+a contradiction, before `page-strategist` or `design-lead` ever run. Do not let
+either start against an unresolved brand conflict; work built on it is wasted.
+
+## Step 12 — Page strategy, before the design triad
+
+Once brand alignment is `CLEAR`, spawn `page-strategist` (stage 1c) the same cold
+way. It reads `01-prd.md` and `01b-brand-alignment.md` and decides what the page
+is as an experience — concept, narrative, scene flow, and the concrete Design
+Brief and Motion Brief — before any visual or motion work starts.
+
+Show the requester the experience concept and mode it chose, and get explicit
+approval — the same gate every other stage artifact needs. Only then spawn
+`creative-director`. A design or motion agent that inherits no page strategy
+invents the experience concept itself, which is exactly the gap this stage
+exists to close.
+
+## Step 13 — Creative direction, before the design triad
+
+Once the page strategy is approved, spawn `creative-director` (stage 1d) the
+same cold way. It reads the brand and page strategy and produces the creative
+thesis, layout/typography/colour/media direction, and the executable Design and
+Motion briefs — interpreting `DESIGN.md`'s existing dark-cinema system rather
+than inventing a new one, unless the page genuinely needs territory that system
+doesn't cover.
+
+Show the requester the selected creative thesis and get explicit approval.
+Watch for over-reach here specifically: a `creative-direction.md` that proposes
+2-3 alternative visual territories for a feature that plainly fits the existing
+system is padding, not diligence — push back on it the same way stage 0 pushes
+back on invented scope. Only once approved does `visual-designer` run.
+
+## Step 14 — Visual identity, before the design triad
+
+Once the creative direction is approved, spawn `visual-designer` (stage 1e) the
+same cold way. It translates the creative thesis into a reproducible visual
+grammar — typography, colour, composition rules, tokens, governance — that
+`design-lead` applies consistently, rather than reinventing per screen.
+
+Show the requester the visual identity thesis and, specifically, whether it
+proposed a `DESIGN.md` delta. **A delta needs your own separate confirmation
+before `DESIGN.md` itself is edited** — this stage only ever proposes one, the
+same discipline `docs/DECISIONS.md` entries follow; it never edits the standing
+file itself. Once approved, and once any delta is confirmed and applied, spawn
+`design-lead` — only now does the design triad actually begin.
+
 ## What good looks like at the end of stage 0
 
 ```

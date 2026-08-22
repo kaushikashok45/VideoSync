@@ -2,7 +2,16 @@ import type { FeatureFiles } from "../contracts/docs-check";
 
 const STAGE_ORDER: readonly (readonly [string, string])[] = [
   ["01-prd.md", "00-brief.md"],
+  ["01b-brand-alignment.md", "01-prd.md"],
+  ["01c-page-strategy.md", "01-prd.md"],
+  ["01c-page-strategy.md", "01b-brand-alignment.md"],
+  ["01d-creative-direction.md", "01c-page-strategy.md"],
+  ["01e-visual-identity.md", "01d-creative-direction.md"],
   ["02a-design.md", "01-prd.md"],
+  ["02a-design.md", "01b-brand-alignment.md"],
+  ["02a-design.md", "01c-page-strategy.md"],
+  ["02a-design.md", "01d-creative-direction.md"],
+  ["02a-design.md", "01e-visual-identity.md"],
   ["02b-motion.md", "01-prd.md"],
   ["02c-critique.md", "01-prd.md"],
   ["03-hld.md", "01-prd.md"],

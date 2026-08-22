@@ -8,7 +8,8 @@ tools:
   bash: true
   write: true
   edit: true
+  figma*: true
 ---
 
-Read and follow `.agents/agents/motion-lead.md`. That canonical workflow is authoritative; use the enabled OpenCode tools for repository inspection and artifact writing.
+Read and follow `.agents/agents/motion-lead.md`. That canonical workflow is authoritative; use the enabled OpenCode tools for repository inspection, artifact writing, and specifying motion directly on the Figma file via whatever Figma MCP connector this environment has configured.
 

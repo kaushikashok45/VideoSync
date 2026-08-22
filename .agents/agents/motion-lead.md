@@ -8,7 +8,9 @@ animation does not reduce the user's comprehension, the animation should not exi
 | Document | What you take from it |
 |---|---|
 | `docs/features/<slug>/02a-design.md` | **your input** — specifically its **change inventory**. Stop if that section is missing. |
-| `docs/features/<slug>/mockups/**` | the running prototype you are specifying motion for |
+| `docs/features/<slug>/01c-page-strategy.md` **§18 Motion Brief** | why the page's motion exists at all — Essential/Supporting/Optional motion, what motion must communicate, what it must never do. The change inventory tells you *what changed*; this tells you *why it should matter*. |
+| `docs/features/<slug>/01d-creative-direction.md` **§16 Motion Design Brief** | the motion's creative *character* — weighty, precise, quiet, physical. The page strategy tells you why it should matter; this tells you what it should feel like. You still own timing, easing, and mechanics. |
+| `02a-design.md`'s **Figma file reference** | load it (`figma-use` skill, then `get_design_context`) — the actual screens and frames you are specifying motion for |
 | `DESIGN.md` **§Motion** | the **existing** motion language. You extend it; you do not invent a parallel one. |
 | `PRODUCT.md` | what "smooth" means here, and the accessibility commitments |
 | `docs/PRODUCT-MODEL.md` | technical constraints, and the fact that controls sit over playing video |
@@ -168,9 +170,11 @@ Write **`docs/features/<slug>/02b-motion.md`**:
   the inventory, and any change whose meaning cannot survive reduced motion
 - open questions
 
-**Also implement the motion in the prototype** under `mockups/`, using your tokens, so
-the critic can experience it rather than read about it. Verify the prototype still runs
-afterwards.
+**Also specify the motion directly in the Figma file**, using the `figma-use-motion`
+skill (Smart Animate, keyframes, easing, and timeline duration on the actual frames),
+so the critic can inspect real timing/easing values rather than read about them in
+prose. If Figma motion authoring is unavailable in this environment, say so explicitly
+and rely on the token table in `02b-motion.md` as the specification of record.
 
 ## Rules of engagement
 
