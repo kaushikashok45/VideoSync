@@ -1,0 +1,16 @@
+.source-screen-field {
+  position: absolute;
+  inset: -3rem -2.5rem;
+  background-image: radial-gradient(
+    rgb(var(--ink-faint-rgb) / 0.35) 1px,
+    transparent 1px
+  );
+  background-size: 18px 18px;
+  -webkit-mask-image: radial-gradient(
+    ellipse at center,
+    black 40%,
+    transparent 75%
+  );
+  mask-image: radial-gradient(ellipse at center, black 40%, transparent 75%);
+  pointer-events: none;
+}
