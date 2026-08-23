@@ -27,7 +27,7 @@ colors:
 typography:
   display:
     fontFamily: "Avenir Next", "Helvetica Neue", system-ui, sans-serif
-    fontSize: 3.5rem
+    fontSize: clamp(2.5rem, 5vw + 1rem, 3.5rem)
     fontWeight: 600
     lineHeight: 1.1
     letterSpacing: -0.04em
@@ -130,10 +130,147 @@ video.
 ### Roles
 
 - **bg `#0d1117`** — the room. Pure near-black, chroma 0. The film-grain
-  baseline.
-- **surface `#161b22` / raised `#1c222b` / sunken `#0a0e13`** — the furniture:
-  panels, cards, inputs. Raised for controls and popovers, sunken for the video
-  well and inputs.
+  baseline. Outside `PlayerShell`, this role is also called **`room`**: the page
+  background every non-player screen's chrome is built into.
+- **surface `#161b22`** — the flat plane every bounded region outside the player
+  uses: `Card`, `TextField`, `Popover`. Outside `PlayerShell`, this role is also
+  called **`panel`**. A `panel` is distinguished from `room` by a hairline
+  (`border`/`borderStrong`), never by being visually "lighter" in a way that
+  reads as lifted or raised — nothing outside the player casts a shadow or sits
+  on an elevated fill. See "Non-player surface model" below.
+- **raised `#1c222b` / sunken `#0a0e13`** — scoped exclusively to
+  `PlayerShell`'s existing stage model: raised for controls and popovers over
+  the video, sunken for the video well. These are not used by any non-player
+  chrome, panel, or input.
+
+### Non-player surface model
+
+Outside `PlayerShell`, the surface system is flat: exactly two fill roles,
+`room` and `panel`, both reusing the existing `bg`/`surface` values above with
+no new hex introduced. A region is set apart from its background by a **1px
+hairline** (`border` at rest, `borderStrong` on hover/focus/active emphasis),
+never by a lighter fill, a shadow, or a blur. If a component reaches for
+`box-shadow` or a lighter background to "lift" itself outside the player, this
+rule has been violated. No third non-player fill role may be introduced to
+express relative importance — hierarchy outside the player is carried by ink
+contrast, border weight, spacing, and the single `brand` accent, never by a
+panel being a lighter shade than another panel of the same role.
+
+`PlayerShell`'s existing overlay/stage model (video anchored, capsule/tray/
+popovers, `raised`/`sunken` fills, the gradient scrim) is unchanged and exempt
+from this rule — it is depth relative to the video, not a chrome-elevation
+system.
+
+### Landing marketing surface (second exemption)
+
+`LandingScreen` (the pre-room page at `/`) is a second, explicit exemption from
+the non-player surface model — a committed warm-cinema mood, not a themeable
+panel, the same way `PlayerShell` is a committed stage rather than a themeable
+panel. It does not follow `html.light`; its tokens are fixed regardless of the
+site-wide theme toggle.
+
+**One accent, warm neutrals, dark only in the hero.** Every other landing color
+is a named neutral; `landing-ember` is the one saturated color on the page.
+Every value below is checked against the specific surface it sits on — see
+"Contrast" for the readings used to decide where each color is allowed.
+
+- **landing-paper `#FBF1E2`** — page base for every section below the hero.
+  Replaces `bg`/`surface` on this page only.
+- **landing-paper-raised `#F4E7D2`** — one step warmer than `landing-paper`, for
+  feature cards and any region that wants separation without a border alone
+  (still no shadow — the separation is the color step itself, scoped to this
+  page's own exemption, not the app-wide "border, not elevation" rule).
+- **landing-ink `#1E1712`** — primary text on `landing-paper`. 16.9:1 contrast.
+- **landing-ink-soft `#3A2F26`** — secondary text/body copy where `landing-ink`
+  would be too heavy (subtext, captions at normal reading size).
+- **landing-clay-deep `#6B5F4C`** — muted text (eyebrows' non-color state,
+  metadata). 5.6:1 on `landing-paper` — passes AA body text.
+- **landing-clay `#D8C9AE`** — hairline borders only, never text. Deliberately
+  low-contrast against `landing-paper` — it is a border, not a message.
+- **landing-ember `#FF4429`** — the one accent: CTA hover/press color, section
+  eyebrows, the footer wordmark's "Party." 3.1:1 on `landing-paper` — large
+  text/icons/borders only, never small body text or link color on the light base
+  (use `landing-ink` or `landing-ink-soft` for those; reserve ember for
+  headline-scale or iconographic use). 5.77:1 on `landing-dusk` — reads fine as
+  text/glow on the hero.
+- **landing-dusk `#120D0A`** — the hero stage only. Nothing outside the hero
+  uses this color; it is not a second "dark mode" for the page, it is the one
+  cinematic surface running underneath the video.
+- **landing-dusk-raised `#201812`** — hero chrome that sits above the stand-in
+  scene (join-reveal panel, if shown over the hero rather than below it).
+- **landing-dusk-ink `#FBF1E2`** (= `landing-paper`, reused as the inverse ink)
+  — text on `landing-dusk`. 17.9:1 contrast.
+- **landing-dusk-ink-soft `#C9BBA4`** — secondary text on `landing-dusk` (hero
+  subtext).
+
+### Landing typography (second exemption)
+
+The landing page uses its own two-role type system instead of the app-wide
+Native TV sans, matching its own committed exemption:
+
+- **Bricolage Grotesque** (variable, weight 200–800, self-hosted) — display
+  role: the hero headline and every section heading on this page. Set uppercase,
+  weight 700–800, tight tracking (−0.02em to −0.04em), at Apple-product-page
+  scale (`clamp(2.5rem, 6vw, 4.5rem)` for the hero headline, capped lower for
+  section heads — see the component rules below).
+- **Karla** (variable, weight 200–800, self-hosted) — body role: subtext,
+  feature/showcase copy, footer/info copy. Never carries the display role; never
+  drops below 0.875rem on this page.
+- The app-wide monospace role is still used for technical/label text (room-code
+  style eyebrows, showcase captions where a technical register fits) — unchanged
+  from the rest of this document.
+
+### Landing motion: the scroll-scrubbed hero
+
+The hero is a **scroll-scrubbed stage**, not an autoplay loop: a tall (`300vh`)
+track holds a sticky (`100vh`) stage, and scroll position — not a timer — drives
+the stage's zoom, grade, and headline reveal, from a settled wide shot at 0% to
+an arrived, in-focus frame at 100%. The mechanism is scroll position mapped
+directly to CSS custom properties on the stage element (no React re-render per
+scroll tick — see [why](DECISION.md#d-004)), never a `<video>` `currentTime`
+scrub yet: the stage currently renders a CSS gradient/grain stand-in scene in
+place of a licensed clip, with the same custom properties (`--scrub-scale`,
+`--scrub-sat`, `--scrub-bright`, `--scrub-scrim`, `--scrub-text-op`) a real
+`<video>` swap would drive (see [why](DECISION.md#d-001)).
+
+Once scrolled past, the sticky stage releases naturally into the page below — no
+JS hand-off. Sections below the hero (`LandingFeatures`, `LandingShowcase`) use
+the document's standard fade-up-on-view reveal (300–450ms `ease-out-expo`,
+`whileInView`, once) — the hero's scroll-linked mechanism is never reused past
+the hero itself.
+
+**Forbidden on this page:** bounce/elastic/spring-overshoot easing on any
+scroll-linked value, auto-looping decorative motion (no idle blobs, no floating
+shapes — the previous gold/teal decorative blobs are removed entirely,
+[why](DECISION.md#d-003)), and scroll-scrubbing anything past the one hero
+moment.
+
+The hero's own content (headline/subtext/CTA/avatars) still enters once via the
+shared spring (`stiffness: 260, damping: 24, mass: 1`, staggered 70ms/item); the
+CTA keeps its squash-and-stretch press spring
+(`stiffness: 500, damping: 15, mass: 0.9`). Both collapse to a 100ms opacity
+fade under `prefers-reduced-motion`, and the scroll-scrub mechanism itself is
+skipped entirely under reduced motion — the hero renders its settled 100% state
+immediately with no scroll listener attached.
+
+**Below the hero, the page turns down the volume.** The hero is the one dark,
+cinematic moment on the page. Every section below it (features, screenshots,
+info, footer) runs on the warm `landing-paper` base and this document's normal
+single-accent discipline: `landing-ember` only, used sparingly (large text,
+icons, hover states), no second saturated color anywhere on this page. Feature
+cards use `landing-paper-raised` fills with a hairline border. Real product
+screenshots are framed with a hairline border and small radius, no drop shadow,
+so they read as evidence, not as a glossy mockup.
+
+### Landing copy: one deadpan register, used narrowly
+
+The "About/Help/Sources" info grid and the footer tagline use a dry,
+understated, slightly-too-formal register — a company-memo wink, not a joke
+repeated everywhere ([why](DECISION.md#d-005)). The hero headline, feature copy,
+and showcase captions keep the page's normal warm/direct voice unchanged.
+Example of the register, applied only where D-005 scopes it: "The connection was
+lost. This has been noted." rather than "Oops! Something went wrong."
+
 - **ink `#e6e9ee`** — primary text. Cool-tinted white, never pure (avoids
   glare).
 - **inkMuted `#aeb6c2` / inkFaint `#7d8794`** — secondary + placeholder text.
@@ -185,6 +322,20 @@ another to create decoration.
 - `text-wrap: balance` on h1–h3.
 - Product UI uses the system sans unless noted; the Avenir-style treatment is
   reserved for the wordmark; monospace is reserved for technical values.
+- **Two typographic registers.** `display` and `h1` are reserved for the landing
+  hero headline only — a title-card moment, not a page heading — and
+  `display.fontSize` is fluid (`clamp(2.5rem, 5vw + 1rem, 3.5rem)`). Every other
+  page-level or section heading (wordmark excepted) ceilings at `h2`; most
+  in-screen section headings should reach for `h3` instead. This ceiling rule is
+  deliberate, not an oversight: it keeps the product's task screens and chrome
+  plainspoken and precise while the landing hero is allowed to be the one
+  editorial moment in the system.
+- **Monospace, expanded scope.** Beyond room codes and technical metadata, the
+  restricted monospace role also carries short state labels (readiness,
+  connection, sync status) on the player and readiness screens specifically. It
+  is not used more broadly than that — monospace must never substitute for the
+  system sans on running prose (setup and source-selection states remain
+  system-sans body copy).
 
 ## Layout
 
@@ -215,7 +366,19 @@ another to create decoration.
 - Semantic z-index scale:
   `overlay(10) → dropdown(20) → sticky(30) → modal-backdrop(40)
   → modal(50) → toast(60) → tooltip(70)`.
-  No 999s.
+  No 999s. Anchored, non-player chrome (see "Chrome anchoring" below)
+  participates in normal document flow and needs no z-index assignment; the
+  `overlay` tier is consumed only by the player's overlay chrome and by genuine
+  dropdown/modal/toast/tooltip layers on any route.
+
+### Chrome anchoring
+
+The shared header and footer are part of the page's own document flow on every
+route except the player — separated from body content by a single hairline, not
+`position: fixed` or floating with their own elevation. On the player, header
+and footer remain overlays that appear and recede with the rest of the playback
+chrome (see "Motion" and `PlayerShell`, below); the component is the same one
+everywhere, only its layering role differs by route.
 
 - The approved player is the centered-controls model: a compact bottom-center
   capsule owns playback and room-tool entry, quick reactions sit above it, and
@@ -239,8 +402,14 @@ another to create decoration.
   is the `brand` color at 2px with a 2px transparent gap.
 - Popovers/overlays use the native `<dialog>`/popover API (or `position: fixed`)
   so they escape `overflow` clipping inside the player shell.
-- Hover on dark surfaces: raise surface +0.04 L or show a 1px `borderStrong`;
-  never rely on color alone.
+- Hover on dark surfaces, **player only**: raise surface +0.04 L or show a 1px
+  `borderStrong`; never rely on color alone.
+- Hover/focus/pressed on non-player chrome (`Card`/`TextField`/`Button`
+  secondary/`Popover`): no fill change of any kind. Hover steps the border from
+  `border` to `borderStrong`; pressed is a brief, small opacity reduction on the
+  element itself; focus is the existing `focusRing`, unchanged. There is no
+  "raise the surface" state outside the player — nothing outside it has
+  elevation left to lift.
 - Every interactive pattern has an observable hover, focus, pressed, disabled,
   loading, success, error, and reduced-motion treatment where applicable.
   Loading preserves the action's context, disabled explains its prerequisite,
@@ -274,18 +443,52 @@ another to create decoration.
 
 ## Components
 
-- **UnifiedButton** — `brand` fill (primary) or `surface` with `borderStrong`
-  (secondary); radius `md`; mono 0.875rem/600. Active: `brandHover`. Focus:
-  `focusRing` ring.
-- **TextField** — `surfaceSunken` fill, `border` stroke, `ink` text, mono. Focus
-  lifts the fill to `surface` and applies a `focusRing` ring. Placeholder:
-  `inkFaint` on sunken, `inkMuted` on raised.
-- **Popover** — `surfaceRaised` fill, `borderStrong` stroke, `lg` radius,
-  `overlay` shadow; uses the native popover API.
-- **PlayerShell** — the stage. Video fills; a gradient scrim (`overlay`) fades
-  controls in/out. Progress = `brand` playhead on a `borderStrong` track.
-- **Card** — reserved for genuinely useful groupings (member list, host
-  controls). No nested cards, no icon-card grids.
+- **UnifiedButton** — primary: `brand` fill; radius `md`; mono 0.875rem/600.
+  Active: `brandHover`. Focus: `focusRing` ring. Secondary, **non-player**: no
+  fill (transparent against `room`/`panel`), `border` stroke at rest,
+  `borderStrong` on hover/focus/pressed — no fill change at any state.
+  Secondary, **player**: unchanged from the existing `surface`-fill treatment.
+- **TextField**, **non-player** — `panel` fill, `border` stroke at rest, `ink`
+  text, mono. Focus is `borderStrong` + the existing `focusRing`; the fill does
+  not change on focus — there is no sunken well outside the player. Placeholder:
+  `inkMuted` on `panel`.
+- **TextField**, **player** — unchanged: `surfaceSunken` fill, focus lifts to
+  `surface`, as before.
+- **Popover**, **non-player** — `panel` fill, `border` stroke at rest /
+  `borderStrong` on open, `lg` radius, **no shadow**; uses the native popover
+  API.
+- **Popover**, **player** — unchanged: `surfaceRaised` fill, `borderStrong`
+  stroke, `overlay` shadow.
+- **PlayerShell** — the stage. Unchanged by the non-player surface model above.
+  Video fills; a gradient scrim (`overlay`) fades controls in/out. Progress =
+  `brand` playhead on a `borderStrong` track.
+- **Card** — **non-player**: `panel` fill, `border` stroke at rest /
+  `borderStrong` on hover/focus/active, no shadow. Reserved for genuinely useful
+  groupings (member list, host controls). No nested cards, no icon-card grids,
+  no fill-lightening to signal emphasis — use border weight, ink contrast, or
+  spacing instead.
+
+## Photography and video
+
+When this product uses real photographic imagery, it depicts a subject lit only
+by the motivated glow of a screen or lamp — no added studio light, no
+colour-graded gradient overlay, no visible screen content, no AI-generated human
+subjects. Reality level: hyperreal-but-plausible, never a produced "film still."
+The subject is never posed toward camera; framing is candid and observational,
+as if caught rather than arranged for a lens.
+
+Photographic imagery, where used, carries no frame device of its own — no card,
+shadow, border, or vignette. It is full-bleed content, not chrome: alongside the
+video on the player, it is the only element permitted to run edge-to-edge and
+unbounded. Everything else in the product is a closed, hairline-bounded region
+(see Color's "Non-player surface model").
+
+The landing hero's video follows the same reality level
+(hyperreal-but-plausible, candid framing, no visible screen content) once a real
+clip replaces the stand-in scene: people watching a shared screen together, lit
+by its glow, never posed toward camera. It runs full-bleed and unbounded like
+player video, and is the only place on the landing page permitted to be
+scroll-scrubbed (see "Landing motion: the scroll-scrubbed hero").
 
 ## Design review checklist
 
@@ -305,10 +508,19 @@ Before accepting a screen or shared component, verify:
 
 ## Rules of thumb
 
-- The red accent is the only saturated color in normal use. If a surface needs
-  two saturated colors, the design is off — pull back to neutrals.
+- The red accent (`brand` in the product, `landing-ember` on the landing page)
+  is the only saturated color in normal use, everywhere in this system including
+  the landing marketing surface (see "Landing marketing surface" under Color) —
+  its own committed palette differs in base color and mood, not in the
+  single-accent discipline. If a surface needs two saturated colors, the design
+  is off — pull back to neutrals.
 - No glassmorphism, no gradient text, no side-stripe borders, no
   uppercase-tracked eyebrows over every section.
+- Outside the player, nothing floats. If a component reaches for a shadow or a
+  lighter "raised" fill to separate itself from the room, that's the elevation
+  model this system replaced — use a hairline (`border`/`borderStrong`) instead.
+  Two non-player fill roles only (`room`, `panel`); a design that needs a third
+  to feel legible has not actually flattened.
 - Empty states use warm, plain-language copy and the approved system/wordmark
   typography; avoid introducing a separate decorative script role.
 - Avoid AI-slop patterns: generic SaaS card grids, uniform rounded cards,

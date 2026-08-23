@@ -5,7 +5,7 @@ import SessionContext from "~/context/Session/logic/SessionContext.ts";
 import { click, render, setupDom } from "~/shared/ui-kit/render-helper.ts";
 import { LandingScreen } from "./landing-screen.tsx";
 
-Deno.test("join is progressively disclosed from the landing screen", () => {
+Deno.test("join opens as a dialog from the landing screen", () => {
   setupDom();
   const { container } = render(
     <MemoryRouter>
@@ -25,25 +25,20 @@ Deno.test("join is progressively disclosed from the landing screen", () => {
   );
   assertEquals(container.textContent?.includes("No account needed"), false);
   assertEquals(container.textContent?.includes("Have an invite?"), false);
-  assertEquals(container.querySelector('[data-testid="join-form"]'), null);
+  assertEquals(document.querySelector('[data-testid="join-form"]'), null);
+  assertEquals(
+    container.querySelector('[data-testid="reveal-join"]')?.getAttribute(
+      "aria-haspopup",
+    ),
+    "dialog",
+  );
   click(container.querySelector('[data-testid="reveal-join"]') as Element);
   assertEquals(
-    container.querySelector('[data-testid="join-form"]') !== null,
+    document.querySelector('[data-testid="join-form"]') !== null,
     true,
   );
-  assertEquals(
-    container.querySelector('[data-testid="reveal-join"]')?.getAttribute(
-      "aria-expanded",
-    ),
-    "true",
-  );
-  assertEquals(
-    container.querySelector('[data-testid="reveal-join"]')?.getAttribute(
-      "aria-controls",
-    ),
-    "join-form",
-  );
-  assertEquals(container.querySelector("#join-form") !== null, true);
+  assertEquals(document.querySelector('[role="dialog"]') !== null, true);
+  assertEquals(document.querySelector("#join-form") !== null, true);
 });
 
 Deno.test("start party navigates hosts to source selection", () => {

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Sync Party — Readiness / host pre-play (CAP-3)</title>
+<link rel="stylesheet" href="tokens.css" />
+<style>
+  main {
+    max-width: 84rem;
+    margin: 0 auto;
+    padding: var(--space-xxl) clamp(1.5rem, 5vw, 4rem);
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+    gap: var(--space-xxl);
+  }
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; }
+  }
+  .task-col, .side-col { display: flex; flex-direction: column; gap: var(--space-lg); }
+  .badge-row { display:flex; gap: var(--space-sm); align-items:center; }
+  .media-frame {
+    position: relative;
+    aspect-ratio: 16/9;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background: var(--panel);
+    overflow: hidden;
+  }
+  .media-frame-top {
+    position: absolute;
+    inset-inline: var(--space-lg);
+    top: var(--space-lg);
+    display: flex;
+    justify-content: space-between;
+  }
+  .handoff-row {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+  }
+  .checklist { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--space-xs); }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <span class="brand-name">Sync <span style="font-weight:400;">Party</span></span>
+  <div class="header-actions">
+    <span class="room-chip">Room <strong style="color:var(--ink);margin-left:4px;">K7QX2M</strong></span>
+    <button type="button" class="btn btn-secondary">Invite</button>
+  </div>
+</header>
+
+<main id="main-content">
+  <section class="task-col">
+    <div class="badge-row">
+      <span class="badge badge-brand">Shared room</span>
+      <span class="badge">Host preview</span>
+    </div>
+
+    <div class="media-frame">
+      <div class="media-frame-top">
+        <!-- Expanded monospace state-language role: readiness + player are
+             the two scoped contexts (01e §03) for short technical state
+             labels beyond room codes. -->
+        <span class="badge mono">3 people in the room</span>
+        <span class="badge mono">Ready to start</span>
+      </div>
+    </div>
+
+    <section class="panel handoff-row">
+      <div style="max-width:42ch;">
+        <p class="mono caption" style="text-transform:uppercase;letter-spacing:0.24em;margin:0 0 4px;">Playback handoff</p>
+        <p class="body-sm" style="color:var(--ink-muted);margin:0;">The stage is stable, the room code is live, and you can start the preview when you are ready.</p>
+      </div>
+      <div style="display:flex;gap:var(--space-sm);flex-wrap:wrap;">
+        <button type="button" class="btn btn-secondary btn-lg">Play preview</button>
+        <button type="button" class="btn btn-primary btn-lg">Start watching</button>
+      </div>
+    </section>
+  </section>
+
+  <div class="side-col">
+    <section class="panel" style="display:flex;flex-direction:column;gap:var(--space-sm);">
+      <span class="badge">Now playing</span>
+      <h2 class="h3" style="margin:0;">Coastal Nights (2019)</h2>
+      <p class="mono body-sm" style="color:var(--ink-muted);margin:0;">1h 47m &middot; Uploaded file</p>
+      <button type="button" class="btn btn-secondary" style="align-self:flex-start;">Replace source</button>
+    </section>
+
+    <section class="panel" style="display:flex;flex-direction:column;gap:var(--space-sm);">
+      <span class="badge">Host checklist</span>
+      <ul class="checklist mono body-sm" style="color:var(--ink-muted);">
+        <li>The active room ID is the one you copy and share.</li>
+        <li>Local files keep their title and duration without movie metadata.</li>
+        <li>Playback starts from one fixed action without moving the stage.</li>
+      </ul>
+    </section>
+  </div>
+</main>
+
+<footer class="app-footer">
+  <span class="caption">Room code stays visible from here through the player.</span>
+  <span class="caption">Host: Ada</span>
+</footer>
+
+<div class="mockup-meta">
+  <strong>State depicted:</strong> Host readiness, source loaded, 3 people
+  present, ready to start. This is one of the two screens (with the player)
+  where the expanded monospace role is authorized to carry short state
+  labels ("Ready to start", "3 people in the room") per 01e §03/§21 —
+  setup and source-selection keep those states in system-sans prose
+  instead.
+</div>
+
+</body>
+</html>

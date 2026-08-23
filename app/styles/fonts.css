@@ -19,3 +19,25 @@
   font-style: normal;
   font-display: swap;
 }
+
+/* Landing marketing surface only (DESIGN.md "Landing marketing surface") —
+ * self-hosted variable fonts, latin subset. Both files cover the full
+ * weight axis, so one @font-face per family is enough. */
+
+@font-face {
+  font-family: 'Bricolage Grotesque';
+  src: url('../../public/fonts/bricolage-grotesque/BricolageGrotesque-Variable.woff2')
+    format('woff2');
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Karla';
+  src: url('../../public/fonts/karla/Karla-Variable.woff2')
+    format('woff2');
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}

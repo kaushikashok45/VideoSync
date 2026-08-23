@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Sync Party — Source selection (CAP-3)</title>
+<link rel="stylesheet" href="tokens.css" />
+<style>
+  main {
+    max-width: 84rem;
+    margin: 0 auto;
+    padding: var(--space-xxl) clamp(1.5rem, 5vw, 4rem);
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+    gap: var(--space-xxl);
+  }
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; }
+  }
+  .task-col, .side-col { display: flex; flex-direction: column; gap: var(--space-lg); }
+  .badge-row { display:flex; gap: var(--space-sm); align-items:center; }
+  .media-frame {
+    position: relative;
+    aspect-ratio: 16/9;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background: var(--panel);
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+  }
+  .media-frame-inner {
+    padding: var(--space-lg);
+    width: 100%;
+  }
+  .source-tabs { display:flex; gap: var(--space-xs); }
+  .source-tab {
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--ink-muted);
+    background: transparent;
+    cursor: pointer;
+  }
+  .source-tab[data-active="true"] {
+    color: var(--ink);
+    border-color: var(--border-strong);
+  }
+  .dropzone {
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xxl) var(--space-lg);
+    text-align: center;
+    color: var(--ink-muted);
+  }
+  .checklist { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--space-xs); }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <span class="brand-name">Sync <span style="font-weight:400;">Party</span></span>
+  <div class="header-actions">
+    <span class="room-chip">Room <strong style="color:var(--ink);margin-left:4px;">K7QX2M</strong></span>
+    <button type="button" class="btn btn-secondary">Invite</button>
+  </div>
+</header>
+
+<main id="main-content">
+  <section class="task-col">
+    <div class="badge-row">
+      <span class="badge badge-brand">Source selection</span>
+      <span class="mono body-sm" style="color:var(--ink-faint);">Host only</span>
+    </div>
+    <h1 class="h2" style="max-width:20ch;">Choose the source, then move into the host room preview.</h1>
+    <p class="body" style="color:var(--ink-muted);">Local files get a real now-playing state right away. URL sources keep the stage stable while the metadata lookup happens next.</p>
+
+    <div class="media-frame">
+      <div class="media-frame-inner">
+        <p class="body-sm" style="color:var(--ink);margin:0;">No source selected yet.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="side-col">
+    <section class="panel" style="display:flex;flex-direction:column;gap:var(--space-md);">
+      <div class="source-tabs">
+        <button type="button" class="source-tab" data-active="true">Upload a file</button>
+        <button type="button" class="source-tab">Paste a URL</button>
+      </div>
+      <div class="dropzone body-sm">Drop a video file here, or click to browse.</div>
+      <button type="button" class="btn btn-primary btn-lg" disabled aria-disabled="true">Choose a file to continue</button>
+    </section>
+
+    <section class="panel" style="display:flex;flex-direction:column;gap:var(--space-sm);">
+      <span class="badge">Now playing</span>
+      <p class="mono body-sm" style="color:var(--ink-muted);margin:0;">No source selected.</p>
+    </section>
+
+    <section class="panel" style="display:flex;flex-direction:column;gap:var(--space-sm);">
+      <span class="badge">Host checklist</span>
+      <ul class="checklist mono body-sm" style="color:var(--ink-muted);">
+        <li>Local files play immediately, no lookup needed.</li>
+        <li>URL sources fetch metadata after you continue.</li>
+        <li>You can always replace the source before starting.</li>
+      </ul>
+    </section>
+  </div>
+</main>
+
+<footer class="app-footer">
+  <span class="caption">Room code stays visible from here through the player.</span>
+  <span class="caption">Host: Ada</span>
+</footer>
+
+<div class="mockup-meta">
+  <strong>State depicted:</strong> Source selection, initial/empty state
+  (no file chosen, primary action disabled). All three columns —
+  task/preview, source picker, and supporting checklist — are
+  <code>panel</code>-fill with a hairline boundary; the dropzone uses a
+  dashed <code>border-strong</code> rather than a new fill to read as
+  "drop target" without inventing a third surface role.
+</div>
+
+</body>
+</html>

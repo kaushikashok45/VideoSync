@@ -21,6 +21,7 @@
     "npm:autoprefixer@^10.4.19": "10.5.4_postcss@8.5.26",
     "npm:babel-plugin-react-compiler@1": "1.0.0",
     "npm:express@4.20.0": "4.20.0",
+    "npm:framer-motion@^13.1.1": "13.1.1_react@19.2.8_react-dom@19.2.8__react@19.2.8",
     "npm:happy-dom@^20.11.1": "20.11.1",
     "npm:isbot@^4.1.0": "4.4.0",
     "npm:jsdom@^30.0.1": "30.0.1",
@@ -1349,6 +1350,20 @@
     "fraction.js@5.3.4": {
       "integrity": "sha512-1X1NTtiJphryn/uLQz3whtY6jK3fTqoE3ohKs0tT+Ujr1W59oopxmoEh7Lu5p6vBaPbgoM0bzveAW4Qi5RyWDQ=="
     },
+    "framer-motion@13.1.1_react@19.2.8_react-dom@19.2.8__react@19.2.8": {
+      "integrity": "sha512-B/xn2TPS4f61cEBLFjiYlQFnBZUW1YVj/LM+C+N4OP8Rs95VLEI2ot/RlfBg111la/EiyECFaJJi/A3FWA8MUA==",
+      "dependencies": [
+        "motion-dom",
+        "motion-utils",
+        "react",
+        "react-dom",
+        "tslib"
+      ],
+      "optionalPeers": [
+        "react",
+        "react-dom"
+      ]
+    },
     "fresh@0.5.2": {
       "integrity": "sha512-zJ2mQYM18rEFOudeV4GShTGIQ7RbzA7ozbU9I/XBpm7kqgMywgmylMwXHxZJmkVoYkna9d2pVXVXPdYTP9ej8Q=="
     },
@@ -1603,6 +1618,15 @@
       "dependencies": [
         "brace-expansion"
       ]
+    },
+    "motion-dom@13.1.1": {
+      "integrity": "sha512-XSf8VYWSB6G/0IY3rWVbyLcxWXtAVHkN1PQE2agTaCv3u8RGvbwu56TyyR/MNzBqqNavEBTZzErcxI1TxBrjcA==",
+      "dependencies": [
+        "motion-utils"
+      ]
+    },
+    "motion-utils@13.0.0": {
+      "integrity": "sha512-7DnN7TmbLcYXcG4RVadXIihWlyuM9afoUww8Y5Agg431kGKiuL2/OMyP4mJ5wLz+pvN3t5ySClLOaVXJ+wekRQ=="
     },
     "ms@2.0.0": {
       "integrity": "sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A=="
@@ -2209,6 +2233,9 @@
       "deprecated": true,
       "bin": true
     },
+    "tslib@2.8.1": {
+      "integrity": "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="
+    },
     "type-is@1.6.18": {
       "integrity": "sha512-TkRKr9sUTxEH8MdfuCSP7VizJyzRNMjj2J2do2Jr3Kym598JVdEksuzPQCnlFPW4ky9Q+iA+ma9BGm06XQBy8g==",
       "dependencies": [
@@ -2365,6 +2392,7 @@
       "npm:autoprefixer@^10.4.19",
       "npm:babel-plugin-react-compiler@1",
       "npm:express@4.20.0",
+      "npm:framer-motion@^13.1.1",
       "npm:happy-dom@^20.11.1",
       "npm:isbot@^4.1.0",
       "npm:jsdom@^30.0.1",

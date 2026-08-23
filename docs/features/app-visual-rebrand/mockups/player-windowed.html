@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Sync Party — Player, windowed (CAP-2 + CAP-3)</title>
+<link rel="stylesheet" href="tokens.css" />
+<style>
+  html, body { height: 100%; }
+  .player-stage {
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .video-placeholder {
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+  }
+  .capsule-controls { display:flex; align-items:center; gap: var(--space-sm); }
+  .transport-btn {
+    display:inline-flex; align-items:center; justify-content:center;
+    width: 2.5rem; height: 2.5rem; border-radius: var(--radius-full);
+    background: transparent; border: none; color: var(--ink); cursor: pointer;
+  }
+  .seek-row { display:flex; align-items:center; gap: var(--space-sm); width: 26rem; max-width: 60vw; margin-top: var(--space-xs); }
+  .seek-track { flex:1; height: 3px; border-radius: var(--radius-full); background: var(--border-strong); position: relative; }
+  .seek-fill { position:absolute; inset:0; width: 38%; background: var(--brand); border-radius: var(--radius-full); }
+  .capsule-wrap { display:flex; flex-direction:column; align-items:center; gap: var(--space-xxs); }
+</style>
+</head>
+<body>
+
+<div class="player-stage" role="group" aria-label="Host player">
+  <div class="scrim"></div>
+  <p class="video-placeholder">[ video — the sole visual anchor, unchanged by this feature ]</p>
+
+  <!-- Header, overlay variant. Same component/typography/fills as the
+       anchored header on every other route; only its layering role
+       (overlay vs. document flow) differs here. -->
+  <div class="player-header-overlay">
+    <span class="player-chip brand-name" style="font-size:1.05rem;background:transparent;border:none;padding:0;">Sync <span style="font-weight:400;">Party</span></span>
+    <div style="display:flex;align-items:center;gap:var(--space-sm);">
+      <span class="player-chip">Room K7QX2M</span>
+      <button type="button" class="player-icon-btn" aria-label="Leave watch party">&#8592;</button>
+    </div>
+  </div>
+
+  <!-- Resolved: the player's footer, per the coexistence constraint. It
+       does NOT occupy the horizontal center (the capsule + reaction tray's
+       vertical zone) — it is reduced to two edge-anchored, low-priority
+       system-state fragments at the far left/right of the very bottom
+       edge, below/outside the capsule's own footprint. See 02a-design.md
+       "Resolved open question #1". -->
+  <div class="player-footer-overlay">
+    <span>Synced &middot; Host: Ada</span>
+    <span>3 watching</span>
+  </div>
+
+  <!-- Reaction tray — unchanged, existing overlay language -->
+  <button type="button" class="reaction-tray" aria-label="Open reactions">&#128512;</button>
+
+  <!-- Bottom-center capsule — unchanged, existing overlay language -->
+  <div class="capsule-wrap">
+    <div class="capsule">
+      <div class="capsule-controls">
+        <button type="button" class="transport-btn" aria-label="Rewind">&#9664;&#9664;</button>
+        <button type="button" class="transport-btn" aria-label="Pause">&#10073;&#10073;</button>
+        <button type="button" class="transport-btn" aria-label="Forward">&#9654;&#9654;</button>
+        <span style="width:1px;height:1.5rem;background:var(--border-strong);"></span>
+        <button type="button" class="transport-btn" aria-label="Volume">&#128266;</button>
+        <button type="button" class="transport-btn" aria-label="Enter fullscreen">&#9974;</button>
+      </div>
+    </div>
+    <div class="seek-row mono caption">
+      <span>14:02</span>
+      <div class="seek-track"><div class="seek-fill"></div></div>
+      <span>1:47:00</span>
+    </div>
+  </div>
+</div>
+
+<div class="mockup-meta">
+  <strong>State depicted:</strong> Player, windowed, active, idle (capsule/
+  reaction tray would normally auto-hide after inactivity per
+  <code>use-idle-visibility.ts</code> — shown here visible for legibility of
+  the coexistence layout; see AC-2.2's point that header/footer remain
+  visible <em>regardless</em> of that idle state, which is the one thing
+  this mockup must demonstrate). Compare against
+  header-footer-states.html State 3 and player-fullscreen.html /
+  player-room-ended.html for the other player-chrome states.
+</div>
+
+</body>
+</html>

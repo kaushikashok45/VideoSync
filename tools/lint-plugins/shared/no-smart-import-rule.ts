@@ -21,6 +21,7 @@ const ALLOWED_BARE_NAMES = new Set([
   "react-router-dom",
   "lucide-react",
   "sonner",
+  "framer-motion",
 ]);
 
 /** Anywhere in the raw specifier -- catches a store import even when resolution fails. */

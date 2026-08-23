@@ -1,5 +1,4 @@
 @import "./features/entry-flow/components/landing-catalog.css";
-@import "./features/entry-flow/components/landing-catalog-art.css";
 @import "./features/entry-flow/components/source-spotlight.css";
 
 @tailwind base;
@@ -9,52 +8,56 @@
 @layer base {
   :root {
     color-scheme: dark;
-    --bg-rgb: 13 17 23;
-    --surface-rgb: 22 27 34;
-    --surface-raised-rgb: 28 34 43;
-    --surface-sunken-rgb: 10 14 19;
-    --ink-rgb: 230 233 238;
-    --ink-muted-rgb: 174 182 194;
-    --ink-faint-rgb: 125 135 148;
-    --brand-rgb: 217 48 54;
-    --brand-hover-rgb: 229 72 77;
-    --brand-text-rgb: 248 81 73;
-    --brand-muted-rgb: 42 22 24;
-    --brand-soft-rgb: 28 18 19;
-    --onbrand-rgb: 255 255 255;
+    /* Afterglow — monochrome dark system. See MASTER.md § Color. */
+    --bg-rgb: 0 0 0;
+    --surface-rgb: 10 10 10;
+    --surface-raised-rgb: 17 17 17;
+    --surface-sunken-rgb: 0 0 0;
+    --ink-rgb: 255 255 255;
+    --ink-muted-rgb: 161 161 161;
+    --ink-faint-rgb: 102 102 102;
+    --brand-rgb: 255 255 255;
+    --brand-hover-rgb: 161 161 161;
+    --brand-text-rgb: 255 255 255;
+    --brand-muted-rgb: 40 40 40;
+    --brand-soft-rgb: 23 23 23;
+    --onbrand-rgb: 0 0 0;
+    --signal-rgb: 0 114 245;
     --status-success-rgb: 63 185 80;
     --status-warning-rgb: 210 153 34;
-    --status-danger-rgb: 248 81 73;
-    --line: rgba(230, 233, 238, 0.1);
-    --line-strong: rgba(230, 233, 238, 0.18);
+    --status-danger-rgb: 255 85 85;
+    --line: rgba(255, 255, 255, 0.14);
+    --line-strong: rgba(255, 255, 255, 0.26);
   }
 
   html.light {
     color-scheme: light;
-    --bg-rgb: 248 248 247;
-    --surface-rgb: 255 255 255;
-    --surface-raised-rgb: 255 255 255;
-    --surface-sunken-rgb: 240 240 238;
-    --ink-rgb: 23 24 26;
-    --ink-muted-rgb: 74 77 82;
-    --ink-faint-rgb: 111 115 122;
-    --brand-rgb: 197 42 48;
-    --brand-hover-rgb: 176 38 44;
-    --brand-text-rgb: 197 42 48;
-    --brand-muted-rgb: 243 201 203;
-    --brand-soft-rgb: 251 232 233;
+    /* Afterglow — monochrome light system. See MASTER.md § Color. */
+    --bg-rgb: 255 255 255;
+    --surface-rgb: 250 250 250;
+    --surface-raised-rgb: 244 244 244;
+    --surface-sunken-rgb: 237 237 237;
+    --ink-rgb: 10 10 10;
+    --ink-muted-rgb: 82 82 82;
+    --ink-faint-rgb: 140 140 140;
+    --brand-rgb: 10 10 10;
+    --brand-hover-rgb: 64 64 64;
+    --brand-text-rgb: 10 10 10;
+    --brand-muted-rgb: 224 224 224;
+    --brand-soft-rgb: 240 240 240;
     --onbrand-rgb: 255 255 255;
+    --signal-rgb: 0 91 197;
     --status-success-rgb: 27 127 58;
     --status-warning-rgb: 122 91 0;
     --status-danger-rgb: 179 38 30;
-    --line: rgba(23, 24, 26, 0.1);
-    --line-strong: rgba(23, 24, 26, 0.18);
+    --line: rgba(10, 10, 10, 0.12);
+    --line-strong: rgba(10, 10, 10, 0.22);
   }
 
   html,
   body {
     @apply bg-bg text-ink font-sans;
-    font-family: "Avenir Next", "Helvetica Neue", ui-sans-serif, system-ui,
+    font-family: "Karla", -apple-system, "Segoe UI", ui-sans-serif, system-ui,
       sans-serif;
     background: rgb(var(--bg-rgb));
     color: rgb(var(--ink-rgb));
@@ -62,10 +65,14 @@
     text-rendering: optimizeLegibility;
   }
 
-  .font-sans,
-  .font-built {
-    font-family: "Avenir Next", "Helvetica Neue", ui-sans-serif, system-ui,
+  .font-sans {
+    font-family: "Karla", -apple-system, "Segoe UI", ui-sans-serif, system-ui,
       sans-serif;
+  }
+
+  .font-built {
+    font-family: "Bricolage Grotesque", "Avenir Next", ui-sans-serif,
+      system-ui, sans-serif;
   }
 
   .font-mono {
@@ -93,11 +100,11 @@
   }
 
   ::selection {
-    background: rgba(248, 81, 73, 0.35);
+    background: rgba(0, 114, 245, 0.3);
   }
 
   :focus-visible {
-    outline: 2px solid rgb(var(--brand-text-rgb));
+    outline: 2px solid rgb(var(--signal-rgb));
     outline-offset: 2px;
   }
 
@@ -170,9 +177,13 @@
 
 /* Keep the product UI readable if a stale Tailwind font token is present in
  * the generated utility layer. Metadata explicitly opts into mono below. */
-.font-sans,
+.font-sans {
+  font-family: "Karla", -apple-system, "Segoe UI", ui-sans-serif, system-ui,
+    sans-serif;
+}
+
 .font-built {
-  font-family: "Avenir Next", "Helvetica Neue", ui-sans-serif, system-ui,
+  font-family: "Bricolage Grotesque", "Avenir Next", ui-sans-serif, system-ui,
     sans-serif;
 }
 

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Sync Party — Player, true fullscreen (AC-2.3)</title>
+<link rel="stylesheet" href="tokens.css" />
+<style>
+  html, body { height: 100%; }
+  .player-stage {
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .video-placeholder {
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+  }
+  .capsule-controls { display:flex; align-items:center; gap: var(--space-sm); }
+  .transport-btn {
+    display:inline-flex; align-items:center; justify-content:center;
+    width: 2.5rem; height: 2.5rem; border-radius: var(--radius-full);
+    background: transparent; border: none; color: var(--ink); cursor: pointer;
+  }
+  .seek-row { display:flex; align-items:center; gap: var(--space-sm); width: 26rem; max-width: 60vw; margin-top: var(--space-xs); }
+  .seek-track { flex:1; height: 3px; border-radius: var(--radius-full); background: var(--border-strong); position: relative; }
+  .seek-fill { position:absolute; inset:0; width: 38%; background: var(--brand); border-radius: var(--radius-full); }
+  .capsule-wrap { display:flex; flex-direction:column; align-items:center; gap: var(--space-xxs); }
+</style>
+</head>
+<body>
+
+<div class="player-stage" role="group" aria-label="Host player, fullscreen">
+  <div class="scrim"></div>
+  <p class="video-placeholder">[ video — unobstructed, edge to edge ]</p>
+
+  <!-- Header/footer are NOT rendered in this state — hidden entirely on
+       true fullscreen (AC-2.3, PD-022), bound to the fullscreenchange
+       event regardless of how fullscreen was triggered (in-app toggle or
+       native shortcut). Nothing is present here to demonstrate that
+       absence beyond their omission from this markup. -->
+
+  <!-- Reaction tray and capsule are unaffected by fullscreen — only their
+       own existing idle timer governs them. -->
+  <button type="button" class="reaction-tray" aria-label="Open reactions">&#128512;</button>
+
+  <div class="capsule-wrap">
+    <div class="capsule">
+      <div class="capsule-controls">
+        <button type="button" class="transport-btn" aria-label="Rewind">&#9664;&#9664;</button>
+        <button type="button" class="transport-btn" aria-label="Pause">&#10073;&#10073;</button>
+        <button type="button" class="transport-btn" aria-label="Forward">&#9654;&#9654;</button>
+        <span style="width:1px;height:1.5rem;background:var(--border-strong);"></span>
+        <button type="button" class="transport-btn" aria-label="Volume">&#128266;</button>
+        <button type="button" class="transport-btn" aria-label="Exit fullscreen">&#9974;</button>
+      </div>
+    </div>
+    <div class="seek-row mono caption">
+      <span>14:02</span>
+      <div class="seek-track"><div class="seek-fill"></div></div>
+      <span>1:47:00</span>
+    </div>
+  </div>
+</div>
+
+<div class="mockup-meta">
+  <strong>State depicted:</strong> Player, true browser fullscreen (entered
+  by either the in-app toggle or a native/OS shortcut — both bind to the
+  same <code>fullscreenchange</code>/<code>:fullscreen</code> state).
+  Header and footer are entirely absent — not dimmed, not reduced in
+  opacity — matching PD-022's "hidden" requirement literally. Exiting
+  fullscreen restores player-windowed.html's chrome exactly, since the
+  underlying component never unmounted, it only stopped rendering visually
+  inert.
+</div>
+
+</body>
+</html>

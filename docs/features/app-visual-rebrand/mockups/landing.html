@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Sync Party — Landing (CAP-1 + CAP-2)</title>
+<link rel="stylesheet" href="tokens.css" />
+<style>
+  main { max-width: 100%; }
+
+  .hero {
+    position: relative;
+    min-height: 84vh;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+  }
+
+  /* Honest placeholder: a CSS-only "documentary" scene — a person's
+     silhouette lit only by the motivated glow of a screen in a dark room.
+     No card, no shadow, no vignette frame — full-bleed per DESIGN.md's
+     Photography section. This is NOT the real photograph; it demonstrates
+     composition/framing/lighting-mood only. */
+  .hero-photo-placeholder {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 34rem 30rem at 62% 46%, rgba(180, 150, 90, 0.30), transparent 60%),
+      radial-gradient(ellipse 60rem 50rem at 70% 70%, rgba(20, 24, 32, 0.9), transparent 70%),
+      linear-gradient(180deg, #05070a 0%, #0d1117 55%, #0a0d12 100%);
+  }
+  .hero-silhouette {
+    position: absolute;
+    right: 12%;
+    bottom: 0;
+    width: 22rem;
+    height: 60%;
+    background: radial-gradient(ellipse 60% 90% at 50% 100%, rgba(0,0,0,0.92), transparent 72%);
+  }
+  .hero-glow {
+    position: absolute;
+    right: 21%;
+    bottom: 32%;
+    width: 6.5rem;
+    height: 4.5rem;
+    border-radius: 3px;
+    background: linear-gradient(160deg, rgba(220,190,130,0.55), rgba(150,110,60,0.15));
+    filter: blur(1px);
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 0 clamp(1.5rem, 5vw, 4rem) var(--space-xxxl);
+    max-width: 42rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+  .kicker {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--brand-text);
+  }
+  .hero-supporting {
+    color: var(--ink-muted);
+  }
+  .cta-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    padding-top: var(--space-xs);
+  }
+  .join-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding-top: var(--space-xxs);
+  }
+
+  /* Benefit section — text-led, Register B, no icon-card grid */
+  .benefits {
+    padding: var(--space-xxxl) clamp(1.5rem, 5vw, 4rem);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-xxl);
+    max-width: 84rem;
+    margin: 0 auto;
+  }
+  .benefit-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--border);
+  }
+  @media (max-width: 760px) {
+    .benefits { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <span class="brand-name">Sync <span style="font-weight:400;">Party</span></span>
+  <div class="header-actions">
+    <button type="button" class="btn btn-secondary" aria-expanded="false" aria-controls="join-form" id="landing-join-toggle">
+      Have a room code?
+    </button>
+  </div>
+</header>
+
+<main id="main-content">
+  <section class="hero" aria-label="Sync Party — start or join a watch party">
+    <div class="hero-photo-placeholder" role="img" aria-label="A person watching something together with friends, lit only by the glow of their own screen, in a dark room at night — placeholder scene, real documentary photography pending"></div>
+    <div class="hero-silhouette"></div>
+    <div class="hero-glow"></div>
+    <span class="placeholder-stamp">PLACEHOLDER PHOTOGRAPHY — pending real production, see 02a-design.md</span>
+
+    <div class="hero-content">
+      <p class="kicker">A room of its own</p>
+      <h1 class="display" style="margin:0;">Make room for everyone.</h1>
+      <p class="body hero-supporting">One link brings the room together. Reactions, chat, and playback stay with the picture — private, up to 15 people.</p>
+      <div class="cta-row">
+        <button type="button" class="btn btn-primary btn-lg">Start a watch party</button>
+        <span class="mono body-sm hero-supporting">Ready when you are.</span>
+      </div>
+      <!-- Resolved open question: "Join with a room code" stays reachable
+           without scroll, directly under the primary CTA, in Register B
+           (body-sm), never Register A — its typographic *weight*, not its
+           position, is what keeps it quiet under the more editorial hero.
+           See 02a-design.md §Open questions resolved. -->
+      <div class="join-row">
+        <button type="button" class="body-sm" style="background:none;border:none;color:var(--brand-text);cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:4px;" aria-expanded="false" aria-controls="join-form-inline">
+          Join with a room code
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="benefits" aria-label="Why start or join here">
+    <div class="benefit-item">
+      <h2 class="h3">One link, one name.</h2>
+      <p class="body-sm hero-supporting">No accounts, no sign-up. Share the room code, add a name, and you're in — the room stays open for as long as the host is.</p>
+    </div>
+    <div class="benefit-item">
+      <h2 class="h3">Reactions and chat, right beside the picture.</h2>
+      <p class="body-sm hero-supporting">Quick reactions and a chat panel sit close to the video without ever taking it over — the watching stays the point.</p>
+    </div>
+    <div class="benefit-item">
+      <h2 class="h3">Plain-language state, always.</h2>
+      <p class="body-sm hero-supporting">"Waiting for host," "Catching up," "Synced" — the room always tells you what's actually happening right now.</p>
+    </div>
+    <div class="benefit-item">
+      <h2 class="h3">Built for a small group.</h2>
+      <p class="body-sm hero-supporting">Up to 15 people, one host, one screening. Not a platform to manage — a room for tonight's watch.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="app-footer">
+  <span class="caption">© The Sync Party — a room of its own.</span>
+  <div class="header-actions">
+    <a href="#" class="caption" style="text-decoration:underline;">Privacy</a>
+    <a href="#" class="caption" style="text-decoration:underline;">How it works</a>
+  </div>
+</footer>
+
+<div class="mockup-meta">
+  <strong>State depicted:</strong> Landing, at rest, hero media loaded. See
+  02a-design.md's state matrix for the media-load-failure and
+  reduced-motion states (AC-1.3/AC-1.4) — both collapse to this exact static
+  markup with no entrance animation, which is why a single static file
+  correctly represents them.
+</div>
+
+</body>
+</html>

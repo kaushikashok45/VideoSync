@@ -105,6 +105,7 @@
     "sonner": "npm:sonner@^2.0.6",
     "isbot": "npm:isbot@^4.1.0",
     "lucide-react": "npm:lucide-react@^0.541.0",
+    "framer-motion": "npm:framer-motion@^13.1.1",
     "vite": "npm:vite@^6.0.0",
     "vite-tsconfig-paths": "npm:vite-tsconfig-paths@^6.0.5",
     "tailwindcss": "npm:tailwindcss@^3.4.4",

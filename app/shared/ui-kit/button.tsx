@@ -13,11 +13,11 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClass: Record<ButtonVariant, string> = {
   primary:
-    "bg-brand text-onbrand border-brand hover:bg-brand-hover active:translate-y-px active:bg-brand",
+    "bg-brand text-onbrand border-transparent hover:bg-brand-hover hover:shadow-glow active:scale-[0.98]",
   secondary:
-    "bg-surface text-ink border-line-strong hover:bg-surface-raised hover:border-ink-faint active:translate-y-px",
+    "bg-transparent text-ink border-line hover:border-line-strong hover:bg-surface active:scale-[0.98]",
   ghost:
-    "bg-transparent text-brand-text border-transparent hover:bg-brand-soft active:bg-brand-muted",
+    "bg-transparent text-ink-muted border-transparent hover:text-ink hover:bg-surface active:scale-[0.98]",
 };
 
 const sizeClass: Record<ButtonSize, string> = {
@@ -27,7 +27,7 @@ const sizeClass: Record<ButtonSize, string> = {
 };
 
 const baseClass =
-  "inline-flex min-h-11 items-center justify-center gap-xs rounded-md border font-built text-sm font-semibold transition-[color,background-color,border-color,transform] duration-200 hover:-translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-text focus-visible:ring-offset-2 focus-visible:ring-offset-bg disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:hover:translate-y-0 motion-reduce:transition-none";
+  "inline-flex min-h-11 items-center justify-center gap-xs rounded-full border font-sans text-sm font-semibold transition-[color,background-color,border-color,transform,box-shadow] duration-200 hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2 focus-visible:ring-offset-bg disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:hover:scale-100 motion-reduce:transition-none";
 
 export function Button({
   variant = "primary",

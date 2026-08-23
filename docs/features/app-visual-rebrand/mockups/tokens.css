@@ -1,0 +1,498 @@
+/* tokens.css — Territory 2 "The Console" (flat, anchored-chrome system)
+   Reproduces DESIGN.md's confirmed non-player surface model + delta.
+   Every non-player fill is `room` or `panel`; boundaries are hairlines only;
+   no box-shadow, no lighter-fill "raised" state outside the player.
+   PlayerShell keeps its own overlay/stage tokens (surfaceRaised/surfaceSunken,
+   the gradient scrim, shadow-pop capsule) unchanged — see the `.player-*`
+   rules at the bottom of this file. */
+
+:root {
+  /* Non-player fill roles (§04 of 01e — two roles only) */
+  --room: #0d1117;      /* = bg. Page background, every non-player route. */
+  --panel: #161b22;     /* = surface. Every bounded flat plane. */
+
+  /* Player-only fills (unchanged, scoped exclusively to PlayerShell) */
+  --surface-raised: #1c222b;
+  --surface-sunken: #0a0e13;
+
+  /* Ink */
+  --ink: #e6e9ee;
+  --ink-muted: #aeb6c2;
+  --ink-faint: #7d8794;
+
+  /* Accent — the single saturated colour */
+  --brand: #d93036;
+  --brand-hover: #e5484d;
+  --brand-text: #f85149;
+  --brand-muted: color-mix(in srgb, #f85149 18%, #161b22);
+  --brand-soft: color-mix(in srgb, #f85149 10%, #0d1117);
+  --on-brand: #ffffff;
+
+  /* Status (status only, never decorative) */
+  --success: #3fb950;
+  --warning: #d29922;
+  --danger: #f85149;
+
+  --focus-ring: #f85149;
+  --overlay-scrim: rgba(6, 8, 12, 0.72);
+
+  /* Hairline boundary — the ONLY device that separates two flat planes
+     outside the player. No shadow, no lighter fill. */
+  --border: rgba(230, 233, 238, 0.10);
+  --border-strong: rgba(230, 233, 238, 0.18);
+
+  /* Radius (unchanged by the flat-system delta) */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* 8pt rhythm, 4px optical correction */
+  --space-xxs: 4px;
+  --space-xs: 8px;
+  --space-sm: 16px;
+  --space-md: 24px;
+  --space-lg: 32px;
+  --space-xl: 40px;
+  --space-xxl: 48px;
+  --space-xxxl: 64px;
+  --space-display: 80px;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
+    sans-serif;
+  --font-display: "Avenir Next", "Helvetica Neue", system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--room);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+img, video {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+}
+
+/* ---------- Typography — two registers ---------- */
+
+/* Register A — landing hero only. Fluid display + brandName clamp. */
+.display {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5vw + 1rem, 3.5rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+
+.brand-name {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 1.75rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+
+/* Register B — everywhere else. Ceiling: h2. */
+.h2 {
+  font-family: var(--font-sans);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.h3 {
+  font-family: var(--font-sans);
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.body {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.6;
+  max-width: 70ch;
+}
+
+.body-sm {
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.caption {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  color: var(--ink-faint);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+/* ---------- Boundary mechanism — hairline only ---------- */
+
+.hairline {
+  border: 1px solid var(--border);
+}
+
+.hairline-strong {
+  border: 1px solid var(--border-strong);
+}
+
+/* ---------- Panels (Card / Popover / bounded regions) ---------- */
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+}
+
+.panel:hover,
+.panel:focus-within,
+.panel[data-active="true"] {
+  border-color: var(--border-strong);
+}
+
+/* No box-shadow anywhere in this stylesheet outside .player-* rules. */
+
+/* ---------- Buttons ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: border-color 120ms ease, opacity 120ms ease;
+  text-decoration: none;
+}
+
+.btn-lg {
+  padding: var(--space-md) var(--space-xl);
+  font-size: 1rem;
+}
+
+.btn-primary {
+  background: var(--brand);
+  color: var(--on-brand);
+}
+
+.btn-primary:hover {
+  background: var(--brand-hover);
+}
+
+.btn-primary:active {
+  opacity: 0.85;
+}
+
+/* Secondary, non-player: no fill, hairline stroke, no fill change ever */
+.btn-secondary {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus-visible {
+  border-color: var(--border-strong);
+}
+
+.btn-secondary:active {
+  opacity: 0.85;
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn:focus-visible,
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* ---------- Text field, non-player ---------- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxs);
+}
+
+.field label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+}
+
+.field input {
+  background: var(--panel);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  /* Resolved craft answer (see 02a-design.md self-assessment):
+     resting border is borderStrong, not border, for small interactive
+     controls specifically — Card/Popover keep `border` at rest. This is
+     an interpretation of DESIGN.md's already-approved border-weight axis
+     (§11 Visual Hierarchy), not a new mechanism or fill role. */
+  border: 1px solid var(--border-strong);
+}
+
+.field input:focus-visible {
+  border-color: var(--brand-text);
+}
+
+.field input::placeholder {
+  color: var(--ink-muted);
+}
+
+/* ---------- Badge ---------- */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xxs);
+  padding: var(--space-xxs) var(--space-sm);
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  border: 1px solid var(--border);
+  color: var(--ink-muted);
+}
+
+.badge-brand {
+  border-color: var(--brand-text);
+  color: var(--brand-text);
+}
+
+.badge-danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+/* ---------- Chrome anchoring — header/footer, non-player ---------- */
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-md) clamp(1.5rem, 5vw, 4rem);
+  border-bottom: 1px solid var(--border);
+  background: var(--room);
+  /* Anchored: normal document flow, no position:fixed, no elevation,
+     no z-index assignment (01e §21 Layout — z-index usage note). */
+}
+
+.app-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-md) clamp(1.5rem, 5vw, 4rem);
+  border-top: 1px solid var(--border);
+  background: var(--room);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.room-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xxs);
+  padding: var(--space-xxs) var(--space-sm);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink);
+}
+
+.room-chip[data-inert="true"] {
+  color: var(--ink-faint);
+  border-color: var(--border);
+  opacity: 0.6;
+}
+
+/* ---------- Player-only overlay/stage model (unchanged) ---------- */
+
+.player-stage {
+  position: relative;
+  background: #000;
+  overflow: hidden;
+}
+
+.player-header-overlay {
+  position: absolute;
+  inset-inline: var(--space-md);
+  top: var(--space-md);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  pointer-events: none;
+}
+
+.player-header-overlay > * {
+  pointer-events: auto;
+}
+
+.player-chip {
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background: rgba(28, 34, 43, 0.9); /* surfaceRaised/90, player only */
+  padding: var(--space-xxs) var(--space-sm);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink);
+}
+
+.player-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background: rgba(28, 34, 43, 0.9);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.player-footer-overlay {
+  position: absolute;
+  inset-inline: var(--space-md);
+  bottom: var(--space-sm);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  pointer-events: none;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
+.capsule {
+  position: absolute;
+  left: 50%;
+  bottom: var(--space-xl);
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: rgba(28, 34, 43, 0.9);
+  backdrop-filter: blur(6px);
+  /* Player retains its own elevation/shadow language — unchanged. */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.reaction-tray {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--space-xl) + 4.5rem);
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background: rgba(28, 34, 43, 0.95);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  color: var(--ink-muted);
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(13, 17, 23, 0.85) 0%,
+    rgba(13, 17, 23, 0.2) 40%,
+    transparent 65%
+  );
+  pointer-events: none;
+}
+
+/* ---------- Mockup meta (annotation only — not app UI) ---------- */
+
+.mockup-meta {
+  max-width: 72rem;
+  margin: var(--space-md) auto 0;
+  padding: 0 clamp(1.5rem, 5vw, 4rem) var(--space-xl);
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  border-top: 1px dashed var(--border);
+  padding-top: var(--space-sm);
+}
+
+.mockup-meta strong {
+  color: var(--ink-muted);
+}
+
+.placeholder-stamp {
+  position: absolute;
+  bottom: var(--space-sm);
+  right: var(--space-sm);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  color: rgba(230, 233, 238, 0.55);
+  background: rgba(6, 8, 12, 0.55);
+  padding: var(--space-xxs) var(--space-xs);
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border);
+  pointer-events: none;
+}

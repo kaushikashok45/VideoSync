@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Sync Party — Player, room ended (PD-002, AC-2.4)</title>
+<link rel="stylesheet" href="tokens.css" />
+<style>
+  html, body { height: 100%; }
+  .player-stage {
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .video-placeholder {
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    text-align: center;
+    max-width: 28rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    align-items: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="player-stage" role="group" aria-label="Host player, room ended">
+  <div class="scrim"></div>
+
+  <div class="video-placeholder">
+    <span class="badge badge-danger">Room ended</span>
+    <p class="body" style="color:var(--ink-muted);margin:0;">The host disconnected. This room is no longer active.</p>
+    <button type="button" class="btn btn-primary">Return home</button>
+  </div>
+
+  <!-- Header/footer stay visible (windowed, non-fullscreen) but every
+       room-scoped affordance goes inert the instant the terminal state is
+       reached (AC-2.4). Only the exit path remains meaningful. -->
+  <div class="player-header-overlay">
+    <span class="player-chip brand-name" style="font-size:1.05rem;background:transparent;border:none;padding:0;">Sync <span style="font-weight:400;">Party</span></span>
+    <div style="display:flex;align-items:center;gap:var(--space-sm);">
+      <span class="player-chip room-chip" data-inert="true">Room ended</span>
+      <button type="button" class="player-icon-btn" aria-label="Return home">&#8592;</button>
+    </div>
+  </div>
+
+  <div class="player-footer-overlay">
+    <span style="color:var(--ink-faint);">Host disconnected — this room has ended.</span>
+    <span></span>
+  </div>
+</div>
+
+<div class="mockup-meta">
+  <strong>State depicted:</strong> Player, terminal "room ended" state
+  (<code>PD-002</code>). The room-code chip is replaced with a de-emphasized
+  <em>Room ended</em> label rather than shown disabled, because there is
+  nothing left to confirm; the invite action is removed entirely, not
+  disabled, since inviting someone into a room that no longer exists is not
+  a degraded action, it is a false one. The reaction tray and capsule are
+  not shown here — playback has stopped and there is nothing left to react
+  to or control, which is a player-body concern this feature does not
+  redesign, only the chrome's response to it.
+</div>
+
+</body>
+</html>

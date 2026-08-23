@@ -30,6 +30,10 @@ export default {
           danger: "rgb(var(--status-danger-rgb) / <alpha-value>)",
         },
         onbrand: "rgb(var(--onbrand-rgb) / <alpha-value>)",
+        signal: {
+          DEFAULT: "rgb(var(--signal-rgb) / <alpha-value>)",
+          soft: "rgb(var(--signal-rgb) / 0.16)",
+        },
         line: {
           DEFAULT: "var(--line)",
           strong: "var(--line-strong)",
@@ -38,15 +42,16 @@ export default {
       fontFamily: {
         airone: ["Airone", "Yesteryear", "cursive"],
         built: [
+          "Bricolage Grotesque",
           "Avenir Next",
-          "Helvetica Neue",
           "ui-sans-serif",
           "system-ui",
           "sans-serif",
         ],
         sans: [
-          "Avenir Next",
-          "Helvetica Neue",
+          "Karla",
+          "-apple-system",
+          "Segoe UI",
           "ui-sans-serif",
           "system-ui",
           "sans-serif",
@@ -70,6 +75,7 @@ export default {
         sm: "6px",
         md: "10px",
         lg: "16px",
+        full: "999px",
       },
       fontSize: {
         display: ["clamp(2.5rem, 6vw, 4rem)", {
@@ -91,7 +97,9 @@ export default {
         overlay:
           "0 24px 64px -12px rgba(0,0,0,0.6), 0 8px 24px -8px rgba(0,0,0,0.5)",
         pop: "0 12px 40px -8px rgba(0,0,0,0.55)",
-        ring: "0 0 0 2px #f85149, 0 0 0 4px rgba(13,17,23,0.9)",
+        ring: "0 0 0 2px #0072f5, 0 0 0 4px rgba(0,0,0,0.9)",
+        glow:
+          "0 0 0 1px var(--line-strong), 0 8px 24px -8px rgba(255,255,255,0.35)",
       },
       keyframes: {
         "fade-in": {

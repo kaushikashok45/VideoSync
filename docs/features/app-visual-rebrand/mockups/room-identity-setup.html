@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Sync Party — Room identity / Setup (CAP-3, host flow)</title>
+<link rel="stylesheet" href="tokens.css" />
+<style>
+  main {
+    max-width: 84rem;
+    margin: 0 auto;
+    padding: var(--space-xxl) clamp(1.5rem, 5vw, 4rem);
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(300px, 380px);
+    gap: var(--space-xxl);
+  }
+  @media (max-width: 860px) {
+    main { grid-template-columns: 1fr; }
+  }
+  .task-col, .context-col { display: flex; flex-direction: column; gap: var(--space-lg); }
+  .badge-row { display:flex; gap: var(--space-sm); align-items:center; }
+  .media-frame {
+    position: relative;
+    aspect-ratio: 16/9;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background: var(--panel);
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+  }
+  .media-frame-inner {
+    padding: var(--space-lg);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    width: 100%;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+  }
+  .checklist { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--space-xs); }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <span class="brand-name">Sync <span style="font-weight:400;">Party</span></span>
+  <div class="header-actions">
+    <span class="room-chip">Room <strong style="color:var(--ink);margin-left:4px;">K7QX2M</strong></span>
+    <button type="button" class="btn btn-secondary">Invite</button>
+  </div>
+</header>
+
+<main id="main-content">
+  <section class="task-col">
+    <div class="badge-row">
+      <span class="badge badge-brand">Host setup</span>
+      <span class="mono body-sm" style="color:var(--ink-faint);">Room identity first</span>
+    </div>
+    <h1 class="h2" style="max-width:16ch;">Set the room, then choose the video.</h1>
+    <p class="body" style="color:var(--ink-muted);">The shareable room code is confirmed before source selection, so the code you copy is the code everyone uses.</p>
+
+    <div class="media-frame">
+      <div class="media-frame-inner">
+        <p class="body-sm" style="color:var(--ink);margin:0;max-width:32ch;">We will confirm the room code before it becomes shareable.</p>
+        <button type="button" class="btn btn-primary btn-lg">Continue to source</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="context-col">
+    <section class="panel" style="display:flex;flex-direction:column;gap:var(--space-sm);">
+      <span class="badge">Room identity</span>
+      <p class="mono body-sm" style="color:var(--ink-muted);margin:0;">The canonical room code appears in live playback after the room opens.</p>
+    </section>
+    <section class="panel" style="display:flex;flex-direction:column;gap:var(--space-sm);">
+      <span class="badge">Host checklist</span>
+      <ul class="checklist mono body-sm" style="color:var(--ink-muted);">
+        <li>One active room ID carried through every next step.</li>
+        <li>Stable shell before metadata, sockets, or peer state arrive.</li>
+        <li>Quiet recovery if the active room ever changes.</li>
+      </ul>
+    </section>
+  </div>
+</main>
+
+<footer class="app-footer">
+  <span class="caption">Room code stays visible from here through the player.</span>
+  <span class="caption">Host: Ada</span>
+</footer>
+
+<div class="mockup-meta">
+  <strong>State depicted:</strong> Room identity / setup, host flow, at rest.
+  The task column (media preview + continue action) and the identity/
+  checklist column are both <code>panel</code>-fill, hairline-bounded — no
+  visual weighting comes from one having a "raised" fill and the other not
+  (01e §05). The join-flow variant of this same screen (name field, "Join
+  and watch" action, room-not-found error state) reuses this identical
+  layout and token set — not mocked separately since it is the same
+  component tree with different copy/inputs, not a different visual state.
+</div>
+
+</body>
+</html>

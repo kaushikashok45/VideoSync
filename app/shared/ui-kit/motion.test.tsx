@@ -109,21 +109,22 @@ Deno.test("negative delay and duration clamp to zero", () => {
   assertEquals(style.animationTimingFunction, EASING.easeOutExpo);
 });
 
-// 6. Hover micro-interaction: the button lifts on hover, guarded by motion-reduce.
-Deno.test("button hover lift is transform-only and motion-reduce guarded", () => {
+// 6. Hover micro-interaction: the button scales up on hover (MASTER.md hover-scale
+// 1.02), guarded by motion-reduce — not the old vertical-lift treatment.
+Deno.test("button hover scale is transform-only and motion-reduce guarded", () => {
   setupDom();
   const { container } = render(<Button>Watch</Button>);
   const button = container.querySelector("button");
   if (!button) throw new Error("no button");
-  assertEquals(button.className.includes("hover:-translate-y-px"), true);
+  assertEquals(button.className.includes("hover:scale-[1.02]"), true);
   assertEquals(
     button.className.includes(
-      "transition-[color,background-color,border-color,transform]",
+      "transition-[color,background-color,border-color,transform,box-shadow]",
     ),
     true,
   );
   assertEquals(
-    button.className.includes("motion-reduce:hover:translate-y-0"),
+    button.className.includes("motion-reduce:hover:scale-100"),
     true,
   );
   assertEquals(

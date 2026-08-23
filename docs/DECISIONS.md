@@ -660,3 +660,94 @@ force `precommit.ts` itself to become a `deno test` harness, which the
 installed hook cannot invoke the way it needs to. Shelling out keeps
 `precommit.ts` a normal, directly testable module while reusing every
 existing checker completely unmodified.
+
+---
+
+## PD-021 — Full visual-system rebrand supersedes DESIGN.md's dark-cinema token system app-wide
+
+- **Decided**: 2026-08-22 · `docs/features/app-visual-rebrand/00-brief.md`
+- **Why**: stakeholder judgment that the current visual execution does not read
+  as attractive/premium enough, starting from the landing page and extended to
+  the whole app during this interrogation.
+- **Alternatives rejected**: a landing-only marketing sub-system that leaves
+  in-room screens on the current dark-cinema system — rejected by the
+  requester in favour of one consistent app-wide language.
+- **Consequences**: `DESIGN.md`'s current tokens are not a fixed constraint for
+  this feature; `visual-designer` proposes a replacement token set through its
+  normal delta-confirmation gate. `PRODUCT.md`'s brand-personality words and
+  product name/wordmark concept remain authoritative — only concrete visual
+  execution changes. Journey/IA (step count, flow order) and accessibility
+  commitments (AA contrast, `prefers-reduced-motion`, keyboard operability)
+  are explicitly unaffected by this decision.
+
+## PD-022 — Header/footer are always visible during windowed playback; hidden only in true fullscreen
+
+- **Decided**: 2026-08-22 · `docs/features/app-visual-rebrand/00-brief.md`
+- **Why**: the requester wants persistent branded chrome across every screen,
+  including the player, while still preserving an unobstructed stage in true
+  fullscreen viewing.
+- **Alternatives rejected**: idle-based auto-hide matching existing playback
+  controls (rejected — requester wants the chrome persistent, not
+  interaction-gated); fully persistent even in fullscreen (rejected — the
+  requester explicitly carved out fullscreen as chrome-free).
+- **Consequences**: amends `DESIGN.md` Principle #1 ("the video is the stage")
+  for the non-fullscreen case. `design-lead` must specify exactly how the
+  header/footer coexist with the existing bottom-center playback capsule
+  without competing for the same screen real estate.
+
+---
+
+## PD-023 — PD-021's supersession extends to DESIGN.md's structural/layout conventions, not just colour and typography token values
+
+- **Decided**: 2026-08-22 · requester revision during stage 1d (`creative-director`) of `docs/features/app-visual-rebrand/`
+- **Why**: after reviewing `01d-creative-direction.md`'s "extend the existing system, diverge only for photography" posture, the requester rejected the premise that `DESIGN.md`'s structural conventions — the stage/overlay layout model, the 8pt spacing scale, the semantic z-index scale, and existing component visual patterns (Card/Button/TextField/Popover/PlayerShell) — are a fixed baseline. `PD-021` as originally scoped covered colour/type/layout *token values*; this decision clarifies it also covers the structural rules built on top of those tokens.
+- **Alternatives rejected**: keeping the rework confined to colour/typography/photography only (creative-director's original posture) — rejected by the requester as insufficient; "pick one thesis and extend" — rejected in favour of generating genuinely distinct alternative creative territories and evaluating them, the same rigor already applied to the photography-direction choice alone.
+- **Consequences**: `creative-director` re-runs stage 1d proposing multiple bold, structurally distinct territories (not just a palette/photography choice) for evaluation. `docs/BRAND-STRATEGY.md`'s invariants are **unaffected** — `INV-1`–`INV-6` (including `INV-4`'s anti-slop guardrails: no glassmorphism, no gradient text, no generic-SaaS patterns) still bind regardless of how the structural system changes, since those were adopted at brand level, independent of any token or layout mechanic. `01c-page-strategy.md`'s architecture (no new route, no IA/journey change, per-screen editorial/conventional split) is also unaffected — this decision is scoped to DESIGN.md's visual/structural execution layer, not the product's information architecture. Any DESIGN.md delta this produces still requires the existing delta-confirmation gate (pipeline stage 14) before the file itself is edited.
+- **Reversibility**: MODERATE — a structural rework is more expensive to unwind than a token-value change, but no code has shipped yet at this stage.
+
+---
+
+## AD-024 — Design triad falls back to HTML mockups instead of Figma for `app-visual-rebrand`
+
+- **Decided**: 2026-08-22 · requester direction after stage 2a (`design-lead`) blocked
+- **Context**: `design-lead` correctly refused to fabricate a prose/Figma-shaped description of screens that were never actually built, since `design-critic` and `reviewer-design-fidelity` are built to inspect the real artifact, not a description of one (docs/PIPELINE.md's stage 2 contract). The Figma MCP connector is not authorized in this environment, and its OAuth flow requires an interactive session this environment cannot run.
+- **Decision**: for this feature only, the design triad builds and inspects real static HTML mockups (`docs/features/app-visual-rebrand/mockups/*.html`) instead of a Figma file. `design-lead` produces them; `motion-lead` and `design-critic` inspect them directly (rendered in a browser) rather than a Figma file's layers/variants.
+- **Alternatives rejected**: waiting on Figma authorization before proceeding — rejected, requester wants to keep moving; a prose-only `02a-design.md` with no visual artifact at all — already rejected by `design-lead` as unverifiable fiction.
+- **Consequences**: this is a real process deviation, not a like-for-like substitute. HTML mockups carry no structured layer/component/variant data the way a Figma file does, so component-level design-system conformance (do these panels actually use `panel`/`room` fills, hairline borders, the two type registers) has to be checked by reading the rendered HTML/CSS rather than Figma's own tooling — `design-critic`'s critique in this feature is scoped to what's inspectable that way. Should Figma become available later, these mockups can seed a real Figma file, but this feature's design-critic verdict is based on the HTML artifact, not a Figma one. Scoped to `app-visual-rebrand`; does not change `docs/PIPELINE.md`'s default Figma-based process for other features.
+- **Reversibility**: EASY — a future feature still uses Figma normally; nothing about the pipeline's default process changes.
+
+---
+
+## PD-025 — `app-visual-rebrand`'s governed pipeline (Territory 2 "The Console") is abandoned in favour of a Tailark/shadcn monochrome direction run through `/genjutsu:paint`
+
+- **Decided**: 2026-08-23 · requester direction, mid-session
+- **Context**: `docs/features/app-visual-rebrand/` had reached stage `02a-design.md`
+  (status "Approved: pending") with real HTML mockups for Territory 2 — a flat,
+  hairline-bordered, single-red-accent system extending `DESIGN.md`'s existing
+  dark-cinema tokens. In parallel, the same requester ran `/genjutsu:paint`
+  in this session, referencing a Tailark shadcn template and reactbits.dev,
+  and approved (via an artifact preview, twice — once corrected toward true
+  monochrome) a Vercel/Geist-style black-and-white system with a single
+  muted signal-blue used only for focus rings.
+- **Decision**: the requester chose to abandon the governed pipeline's
+  Territory 2 output rather than run both to `design-critic` for a judged
+  comparison, or finish Territory 2 first. The Tailark/shadcn monochrome
+  direction becomes the system going forward, app-wide (landing + in-room/
+  player UI) — not scoped to the landing page.
+- **Alternatives rejected**: running `design-critic` against both directions
+  (offered, not taken); finishing Territory 2 first and doing the shadcn
+  rebuild after (offered, not taken).
+- **Consequences**: `INV-4` in `docs/BRAND-STRATEGY.md` is narrowed by this
+  decision — see that document's own Decision Log for the exact wording
+  change. `docs/features/app-visual-rebrand/` (brief through `02a-design.md`
+  and its mockups) is left in place as historical record but is no longer
+  live; no future feature should resume it without a fresh brief. `DESIGN.md`,
+  `PRODUCT.md`, and `docs/BRAND-STRATEGY.md` are rewritten for the new system
+  as part of this same effort, superseding `PD-021`–`PD-023` and `AD-024`'s
+  premises (there is no "delta-confirmation gate" against the old dark-cinema
+  tokens to satisfy, because the token system itself is being replaced, not
+  amended).
+- **Reversibility**: HARD — the governed pipeline's PRD/brand-alignment/
+  page-strategy work is discarded, not merged; reviving Territory 2 later
+  means re-running the pipeline from a fresh brief against whatever ships
+  from this decision.

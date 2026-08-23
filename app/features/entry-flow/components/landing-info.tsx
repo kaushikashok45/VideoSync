@@ -1,28 +1,43 @@
+type InfoPanel = {
+  id: string;
+  heading: string;
+  body: string;
+};
+
+const PANELS: InfoPanel[] = [
+  {
+    id: "about",
+    heading: "About Sync Party",
+    body:
+      "A private room for watching something together, wherever everyone actually is. Bring a file, share a link, stay in sync.",
+  },
+  {
+    id: "help",
+    heading: "Need a hand?",
+    body:
+      "Starting a room makes you the host. Joining one just takes a room code — playback, reactions, and everyone else in the room show up as soon as you're in.",
+  },
+  {
+    id: "policy",
+    heading: "Room limits",
+    body:
+      "Rooms hold up to 15 people at once. If a room's full, the host will need to make space before anyone else can join.",
+  },
+];
+
+function InfoSection({ id, heading, body }: InfoPanel) {
+  return (
+    <section id={id} aria-labelledby={`${id}-heading`}>
+      <h2 id={`${id}-heading`}>{heading}</h2>
+      <p>{body}</p>
+    </section>
+  );
+}
+
 export function LandingInfo() {
   return (
     <div className="landing-info-grid">
-      <section id="about" aria-labelledby="about-heading">
-        <h2 id="about-heading">About Sync Party</h2>
-        <p>
-          A private screening room for the people you wish were in the room.
-          Bring a film, share one link, and stay in sync from anywhere.
-        </p>
-      </section>
-      <section id="help" aria-labelledby="help-heading">
-        <h2 id="help-heading">Need a hand?</h2>
-        <p>
-          Start a party to host, or use a room code from your host. Playback,
-          chat, reactions, and room details are available once you join.
-        </p>
-      </section>
-      <section id="sources" aria-labelledby="sources-heading">
-        <h2 id="sources-heading">Archive sources</h2>
-        <p>
-          Poster artwork is sourced from Wikimedia Commons and selected for
-          public-domain status in the United States. Check local rights before
-          reuse.
-        </p>
-      </section>
+      {PANELS.map((panel) => <InfoSection key={panel.id} {...panel} />)}
     </div>
   );
 }
