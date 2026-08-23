@@ -29,6 +29,8 @@ import PlayerFeedback from "./player-feedback.tsx";
 import PlayerHeader from "./player-header.tsx";
 import ReactionTray from "~/widgets/reaction-overlay/ui/reaction-tray.tsx";
 import { useSeekerBehaviour } from "../logic/use-seeker-behaviour.ts";
+import { copyRoomCode } from "~/features/room-controls/model/host-tools-behaviour.ts";
+import { toast } from "sonner";
 
 const DRIFT_THRESHOLD_MS = 1500;
 
@@ -83,7 +85,10 @@ export default function PlayerShell({
     () => store.getState().getSnapshot(),
     () => undefined,
   );
-  const currentTime = snapshot?.currentTime ?? 0;
+  const [mediaTime, setMediaTime] = useState(0);
+  const currentTime = snapshot?.status === "playing"
+    ? mediaTime
+    : snapshot?.currentTime ?? 0;
   const duration = snapshot?.duration ?? 0;
   const seeker = useSeekerBehaviour(
     currentTime,
@@ -105,7 +110,7 @@ export default function PlayerShell({
   const [reactionOpen, setReactionOpen] = useState(false);
   const [roomOpen, setRoomOpen] = useState(false);
   const [roomTab, setRoomTab] = useState<"chat" | "members">("chat");
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
   const src = useLocalFileSource(mode, file) ??
     ("mode" in media
       ? (media.mode === "url" ? media.url : undefined)
@@ -121,16 +126,16 @@ export default function PlayerShell({
     hadStream: hadRemoteStream,
   });
   useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(document.fullscreenElement === stageRef.current);
+    const video = videoRef.current;
+    if (!video) return;
+    const updateTime = () => setMediaTime(video.currentTime);
+    video.addEventListener("timeupdate", updateTime);
+    video.addEventListener("loadedmetadata", updateTime);
+    return () => {
+      video.removeEventListener("timeupdate", updateTime);
+      video.removeEventListener("loadedmetadata", updateTime);
     };
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () =>
-      document.removeEventListener(
-        "fullscreenchange",
-        handleFullscreenChange,
-      );
-  }, []);
+  }, [remoteStream, src]);
   const handleStageKeyDown = (
     event: React.KeyboardEvent<HTMLDivElement>,
   ) => {
@@ -142,6 +147,7 @@ export default function PlayerShell({
       setVolume(1);
       syncHandleRef.current?.setVolume(1);
     }
+    syncHandleRef.current?.setVolume(volume || 1);
     const started = await syncHandleRef.current?.play();
     setAutoplayBlocked(!started);
     setAutoplayError(
@@ -149,6 +155,14 @@ export default function PlayerShell({
         ? null
         : "Playback is still blocked. Use your browser’s play control and try again.",
     );
+  };
+  const handleShare = async () => {
+    const shareLink = typeof globalThis.location === "undefined"
+      ? roomId
+      : new URL(`/${roomId}`, globalThis.location.origin).toString();
+    const copied = await copyRoomCode(shareLink);
+    if (copied) toast.success("Room link copied");
+    else toast.error("Unable to copy room link");
   };
 
   useEffect(() => {
@@ -167,12 +181,14 @@ export default function PlayerShell({
       onPointerMove={reveal}
       onKeyDown={handleStageKeyDown}
       onClick={reveal}
-      className="player-stage is-cinema relative min-h-0 max-w-none overflow-hidden bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-text focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+      className={`player-stage is-cinema relative min-h-0 max-w-none overflow-hidden bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-text focus-visible:ring-offset-2 focus-visible:ring-offset-bg ${
+        isMinimized ? "is-minimized" : ""
+      }`}
     >
       <video
         ref={videoRef}
         src={src}
-        autoPlay={false}
+        autoPlay
         preload="metadata"
         playsInline
         controls={false}
@@ -199,9 +215,10 @@ export default function PlayerShell({
           setRoomOpen(true);
         }}
         onExit={onExit}
+        minimal={isMinimized}
       />
       <ControlBar
-        hidden={!visible}
+        hidden={!visible && snapshot?.status !== "paused"}
         me={me}
         volume={volume}
         onVolumeChange={setVolume}
@@ -211,7 +228,16 @@ export default function PlayerShell({
         seekerValue={seeker.value}
         onSeekPreview={seeker.preview}
         onSeekCommit={seeker.commit}
-        isFullscreen={isFullscreen}
+        isMinimized={isMinimized}
+        onToggleMinimize={() => {
+          setIsMinimized((current) => {
+            const next = !current;
+            setRoomTab("chat");
+            setRoomOpen(next);
+            return next;
+          });
+        }}
+        onShare={handleShare}
       />
       <div
         className={`pointer-events-none absolute bottom-[clamp(7rem,12vh,9rem)] left-1/2 z-20 -translate-x-1/2 transition-[opacity,transform] duration-300 motion-reduce:transition-none ${
@@ -242,7 +268,7 @@ export default function PlayerShell({
         fullscreenRef={stageRef}
         actionRef={syncHandleRef}
         stream={remoteStream}
-        autoplay={mode === "receiver" && remoteStream !== null}
+        autoplay={mode === "host" || remoteStream !== null}
         onAutoplayBlocked={() => {
           setAutoplayBlocked(true);
           setAutoplayError(null);
@@ -260,6 +286,8 @@ export default function PlayerShell({
         onOpenChange={setRoomOpen}
         openTab={roomTab}
         showToggle={false}
+        integrated={isMinimized}
+        onExit={onExit}
       />
       <ReactionOverlay
         reactionStore={reactionRef.current}

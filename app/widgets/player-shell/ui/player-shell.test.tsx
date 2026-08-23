@@ -123,6 +123,25 @@ Deno.test("renders a video element and the control bar for a url source", async 
   await flush(60);
 });
 
+Deno.test("minimize control switches to the integrated sidebar layout", () => {
+  setupDom();
+  const { container } = shell({ me: host() });
+  const minimize = container.querySelector(
+    '[aria-label="Minimize player"]',
+  );
+  if (!minimize) throw new Error("missing minimize control");
+  click(minimize);
+  assertEquals(
+    container.querySelector('[aria-label="Restore full player"]') !== null,
+    true,
+  );
+  assertEquals(
+    container.querySelector('[data-testid="sidebar-scrim"]') === null,
+    true,
+  );
+  assertEquals(stage(container).className.includes("is-minimized"), true);
+});
+
 Deno.test("player uses the centered Vercel control composition", async () => {
   setupDom();
   const { container } = shell({ idleMs: 50, me: host() });
@@ -219,7 +238,7 @@ Deno.test("host upload with a local file gets a video src and no waiting frame",
   );
   if (!video) throw new Error("no video element");
   assertEquals(video.getAttribute("src")?.startsWith("blob:"), true);
-  assertEquals(video.autoplay, false);
+  assertEquals(video.autoplay, true);
   assertEquals(video.muted, false);
   assertEquals(video.volume, 1);
   return flush(15);

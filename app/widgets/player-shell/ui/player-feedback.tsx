@@ -2,6 +2,7 @@ import type { PlaybackSnapshot } from "contracts/playback.ts";
 import { Button, InlineError } from "~/shared/ui-kit/index.ts";
 import type { MovieMetadata } from "contracts/movie-metadata.ts";
 import PlayerWaitingState from "./player-waiting-state.tsx";
+import { formatPlaybackTime } from "./format-playback-time.ts";
 
 export interface PlayerFeedbackProps {
   mode: "host" | "receiver";
@@ -38,6 +39,9 @@ export default function PlayerFeedback({
 }: PlayerFeedbackProps) {
   const playable = Boolean(src) || hasStream;
   const showAudioRecovery = autoplayBlocked || autoplayError !== null;
+  const runtimeSeconds = metadata?.runtime
+    ? metadata.runtime * 60
+    : snapshot?.duration ?? 0;
   const showNowPlaying = mode === "host" && playable &&
     snapshot?.status !== "playing";
   const waitingMessage = mode === "host"
@@ -71,40 +75,28 @@ export default function PlayerFeedback({
       {waitingMessage
         ? <PlayerWaitingState title={waitingTitle} message={waitingMessage} />
         : null}
-      {metadata?.title
-        ? (
-          <div className="pointer-events-none absolute left-md top-16 z-10 max-w-[min(28rem,calc(100%-2rem))]">
-            <h2 className="font-built text-base font-semibold text-ink">
-              {metadata.title}
-            </h2>
-          </div>
-        )
-        : null}
       <div
         data-testid="player-feedback-slot"
-        className="pointer-events-none absolute inset-x-md bottom-[6.5rem] z-20 flex min-h-20 items-center justify-center"
+        className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center"
       >
         {showNowPlaying
           ? (
             <div
               data-testid="now-playing-screen"
-              className="pointer-events-auto flex w-full max-w-xl flex-col gap-md border border-line bg-surface-raised/95 p-lg text-left shadow-overlay md:p-xl"
+              className="pointer-events-auto flex items-center justify-center"
             >
-              <div className="flex items-start justify-between gap-md">
-                <div>
-                  <p className="font-built text-xs font-semibold text-brand-text">
-                    Now playing
-                  </p>
-                  <h2 className="mt-xs font-built text-2xl font-semibold text-ink text-balance md:text-3xl">
-                    {metadata?.title ?? "Your movie night"}
-                  </h2>
-                </div>
-                <Button size="md" onClick={onPlay}>Play</Button>
+              <div className="pointer-events-none absolute inset-y-0 left-md flex max-w-[min(42rem,calc(100%-2rem))] flex-col items-start justify-center text-left text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.9)]">
+                <p className="max-w-full break-words text-balance font-built text-lg font-semibold md:text-xl">
+                  {metadata?.title ?? "Now playing"}
+                </p>
+                {runtimeSeconds > 0
+                  ? (
+                    <p className="mt-xxs font-mono text-xs text-white/65">
+                      {formatPlaybackTime(runtimeSeconds)}
+                    </p>
+                  )
+                  : null}
               </div>
-              <p className="max-w-[60ch] text-sm leading-relaxed text-ink-muted text-pretty">
-                {metadata?.overview ||
-                  "Press play when everyone is ready. Playback stays in sync for the room."}
-              </p>
             </div>
           )
           : showAudioRecovery

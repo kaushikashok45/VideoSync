@@ -77,7 +77,7 @@ export default function PlaybackSync({
     if (!video) return;
     const nextVolume = Math.max(0, Math.min(1, volume));
     video.volume = nextVolume;
-    if (nextVolume > 0) video.muted = false;
+    video.muted = nextVolume === 0;
   };
   const toggleFullscreen = () => {
     const target = fullscreenRef?.current ?? videoRef.current;

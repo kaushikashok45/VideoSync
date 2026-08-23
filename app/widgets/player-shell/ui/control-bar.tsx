@@ -20,7 +20,9 @@ export interface ControlBarProps {
   seekerValue: number;
   onSeekPreview: (time: number) => void;
   onSeekCommit: () => void;
-  isFullscreen: boolean;
+  isMinimized: boolean;
+  onToggleMinimize: () => void;
+  onShare: () => void;
 }
 
 export default function ControlBar({
@@ -34,7 +36,9 @@ export default function ControlBar({
   seekerValue,
   onSeekPreview,
   onSeekCommit,
-  isFullscreen,
+  isMinimized,
+  onToggleMinimize,
+  onShare,
 }: ControlBarProps) {
   const state = store.getState();
   const playing = snapshot?.status === "playing";
@@ -69,7 +73,9 @@ export default function ControlBar({
             syncHandleRef={syncHandleRef}
             volume={volume}
             onVolumeChange={onVolumeChange}
-            isFullscreen={isFullscreen}
+            isMinimized={isMinimized}
+            onToggleMinimize={onToggleMinimize}
+            onShare={onShare}
           />
         </div>
       </div>
@@ -78,7 +84,9 @@ export default function ControlBar({
           syncHandleRef={syncHandleRef}
           volume={volume}
           onVolumeChange={onVolumeChange}
-          isFullscreen={isFullscreen}
+          isMinimized={isMinimized}
+          onToggleMinimize={onToggleMinimize}
+          onShare={onShare}
         />
       </div>
     </div>

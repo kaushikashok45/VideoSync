@@ -16,10 +16,11 @@ export default function SidebarTabButton({
       type="button"
       data-testid={testId}
       aria-pressed={active}
+      aria-current={active ? "page" : undefined}
       onClick={onClick}
       className={`rounded-md px-md py-sm font-mono text-sm font-semibold transition-colors ${
         active
-          ? "bg-brand-soft text-brand-text"
+          ? "bg-ink text-onbrand shadow-sm"
           : "text-ink-muted hover:text-ink"
       }`}
     >

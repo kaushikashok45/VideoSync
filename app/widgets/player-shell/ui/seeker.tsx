@@ -4,7 +4,7 @@ const thumbStyles = `input[data-testid="seeker"]::-webkit-slider-thumb {
   width: 14px;
   height: 14px;
   border-radius: 9999px;
-  background: #f85149;
+  background: #ffffff;
   cursor: pointer;
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -16,7 +16,7 @@ input[data-testid="seeker"]::-moz-range-thumb {
   height: 14px;
   border-radius: 9999px;
   border: 0;
-  background: #f85149;
+  background: #ffffff;
   cursor: pointer;
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -57,13 +57,13 @@ export default function Seeker({
       <style>{thumbStyles}</style>
       <div
         data-testid="seeker-track"
-        className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-line-strong"
+        className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-white/25"
       >
         <span
           data-testid="seeker-completed"
           aria-hidden="true"
           style={{ width: `${progress}%` }}
-          className="absolute inset-y-0 left-0 bg-brand"
+          className="absolute inset-y-0 left-0 bg-white"
         />
         <input
           type="range"
@@ -76,10 +76,12 @@ export default function Seeker({
           onChange={() => undefined}
           onPointerUp={(event) =>
             onSeekCommit(Number(event.currentTarget.value))}
+          onPointerCancel={(event) =>
+            onSeekCommit(Number(event.currentTarget.value))}
           onKeyUp={(event) => onSeekCommit(Number(event.currentTarget.value))}
           aria-label="Seek"
           data-testid="seeker"
-          className="absolute inset-0 h-1.5 w-full cursor-pointer appearance-none bg-transparent accent-brand"
+          className="absolute inset-0 h-1.5 w-full cursor-pointer appearance-none bg-transparent accent-white"
         />
       </div>
     </>

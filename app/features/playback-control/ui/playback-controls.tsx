@@ -16,7 +16,7 @@ export interface PlaybackControlsProps {
 }
 
 const BUTTON_CLASS =
-  "relative h-14 w-14 text-white/80 transition-transform hover:scale-105 hover:text-white";
+  "relative h-14 w-14 text-white/80 transition-colors hover:bg-white/10 hover:text-white focus-visible:bg-white/10 motion-reduce:transition-none";
 
 export default function PlaybackControls({
   me,

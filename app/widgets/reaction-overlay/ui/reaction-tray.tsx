@@ -13,7 +13,13 @@ export default function ReactionTray({
   onReact,
 }: ReactionTrayProps) {
   return (
-    <div className="flex flex-col items-center gap-xs">
+    <div
+      className="flex flex-col items-center gap-xs"
+      onBlur={(event) => {
+        const next = event.relatedTarget;
+        if (open && (!next || !event.currentTarget.contains(next))) onToggle();
+      }}
+    >
       <div
         data-testid="reaction-tray"
         aria-hidden={!open}

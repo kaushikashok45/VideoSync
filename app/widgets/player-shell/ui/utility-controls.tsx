@@ -9,7 +9,8 @@ export interface UtilityControlsProps {
   volume: number;
   onVolumeChange: (volume: number) => void;
   onShare?: () => void;
-  isFullscreen?: boolean;
+  isMinimized?: boolean;
+  onToggleMinimize?: () => void;
 }
 
 const BUTTON_CLASS =
@@ -20,7 +21,8 @@ export default function UtilityControls({
   volume,
   onVolumeChange,
   onShare,
-  isFullscreen = false,
+  isMinimized = false,
+  onToggleMinimize,
 }: UtilityControlsProps) {
   const lastAudibleVolumeRef = useRef(1);
   const muted = volume === 0;
@@ -64,13 +66,13 @@ export default function UtilityControls({
         </output>
       </div>
       <IconButton
-        label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
-        onClick={() => syncHandleRef.current?.toggleFullscreen()}
+        label={isMinimized ? "Restore full player" : "Minimize player"}
+        onClick={onToggleMinimize}
         className={BUTTON_CLASS}
       >
-        {isFullscreen
-          ? <Minimize2 className="size-6" />
-          : <Maximize2 className="size-6" />}
+        {isMinimized
+          ? <Maximize2 className="size-6" />
+          : <Minimize2 className="size-6" />}
       </IconButton>
       <IconButton label="Share" onClick={onShare} className={BUTTON_CLASS}>
         <Share2 className="size-6" />

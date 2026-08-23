@@ -15,8 +15,7 @@ import MessageStream from "~/features/chat/ui/message-stream.tsx";
 import HostTools from "~/features/room-controls/ui/host-tools.tsx";
 import MemberList from "~/widgets/member-list/ui/member-list.tsx";
 import ReactionRow from "./reaction-row.tsx";
-import SidebarTabButton from "./sidebar-tab-button.tsx";
-import { MessageSquareText, Users, X } from "lucide-react";
+import { LogOut, MessageSquareText, Settings, Users, X } from "lucide-react";
 import { IconButton } from "~/shared/ui-kit/index.ts";
 
 export interface RoomSidebarProps {
@@ -31,6 +30,8 @@ export interface RoomSidebarProps {
   onOpenChange?: (open: boolean) => void;
   openTab?: "chat" | "members";
   showToggle?: boolean;
+  integrated?: boolean;
+  onExit?: () => void;
 }
 
 type SidebarTab = "chat" | "members";
@@ -47,6 +48,8 @@ export default function RoomSidebar({
   onOpenChange,
   openTab,
   showToggle = true,
+  integrated = false,
+  onExit,
 }: RoomSidebarProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen ?? internalOpen;
@@ -64,10 +67,11 @@ export default function RoomSidebar({
   const closeRef = useRef(() => updateOpen(false));
   useEffect(() => {
     closeRef.current = () => {
+      if (integrated) return;
       updateOpen(false);
       toggleRef.current?.focus();
     };
-  });
+  }, [integrated]);
   useEffect(() => {
     if (!open) return;
     panelRef.current?.focus();
@@ -99,7 +103,7 @@ export default function RoomSidebar({
 
   return (
     <>
-      {open
+      {open && !integrated
         ? (
           <div
             data-testid="sidebar-scrim"
@@ -137,6 +141,10 @@ export default function RoomSidebar({
         role="dialog"
         aria-label="Room details"
         className={`fixed inset-x-0 bottom-0 z-40 flex max-h-[78vh] flex-col rounded-t-[28px] border-t border-line bg-surface-raised shadow-overlay transition-transform duration-300 motion-reduce:transition-none md:inset-x-auto md:bottom-md md:right-0 md:top-md md:max-h-[calc(100dvh-2rem)] md:w-[380px] md:rounded-[28px] md:border md:border-line ${
+          integrated
+            ? "md:bottom-0 md:top-0 md:w-[380px] md:rounded-r-[24px] md:rounded-l-none md:border-y-0 md:border-r md:border-l"
+            : ""
+        } ${
           open
             ? "translate-y-0 md:translate-x-0"
             : "translate-y-full md:translate-y-0 md:translate-x-[calc(100%+1rem)]"
@@ -156,9 +164,39 @@ export default function RoomSidebar({
                 {connectionLabel}
               </p>
             </div>
-            <IconButton label="Close room panel" onClick={close}>
-              <X className="size-4.5" />
-            </IconButton>
+            {integrated
+              ? (
+                <div className="flex items-center gap-xxs">
+                  <IconButton
+                    label="Open chat"
+                    aria-pressed={tab === "chat"}
+                    onClick={() => setTab("chat")}
+                    className={tab === "chat" ? "bg-ink text-onbrand" : ""}
+                  >
+                    <MessageSquareText className="size-4.5" />
+                  </IconButton>
+                  <IconButton
+                    label="Open room settings"
+                    aria-pressed={tab === "members"}
+                    onClick={() => setTab("members")}
+                    className={tab === "members" ? "bg-ink text-onbrand" : ""}
+                  >
+                    <Settings className="size-4.5" />
+                  </IconButton>
+                  {onExit
+                    ? (
+                      <IconButton label="Leave watch party" onClick={onExit}>
+                        <LogOut className="size-4.5" />
+                      </IconButton>
+                    )
+                    : null}
+                </div>
+              )
+              : (
+                <IconButton label="Close room panel" onClick={close}>
+                  <X className="size-4.5" />
+                </IconButton>
+              )}
           </div>
           <div className="mt-sm flex items-center gap-sm text-ink-muted">
             <span className="inline-flex items-center gap-xs font-mono text-xs">
@@ -167,20 +205,40 @@ export default function RoomSidebar({
             </span>
           </div>
         </header>
-        <div className="flex items-center gap-xs border-b border-line px-md py-sm">
-          <SidebarTabButton
-            active={tab === "chat"}
-            testId="chat-tab"
-            label={chatLabel}
-            onClick={() => setTab("chat")}
-          />
-          <SidebarTabButton
-            active={tab === "members"}
-            testId="members-tab"
-            label="Members"
-            onClick={() => setTab("members")}
-          />
-        </div>
+        {!integrated
+          ? (
+            <div className="flex items-center gap-xs border-b border-line px-md py-sm">
+              <button
+                type="button"
+                data-testid="chat-tab"
+                aria-label={chatLabel}
+                aria-pressed={tab === "chat"}
+                onClick={() => setTab("chat")}
+                className={`rounded-md p-sm transition-colors ${
+                  tab === "chat"
+                    ? "bg-ink text-onbrand shadow-sm"
+                    : "text-ink-muted hover:bg-surface hover:text-ink"
+                }`}
+              >
+                <MessageSquareText aria-hidden="true" className="size-5" />
+              </button>
+              <button
+                type="button"
+                data-testid="members-tab"
+                aria-label="Members"
+                aria-pressed={tab === "members"}
+                onClick={() => setTab("members")}
+                className={`rounded-md p-sm transition-colors ${
+                  tab === "members"
+                    ? "bg-ink text-onbrand shadow-sm"
+                    : "text-ink-muted hover:bg-surface hover:text-ink"
+                }`}
+              >
+                <Users aria-hidden="true" className="size-5" />
+              </button>
+            </div>
+          )
+          : null}
         <div className="flex min-h-0 flex-1 flex-col">
           {tab === "chat"
             ? (
