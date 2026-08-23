@@ -1,4 +1,5 @@
 import { assertEquals } from "@std/assert";
+import { act } from "react";
 import { render, setupDom } from "~/shared/ui-kit/render-helper.ts";
 import Seeker from "./seeker.tsx";
 
@@ -34,6 +35,33 @@ Deno.test("renders the completed portion of the timeline", () => {
     '[data-testid="seeker-completed"]',
   );
   assertEquals(completed?.style.width, "25%");
+});
+
+Deno.test("commits a seek after the playing thumb is released", () => {
+  setupDom();
+  const calls: number[] = [];
+  const { container } = render(
+    <Seeker
+      currentTime={10}
+      duration={100}
+      onSeek={() => {}}
+      onSeekCommit={(time) => calls.push(time)}
+    />,
+  );
+  const input = container.querySelector<HTMLInputElement>(
+    '[data-testid="seeker"]',
+  );
+  if (!input) throw new Error("no seeker");
+  act(() => {
+    input.value = "42";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  assertEquals(calls, []);
+  assertEquals(input.value, "42");
+  act(() => {
+    input.dispatchEvent(new MouseEvent("pointerup", { bubbles: true }));
+  });
+  assertEquals(calls, [42]);
 });
 
 // Sad path: a seeker with no usable duration stays rendered but disabled.

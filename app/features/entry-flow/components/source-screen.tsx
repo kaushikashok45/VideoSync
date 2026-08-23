@@ -74,7 +74,7 @@ export function SourceScreen() {
         navigate(route);
         return;
       }
-      navigate(`${route}?preview=1`);
+      navigate(route);
     },
   });
   const revealEyebrow = useReveal({ delayMs: 0 });

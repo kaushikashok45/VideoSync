@@ -101,12 +101,12 @@ Deno.test("permission matrix is host-or-canControl, not host-and-canControl", ()
   assertEquals(conductorCalls, ["pause"]);
 });
 
-Deno.test("forward and rewind step by exactly 5 seconds through the store", () => {
+Deno.test("forward and rewind step by exactly 10 seconds through the store", () => {
   const host = member({ role: "host" });
   const store = createPlaybackStore({ driftThresholdMs: 1500 });
   store.getState().applyServerSnapshot(paused(30));
   applyPlayback("forward", host, store.getState());
-  assertEquals(store.getState().snapshot?.currentTime, 35);
+  assertEquals(store.getState().snapshot?.currentTime, 40);
   applyPlayback("rewind", host, store.getState());
   assertEquals(store.getState().snapshot?.currentTime, 30);
 });

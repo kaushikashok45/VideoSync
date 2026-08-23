@@ -38,6 +38,7 @@ export interface SeekerProps {
   duration: number;
   disabled?: boolean;
   onSeek: (time: number) => void;
+  onSeekCommit?: (time: number) => void;
 }
 
 export default function Seeker({
@@ -45,6 +46,7 @@ export default function Seeker({
   duration,
   disabled = false,
   onSeek,
+  onSeekCommit = onSeek,
 }: SeekerProps) {
   const seekable = Number.isFinite(duration) && duration > 0;
   const max = seekable ? duration : 0;
@@ -70,7 +72,11 @@ export default function Seeker({
           step={0.1}
           value={value}
           disabled={disabled || !seekable}
-          onChange={(event) => onSeek(Number(event.target.value))}
+          onInput={(event) => onSeek(Number(event.currentTarget.value))}
+          onChange={() => undefined}
+          onPointerUp={(event) =>
+            onSeekCommit(Number(event.currentTarget.value))}
+          onKeyUp={(event) => onSeekCommit(Number(event.currentTarget.value))}
           aria-label="Seek"
           data-testid="seeker"
           className="absolute inset-0 h-1.5 w-full cursor-pointer appearance-none bg-transparent accent-brand"

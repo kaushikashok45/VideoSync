@@ -27,6 +27,10 @@ export interface RoomSidebarProps {
   chatStore: ChatStore;
   reactionStore: ReactionStore;
   socket?: SocketClient | null;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  openTab?: "chat" | "members";
+  showToggle?: boolean;
 }
 
 type SidebarTab = "chat" | "members";
@@ -39,16 +43,28 @@ export default function RoomSidebar({
   chatStore,
   reactionStore,
   socket = null,
+  open: controlledOpen,
+  onOpenChange,
+  openTab,
+  showToggle = true,
 }: RoomSidebarProps) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const updateOpen = (next: boolean) => {
+    setInternalOpen(next);
+    onOpenChange?.(next);
+  };
   const [tab, setTab] = useState<SidebarTab>("chat");
+  useEffect(() => {
+    if (openTab) setTab(openTab);
+  }, [openTab]);
   const panelId = useId();
   const toggleRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
-  const closeRef = useRef(() => setOpen(false));
+  const closeRef = useRef(() => updateOpen(false));
   useEffect(() => {
     closeRef.current = () => {
-      setOpen(false);
+      updateOpen(false);
       toggleRef.current?.focus();
     };
   });
@@ -93,18 +109,24 @@ export default function RoomSidebar({
           />
         )
         : null}
-      <button
-        ref={toggleRef}
-        type="button"
-        data-testid="sidebar-toggle"
-        aria-expanded={open}
-        aria-controls={panelId}
-        aria-label={open ? "Close chat and members" : "Open chat and members"}
-        onClick={() => (open ? close() : setOpen(true))}
-        className="absolute bottom-[clamp(2rem,5vh,3rem)] right-md z-40 inline-flex h-11 w-11 items-center justify-center rounded-full border border-line bg-surface-raised/90 text-ink shadow-pop backdrop-blur transition-colors hover:text-brand-text focus-visible:ring-2 focus-visible:ring-brand-text focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
-      >
-        <MessageSquareText className="size-5" />
-      </button>
+      {showToggle
+        ? (
+          <button
+            ref={toggleRef}
+            type="button"
+            data-testid="sidebar-toggle"
+            aria-expanded={open}
+            aria-controls={panelId}
+            aria-label={open
+              ? "Close chat and members"
+              : "Open chat and members"}
+            onClick={() => (open ? close() : updateOpen(true))}
+            className="absolute bottom-[clamp(2rem,5vh,3rem)] right-md z-40 inline-flex h-11 w-11 items-center justify-center rounded-full border border-line bg-surface-raised/90 text-ink shadow-pop backdrop-blur transition-colors hover:text-brand-text focus-visible:ring-2 focus-visible:ring-brand-text focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+          >
+            <MessageSquareText className="size-5" />
+          </button>
+        )
+        : null}
       <aside
         id={panelId}
         ref={panelRef}

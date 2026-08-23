@@ -123,7 +123,7 @@ Deno.test("renders a video element and the control bar for a url source", async 
   await flush(60);
 });
 
-Deno.test("player uses the centered Native TV control composition", async () => {
+Deno.test("player uses the centered Vercel control composition", async () => {
   setupDom();
   const { container } = shell({ idleMs: 50, me: host() });
   assertEquals(stage(container).className.includes("player-stage"), true);
@@ -141,7 +141,7 @@ Deno.test("player uses the centered Native TV control composition", async () => 
   const controls = [...container.querySelectorAll(
     '[data-testid="playback-controls"] button',
   )].map((button) => button.getAttribute("aria-label"));
-  assertEquals(controls, ["Play", "Rewind 5 seconds", "Forward 5 seconds"]);
+  assertEquals(controls, ["Rewind 10 seconds", "Play", "Forward 10 seconds"]);
   assertEquals(
     container.querySelector('[aria-label="Open reactions"]') !== null,
     true,
@@ -266,16 +266,16 @@ Deno.test("idle boundary: visible before the deadline, hidden at and beyond it",
   assertEquals(bar(container)?.getAttribute("aria-hidden"), "true");
 });
 
-Deno.test("keyboard seek uses 5-second and 30-second host steps", () => {
+Deno.test("keyboard seek uses 10-second and 30-second host steps", () => {
   setupDom();
   const store = createPlaybackStore({ driftThresholdMs: 1500 });
   store.getState().applyServerSnapshot(paused(10));
   const { container } = shell({ idleMs: 30, me: host(), playbackStore: store });
   const playerStage = stage(container);
   key(playerStage, { key: "ArrowRight" });
-  assertEquals(store.getState().snapshot?.currentTime, 15);
+  assertEquals(store.getState().snapshot?.currentTime, 20);
   key(playerStage, { key: "ArrowRight", shiftKey: true });
-  assertEquals(store.getState().snapshot?.currentTime, 45);
+  assertEquals(store.getState().snapshot?.currentTime, 50);
 });
 
 Deno.test("keyboard seek clamps home and end to the media boundaries", () => {
@@ -306,7 +306,7 @@ Deno.test("keyboard seek uses the projected live position while playing", () => 
     });
     const playerStage = stage(container);
     key(playerStage, { key: "ArrowRight" });
-    assertEquals(store.getState().snapshot?.currentTime, 25);
+    assertEquals(store.getState().snapshot?.currentTime, 30);
   } finally {
     Date.now = originalNow;
     HTMLMediaElement.prototype.play = originalPlay;

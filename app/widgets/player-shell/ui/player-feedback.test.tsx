@@ -79,11 +79,6 @@ Deno.test("receiver reconnecting state announces recovery without blocking the s
     container.textContent?.includes("Connection interrupted. Trying again."),
     true,
   );
-  assertEquals(
-    container.querySelector('[data-testid="player-connection-status"]') !==
-      null,
-    true,
-  );
 });
 
 Deno.test("normal playback does not leave a visible floating feedback card", () => {

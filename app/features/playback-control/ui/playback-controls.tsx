@@ -7,7 +7,7 @@ import {
   type PlaybackCommandStore,
 } from "../model/playback-behaviour.ts";
 import { SMALL_SEEK_SECONDS } from "~/entities/playback/seek-seconds.ts";
-import { FastForward, Pause, Play, Rewind } from "lucide-react";
+import { Pause, Play, RotateCcw, RotateCw } from "lucide-react";
 
 export interface PlaybackControlsProps {
   me: Member | null;
@@ -15,7 +15,8 @@ export interface PlaybackControlsProps {
   store: PlaybackCommandStore;
 }
 
-const BUTTON_CLASS = "h-14 w-14 transition-transform hover:scale-105";
+const BUTTON_CLASS =
+  "relative h-14 w-14 text-white/80 transition-transform hover:scale-105 hover:text-white";
 
 export default function PlaybackControls({
   me,
@@ -29,6 +30,17 @@ export default function PlaybackControls({
   return (
     <div data-testid="playback-controls" className="flex items-center gap-xs">
       <IconButton
+        label={`Rewind ${SMALL_SEEK_SECONDS} seconds`}
+        disabled={!canControl}
+        onClick={command("rewind")}
+        className={BUTTON_CLASS}
+      >
+        <RotateCcw className="size-6" />
+        <span className="pointer-events-none absolute text-[9px] font-semibold">
+          10
+        </span>
+      </IconButton>
+      <IconButton
         label={playing ? "Pause" : "Play"}
         disabled={!canControl}
         onClick={command(playing ? "pause" : "play")}
@@ -37,20 +49,15 @@ export default function PlaybackControls({
         {playing ? <Pause className="size-6" /> : <Play className="size-6" />}
       </IconButton>
       <IconButton
-        label={`Rewind ${SMALL_SEEK_SECONDS} seconds`}
-        disabled={!canControl}
-        onClick={command("rewind")}
-        className={BUTTON_CLASS}
-      >
-        <Rewind className="size-6" />
-      </IconButton>
-      <IconButton
         label={`Forward ${SMALL_SEEK_SECONDS} seconds`}
         disabled={!canControl}
         onClick={command("forward")}
         className={BUTTON_CLASS}
       >
-        <FastForward className="size-6" />
+        <RotateCw className="size-6" />
+        <span className="pointer-events-none absolute text-[9px] font-semibold">
+          10
+        </span>
       </IconButton>
     </div>
   );

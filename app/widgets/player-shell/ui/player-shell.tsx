@@ -22,11 +22,13 @@ import { resolveRoomConnectionState } from "../logic/resolve-room-connection-sta
 import { useSocketConnectionState } from "../logic/use-socket-connection-state.ts";
 import { usePeerMediaStream } from "../logic/use-peer-media-stream.ts";
 import { handleStagePlaybackShortcut } from "~/features/playback-control/model/handle-stage-playback-shortcut.ts";
+import { applyPlayback } from "~/features/playback-control/model/playback-behaviour.ts";
 import ControlBar from "./control-bar.tsx";
 import PlaybackSync, { type PlaybackSyncHandle } from "./playback-sync.tsx";
 import PlayerFeedback from "./player-feedback.tsx";
 import PlayerHeader from "./player-header.tsx";
 import ReactionTray from "~/widgets/reaction-overlay/ui/reaction-tray.tsx";
+import { useSeekerBehaviour } from "../logic/use-seeker-behaviour.ts";
 
 const DRIFT_THRESHOLD_MS = 1500;
 
@@ -45,6 +47,7 @@ export default function PlayerShell({
   onExit,
 }: PlayerShellProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
   const syncHandleRef = useRef<PlaybackSyncHandle>(null);
   const storeRef = useRef<PlaybackStore | null>(null);
   const membersRef = useRef<MembersStore | null>(null);
@@ -80,6 +83,13 @@ export default function PlayerShell({
     () => store.getState().getSnapshot(),
     () => undefined,
   );
+  const currentTime = snapshot?.currentTime ?? 0;
+  const duration = snapshot?.duration ?? 0;
+  const seeker = useSeekerBehaviour(
+    currentTime,
+    duration,
+    (target) => applyPlayback("seek", me, store.getState(), target),
+  );
   const hostPresent = useSyncExternalStore(
     membersRef.current.subscribe,
     () =>
@@ -92,8 +102,10 @@ export default function PlayerShell({
   const [autoplayError, setAutoplayError] = useState<string | null>(null);
   const [volume, setVolume] = useState(1);
   const [hadRemoteStream, setHadRemoteStream] = useState(false);
-  const [cinemaMode, setCinemaMode] = useState(false);
   const [reactionOpen, setReactionOpen] = useState(false);
+  const [roomOpen, setRoomOpen] = useState(false);
+  const [roomTab, setRoomTab] = useState<"chat" | "members">("chat");
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const src = useLocalFileSource(mode, file) ??
     ("mode" in media
       ? (media.mode === "url" ? media.url : undefined)
@@ -109,8 +121,16 @@ export default function PlayerShell({
     hadStream: hadRemoteStream,
   });
   useEffect(() => {
-    if (snapshot?.status === "playing") setCinemaMode(true);
-  }, [snapshot?.status]);
+    const handleFullscreenChange = () => {
+      setIsFullscreen(document.fullscreenElement === stageRef.current);
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () =>
+      document.removeEventListener(
+        "fullscreenchange",
+        handleFullscreenChange,
+      );
+  }, []);
   const handleStageKeyDown = (
     event: React.KeyboardEvent<HTMLDivElement>,
   ) => {
@@ -140,15 +160,14 @@ export default function PlayerShell({
   return (
     <div
       data-testid="player-shell"
+      ref={stageRef}
       role="group"
       aria-label={mode === "host" ? "Host player" : "Receiver player"}
       tabIndex={0}
       onPointerMove={reveal}
       onKeyDown={handleStageKeyDown}
       onClick={reveal}
-      className={`player-stage relative min-h-0 max-w-none overflow-hidden bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-text focus-visible:ring-offset-2 focus-visible:ring-offset-bg ${
-        cinemaMode ? "is-cinema" : ""
-      }`}
+      className="player-stage is-cinema relative min-h-0 max-w-none overflow-hidden bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-text focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
     >
       <video
         ref={videoRef}
@@ -156,6 +175,7 @@ export default function PlayerShell({
         autoPlay={false}
         preload="metadata"
         playsInline
+        controls={false}
         className="h-full w-full bg-black object-contain"
         data-testid="player-video"
       />
@@ -168,12 +188,18 @@ export default function PlayerShell({
         awaitingSource={awaitingSource}
         autoplayBlocked={autoplayBlocked}
         autoplayError={autoplayError}
-        visible={visible}
         metadata={metadata}
         onPlay={handlePlayWithSound}
         snapshot={snapshot}
       />
-      <PlayerHeader roomId={roomId} onExit={onExit} />
+      <PlayerHeader
+        roomId={roomId}
+        onOpenRoom={(tab) => {
+          setRoomTab(tab);
+          setRoomOpen(true);
+        }}
+        onExit={onExit}
+      />
       <ControlBar
         hidden={!visible}
         me={me}
@@ -182,6 +208,10 @@ export default function PlayerShell({
         store={store}
         snapshot={snapshot}
         syncHandleRef={syncHandleRef}
+        seekerValue={seeker.value}
+        onSeekPreview={seeker.preview}
+        onSeekCommit={seeker.commit}
+        isFullscreen={isFullscreen}
       />
       <div
         className={`pointer-events-none absolute bottom-[clamp(7rem,12vh,9rem)] left-1/2 z-20 -translate-x-1/2 transition-[opacity,transform] duration-300 motion-reduce:transition-none ${
@@ -209,6 +239,7 @@ export default function PlayerShell({
         mode={mode}
         store={store}
         videoRef={videoRef}
+        fullscreenRef={stageRef}
         actionRef={syncHandleRef}
         stream={remoteStream}
         autoplay={mode === "receiver" && remoteStream !== null}
@@ -225,6 +256,10 @@ export default function PlayerShell({
         chatStore={chatRef.current}
         reactionStore={reactionRef.current}
         socket={socket}
+        open={roomOpen}
+        onOpenChange={setRoomOpen}
+        openTab={roomTab}
+        showToggle={false}
       />
       <ReactionOverlay
         reactionStore={reactionRef.current}

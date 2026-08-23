@@ -1,4 +1,4 @@
-import { useEffect, useImperativeHandle } from "react";
+import { useEffect, useImperativeHandle, useRef } from "react";
 import type { RefObject } from "react";
 import type { PlaybackSnapshot } from "contracts/playback.ts";
 import type { PlaybackStore } from "~/entities/playback/playback-store.ts";
@@ -13,6 +13,7 @@ export interface PlaybackSyncProps {
   mode: "host" | "receiver";
   store: PlaybackStore;
   videoRef: RefObject<HTMLVideoElement | null>;
+  fullscreenRef?: RefObject<HTMLElement | null>;
   actionRef: RefObject<PlaybackSyncHandle | null>;
   stream?: MediaStream | null;
   autoplay?: boolean;
@@ -63,11 +64,14 @@ export default function PlaybackSync({
   mode,
   store,
   videoRef,
+  fullscreenRef,
   actionRef,
   stream = null,
   autoplay = false,
   onAutoplayBlocked,
 }: PlaybackSyncProps) {
+  const autoplayBlockedRef = useRef(onAutoplayBlocked);
+  autoplayBlockedRef.current = onAutoplayBlocked;
   const setVolume = (volume: number) => {
     const video = videoRef.current;
     if (!video) return;
@@ -76,10 +80,10 @@ export default function PlaybackSync({
     if (nextVolume > 0) video.muted = false;
   };
   const toggleFullscreen = () => {
-    const video = videoRef.current;
-    if (!video?.requestFullscreen) return;
+    const target = fullscreenRef?.current ?? videoRef.current;
+    if (!target?.requestFullscreen) return;
     if (document.fullscreenElement) void document.exitFullscreen();
-    else void video.requestFullscreen();
+    else void target.requestFullscreen();
   };
   const play = async () => {
     const video = videoRef.current;
@@ -96,7 +100,7 @@ export default function PlaybackSync({
   useImperativeHandle(
     actionRef,
     () => ({ setVolume, toggleFullscreen, play }),
-    [mode, store, videoRef],
+    [fullscreenRef, mode, store, videoRef],
   );
 
   useEffect(() => {
@@ -105,7 +109,7 @@ export default function PlaybackSync({
     const playStream = () => {
       if (!stream || !autoplay) return;
       video.muted = true;
-      void video.play().catch(() => onAutoplayBlocked?.());
+      void video.play().catch(() => autoplayBlockedRef.current?.());
     };
     video.addEventListener("loadedmetadata", playStream);
     video.srcObject = stream;
@@ -114,7 +118,7 @@ export default function PlaybackSync({
       video.removeEventListener("loadedmetadata", playStream);
       if (video.srcObject === stream) video.srcObject = null;
     };
-  }, [autoplay, onAutoplayBlocked, stream, videoRef]);
+  }, [autoplay, stream, videoRef]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -132,7 +136,7 @@ export default function PlaybackSync({
         .then(() => {
           if (mode === "host") store.getState().play();
         })
-        .catch(() => onAutoplayBlocked?.());
+        .catch(() => autoplayBlockedRef.current?.());
     };
     const onTime = () => {
       const projected = store.getState().projectedAt(Date.now());
@@ -145,7 +149,7 @@ export default function PlaybackSync({
       video.removeEventListener("loadedmetadata", onLoaded);
       video.removeEventListener("timeupdate", onTime);
     };
-  }, [autoplay, mode, onAutoplayBlocked, store, videoRef]);
+  }, [autoplay, mode, store, videoRef]);
 
   return null;
 }

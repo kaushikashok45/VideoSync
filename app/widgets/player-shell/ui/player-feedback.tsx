@@ -16,8 +16,8 @@ export interface PlayerFeedbackProps {
   hostPresent?: boolean;
   awaitingSource: boolean;
   autoplayBlocked: boolean;
+  visible?: boolean;
   autoplayError?: string | null;
-  visible: boolean;
   metadata: MovieMetadata | null;
   onPlay: () => void;
   snapshot?: PlaybackSnapshot;
@@ -32,7 +32,6 @@ export default function PlayerFeedback({
   awaitingSource,
   autoplayBlocked,
   autoplayError = null,
-  visible,
   metadata,
   onPlay,
   snapshot,
@@ -67,34 +66,11 @@ export default function PlayerFeedback({
     : connectionState === "reconnecting"
     ? "Connection interrupted"
     : "Entering the room";
-  const connectionLabel = connectionState === "in-sync"
-    ? "In sync"
-    : connectionState === "reconnecting"
-    ? "Reconnecting"
-    : null;
   return (
     <>
       {waitingMessage
         ? <PlayerWaitingState title={waitingTitle} message={waitingMessage} />
         : null}
-      {connectionLabel
-        ? (
-          <div
-            data-testid="player-connection-status"
-            role="status"
-            aria-live="polite"
-            className="pointer-events-none absolute bottom-24 right-md z-20 rounded-full border border-line bg-surface-raised/90 px-sm py-xxs font-built text-xs font-semibold text-ink shadow-pop"
-          >
-            {connectionLabel}
-          </div>
-        )
-        : null}
-      <div
-        aria-hidden="true"
-        className={`pointer-events-none absolute inset-0 bg-gradient-to-t from-bg/80 via-transparent to-bg/40 transition-opacity duration-300 ${
-          visible ? "opacity-100" : "opacity-0"
-        }`}
-      />
       {metadata?.title
         ? (
           <div className="pointer-events-none absolute left-md top-16 z-10 max-w-[min(28rem,calc(100%-2rem))]">

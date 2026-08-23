@@ -152,7 +152,9 @@ Deno.test("live host playback resolves the route room id over stale session stat
     metadata: METADATA,
   });
   const container = await renderHost("abc23", "zzzzz", false);
-  click(container.querySelector('[data-testid="sidebar-toggle"]') as Element);
+  click(
+    container.querySelector('[aria-label="Open chat and members"]') as Element,
+  );
   click(container.querySelector('[data-testid="members-tab"]') as Element);
   assertEquals(container.textContent?.includes("abc23"), true);
 });
