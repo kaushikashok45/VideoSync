@@ -117,6 +117,14 @@ Deno.test("renders a video element and the control bar for a url source", async 
   assertEquals(bar(container) !== null, true);
   assertEquals(stage(container).className.includes("is-minimized"), true);
   assertEquals(
+    container.querySelector('[data-testid="room-space-rail"]') !== null,
+    true,
+  );
+  assertEquals(
+    container.querySelector('[data-testid="room-channel-rail"]') !== null,
+    true,
+  );
+  assertEquals(
     container.querySelector('[data-testid="chat-stream"]') !== null,
     true,
   );
@@ -145,6 +153,10 @@ Deno.test("maximize control switches from the integrated room layout", () => {
     true,
   );
   assertEquals(stage(container).className.includes("is-minimized"), false);
+  assertEquals(
+    container.querySelector('[data-testid="room-space-rail"]'),
+    null,
+  );
 });
 
 Deno.test("player uses the centered Vercel control composition", async () => {

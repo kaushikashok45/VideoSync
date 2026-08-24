@@ -1,61 +1,71 @@
-import { LogOut, MessageSquareText, Settings } from "lucide-react";
+import { Circle, LogOut, MessageSquareText, Settings } from "lucide-react";
 import { IconButton } from "~/shared/ui-kit/index.ts";
 
 export interface PlayerHeaderProps {
   roomId: string;
+  connectionLabel: string;
   onOpenRoom: (tab: "chat" | "members") => void;
   onExit?: () => void;
-  minimal?: boolean;
 }
 
 export default function PlayerHeader({
   roomId,
+  connectionLabel,
   onOpenRoom,
   onExit,
-  minimal = false,
 }: PlayerHeaderProps) {
   return (
     <header
       data-testid="player-header"
-      className="pointer-events-none absolute inset-x-md top-md z-30 flex items-center justify-between gap-md"
+      className="pointer-events-none absolute inset-x-0 top-0 z-30 flex min-h-12 items-center gap-3 border-b border-white/[0.06] bg-black px-4"
     >
-      <p className="font-built text-xl font-semibold tracking-tight text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.9)]">
-        Sync <span className="font-normal">Party</span>
-      </p>
-      {!minimal
-        ? (
-          <div className="pointer-events-auto flex items-center gap-sm text-white/80 drop-shadow-[0_1px_8px_rgba(0,0,0,0.9)]">
-            <span className="hidden font-mono text-xs text-white/60 sm:inline-flex">
-              {roomId ? `ROOM / ${roomId}` : "ROOM"}
-            </span>
-            <IconButton
-              label="Open chat and members"
-              onClick={() => onOpenRoom("chat")}
-              className="text-white hover:bg-white/10 hover:text-white"
-            >
-              <MessageSquareText className="size-4.5" />
-            </IconButton>
-            <IconButton
-              label={`Open room settings for ${roomId}`}
-              onClick={() => onOpenRoom("members")}
-              className="text-white hover:bg-white/10 hover:text-white"
-            >
-              <Settings className="size-4.5" />
-            </IconButton>
-            {onExit
-              ? (
-                <IconButton
-                  label="Leave watch party"
-                  onClick={onExit}
-                  className="text-white hover:bg-white/10 hover:text-white"
-                >
-                  <LogOut className="size-4" />
-                </IconButton>
-              )
-              : null}
-          </div>
-        )
-        : null}
+      <span className="sr-only">Sync Party</span>
+      <div className="flex min-w-0 items-center gap-2">
+        <span
+          className="text-[22px] font-light text-white/35"
+          aria-hidden="true"
+        >
+          #
+        </span>
+        <strong className="truncate text-sm">watch-party</strong>
+        <span className="hidden truncate text-sm text-white/35 sm:inline">
+          · {roomId ? `Room ${roomId}` : "Friday night watch"}
+        </span>
+      </div>
+      <span className="flex-1" aria-hidden="true" />
+      <div className="flex items-center gap-1.5">
+        <span className="hidden items-center gap-1.5 text-xs font-semibold text-[#8de1aa] sm:flex">
+          <Circle className="size-2 fill-[#46c37b] text-[#46c37b]" />
+          {connectionLabel}
+        </span>
+        <div className="pointer-events-auto flex items-center gap-0.5 text-white/70">
+          <IconButton
+            label="Open chat"
+            onClick={() => onOpenRoom("chat")}
+            className="h-8 w-8 rounded-md hover:bg-white/10 hover:text-white"
+          >
+            <MessageSquareText className="size-4" />
+          </IconButton>
+          <IconButton
+            label="Open room settings"
+            onClick={() => onOpenRoom("members")}
+            className="h-8 w-8 rounded-md hover:bg-white/10 hover:text-white"
+          >
+            <Settings className="size-4" />
+          </IconButton>
+          {onExit
+            ? (
+              <IconButton
+                label="Leave watch party"
+                onClick={onExit}
+                className="h-8 w-8 rounded-md hover:bg-white/10 hover:text-white"
+              >
+                <LogOut className="size-4" />
+              </IconButton>
+            )
+            : null}
+        </div>
+      </div>
     </header>
   );
 }

@@ -15,7 +15,7 @@ import MessageStream from "~/features/chat/ui/message-stream.tsx";
 import HostTools from "~/features/room-controls/ui/host-tools.tsx";
 import MemberList from "~/widgets/member-list/ui/member-list.tsx";
 import ReactionRow from "./reaction-row.tsx";
-import { LogOut, MessageSquareText, Settings, Users, X } from "lucide-react";
+import { MessageSquareText, Users, X } from "lucide-react";
 import { IconButton } from "~/shared/ui-kit/index.ts";
 
 export interface RoomSidebarProps {
@@ -31,7 +31,6 @@ export interface RoomSidebarProps {
   openTab?: "chat" | "members";
   showToggle?: boolean;
   integrated?: boolean;
-  onExit?: () => void;
 }
 
 type SidebarTab = "chat" | "members";
@@ -49,7 +48,6 @@ export default function RoomSidebar({
   openTab,
   showToggle = true,
   integrated = false,
-  onExit,
 }: RoomSidebarProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen ?? internalOpen;
@@ -164,39 +162,13 @@ export default function RoomSidebar({
                 {connectionLabel}
               </p>
             </div>
-            {integrated
+            {!integrated
               ? (
-                <div className="flex items-center gap-xxs">
-                  <IconButton
-                    label="Open chat"
-                    aria-pressed={tab === "chat"}
-                    onClick={() => setTab("chat")}
-                    className={tab === "chat" ? "bg-ink text-onbrand" : ""}
-                  >
-                    <MessageSquareText className="size-4.5" />
-                  </IconButton>
-                  <IconButton
-                    label="Open room settings"
-                    aria-pressed={tab === "members"}
-                    onClick={() => setTab("members")}
-                    className={tab === "members" ? "bg-ink text-onbrand" : ""}
-                  >
-                    <Settings className="size-4.5" />
-                  </IconButton>
-                  {onExit
-                    ? (
-                      <IconButton label="Leave watch party" onClick={onExit}>
-                        <LogOut className="size-4.5" />
-                      </IconButton>
-                    )
-                    : null}
-                </div>
-              )
-              : (
                 <IconButton label="Close room panel" onClick={close}>
                   <X className="size-4.5" />
                 </IconButton>
-              )}
+              )
+              : null}
           </div>
           <div className="mt-sm flex items-center gap-sm text-ink-muted">
             <span className="inline-flex items-center gap-xs font-mono text-xs">

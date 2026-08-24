@@ -27,6 +27,8 @@ import ControlBar from "./control-bar.tsx";
 import PlaybackSync, { type PlaybackSyncHandle } from "./playback-sync.tsx";
 import PlayerFeedback from "./player-feedback.tsx";
 import PlayerHeader from "./player-header.tsx";
+import { RoomChannelRail } from "./room-channel-rail.tsx";
+import { RoomSpaceRail } from "./room-space-rail.tsx";
 import ReactionTray from "~/widgets/reaction-overlay/ui/reaction-tray.tsx";
 import { useSeekerBehaviour } from "../logic/use-seeker-behaviour.ts";
 import { copyRoomCode } from "~/features/room-controls/model/host-tools-behaviour.ts";
@@ -185,95 +187,108 @@ export default function PlayerShell({
         isMinimized ? "is-minimized" : ""
       }`}
     >
-      <video
-        ref={videoRef}
-        src={src}
-        autoPlay
-        preload="metadata"
-        playsInline
-        controls={false}
-        className="h-full w-full bg-black object-contain"
-        data-testid="player-video"
-      />
-      <PlayerFeedback
-        mode={mode}
-        connectionState={connection.stage}
-        src={src}
-        hasStream={remoteStream !== null}
-        hostPresent={hostPresent}
-        awaitingSource={awaitingSource}
-        autoplayBlocked={autoplayBlocked}
-        autoplayError={autoplayError}
-        metadata={metadata}
-        onPlay={handlePlayWithSound}
-        snapshot={snapshot}
-      />
-      <PlayerHeader
-        roomId={roomId}
-        onOpenRoom={(tab) => {
-          setRoomTab(tab);
-          setRoomOpen(true);
-        }}
-        onExit={onExit}
-        minimal={isMinimized}
-      />
-      <ControlBar
-        hidden={!visible && snapshot?.status !== "paused"}
-        me={me}
-        volume={volume}
-        onVolumeChange={setVolume}
-        store={store}
-        snapshot={snapshot}
-        syncHandleRef={syncHandleRef}
-        seekerValue={seeker.value}
-        onSeekPreview={seeker.preview}
-        onSeekCommit={seeker.commit}
-        isMinimized={isMinimized}
-        onToggleMinimize={() => {
-          setIsMinimized((current) => {
-            const next = !current;
-            setRoomTab("chat");
-            setRoomOpen(next);
-            return next;
-          });
-        }}
-        onShare={handleShare}
-      />
-      <div
-        className={`pointer-events-none absolute bottom-[clamp(7rem,12vh,9rem)] left-1/2 z-20 -translate-x-1/2 transition-[opacity,transform] duration-300 motion-reduce:transition-none ${
-          visible ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
-        }`}
-        aria-hidden={!visible || undefined}
-      >
-        <div className="pointer-events-auto">
-          <ReactionTray
-            open={reactionOpen}
-            onToggle={() => setReactionOpen((current) => !current)}
-            onReact={(emoji) => {
-              const senderName = me?.name ?? "You";
-              if (socket === null) {
-                reactionRef.current?.getState().send(emoji, senderName);
-              } else {
-                socket.sendReaction(emoji, senderName);
-              }
-              setReactionOpen(false);
-            }}
-          />
+      {isMinimized
+        ? (
+          <>
+            <RoomSpaceRail />
+            <RoomChannelRail
+              roomId={roomId}
+              userName={me?.name ?? "You"}
+            />
+          </>
+        )
+        : null}
+      <div className="player-stage-content">
+        <video
+          ref={videoRef}
+          src={src}
+          autoPlay
+          preload="metadata"
+          playsInline
+          controls={false}
+          className="h-full w-full bg-black object-contain"
+          data-testid="player-video"
+        />
+        <PlayerFeedback
+          mode={mode}
+          connectionState={connection.stage}
+          src={src}
+          hasStream={remoteStream !== null}
+          hostPresent={hostPresent}
+          awaitingSource={awaitingSource}
+          autoplayBlocked={autoplayBlocked}
+          autoplayError={autoplayError}
+          metadata={metadata}
+          onPlay={handlePlayWithSound}
+          snapshot={snapshot}
+        />
+        <PlayerHeader
+          roomId={roomId}
+          connectionLabel={connection.label}
+          onOpenRoom={(tab) => {
+            setRoomTab(tab);
+            setRoomOpen(true);
+          }}
+          onExit={onExit}
+        />
+        <ControlBar
+          hidden={!visible && snapshot?.status !== "paused"}
+          me={me}
+          volume={volume}
+          onVolumeChange={setVolume}
+          store={store}
+          snapshot={snapshot}
+          syncHandleRef={syncHandleRef}
+          seekerValue={seeker.value}
+          onSeekPreview={seeker.preview}
+          onSeekCommit={seeker.commit}
+          isMinimized={isMinimized}
+          onToggleMinimize={() => {
+            setIsMinimized((current) => {
+              const next = !current;
+              setRoomTab("chat");
+              setRoomOpen(next);
+              return next;
+            });
+          }}
+          onShare={handleShare}
+        />
+        <div
+          className={`pointer-events-none absolute bottom-[clamp(7rem,12vh,9rem)] left-1/2 z-20 -translate-x-1/2 transition-[opacity,transform] duration-300 motion-reduce:transition-none ${
+            visible ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
+          }`}
+          aria-hidden={!visible || undefined}
+        >
+          <div className="pointer-events-auto">
+            <ReactionTray
+              open={reactionOpen}
+              onToggle={() => setReactionOpen((current) => !current)}
+              onReact={(emoji) => {
+                const senderName = me?.name ?? "You";
+                if (socket === null) {
+                  reactionRef.current?.getState().send(emoji, senderName);
+                } else {
+                  socket.sendReaction(emoji, senderName);
+                }
+                setReactionOpen(false);
+              }}
+            />
+          </div>
         </div>
+        <PlaybackSync
+          mode={mode}
+          store={store}
+          videoRef={videoRef}
+          fullscreenRef={stageRef}
+          actionRef={syncHandleRef}
+          stream={remoteStream}
+          autoplay={mode === "host" || remoteStream !== null}
+          onAutoplayBlocked={() => {
+            setAutoplayBlocked(true);
+            setAutoplayError(null);
+          }}
+        />
       </div>
-      <PlaybackSync
-        mode={mode}
-        store={store}
-        videoRef={videoRef}
-        fullscreenRef={stageRef}
-        actionRef={syncHandleRef}
-        stream={remoteStream}
-        autoplay={mode === "host" || remoteStream !== null}
-        onAutoplayBlocked={() => {
-          setAutoplayBlocked(true);
-          setAutoplayError(null);
-        }}
-      />
       <RoomSidebar
         roomId={roomId}
         connectionLabel={connection.label}
@@ -287,7 +302,6 @@ export default function PlayerShell({
         openTab={roomTab}
         showToggle={false}
         integrated={isMinimized}
-        onExit={onExit}
       />
       <ReactionOverlay
         reactionStore={reactionRef.current}
