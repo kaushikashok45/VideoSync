@@ -76,7 +76,7 @@ async function renderHost(
   return container;
 }
 
-Deno.test("host route previews url media from hostSourceStore", async () => {
+Deno.test("host route uses the updated player shell for url media", async () => {
   setupDom();
   installMediaMocks();
   hostSourceStore.getState().commit({
@@ -88,10 +88,17 @@ Deno.test("host route previews url media from hostSourceStore", async () => {
   const video = container.querySelector("video");
   if (!video) throw new Error("no video element");
   assertEquals(video.getAttribute("src"), "https://example.com/movie.mp4");
-  assertEquals(container.textContent?.includes("Video URL"), true);
+  assertEquals(
+    container.querySelector('[data-testid="player-shell"]') !== null,
+    true,
+  );
+  assertEquals(
+    container.querySelector('[data-testid="chat-stream"]') !== null,
+    true,
+  );
 });
 
-Deno.test("host route derives a local title and blob preview for upload handoff", async () => {
+Deno.test("host route keeps the upload handoff in the player shell", async () => {
   setupDom();
   installMediaMocks();
   hostSourceStore.getState().commit({
@@ -103,19 +110,25 @@ Deno.test("host route derives a local title and blob preview for upload handoff"
   const video = container.querySelector("video");
   if (!video) throw new Error("no video element");
   assertEquals(video.getAttribute("src")?.startsWith("blob:"), true);
-  assertEquals(container.textContent?.includes("My Movie.Final"), true);
+  assertEquals(
+    container.querySelector('[data-testid="player-shell"]') !== null,
+    true,
+  );
 });
 
-Deno.test("host route shows a stable empty state when no source is available", async () => {
+Deno.test("host route leaves the player empty when no source is available", async () => {
   setupDom();
   installMediaMocks();
   hostSourceStore.getState().clear();
   const container = await renderHost("abc23");
-  assertEquals(container.textContent?.includes("No video selected"), true);
-  assertEquals(container.textContent?.includes("Choose a source"), true);
+  assertEquals(container.querySelector("video"), null);
+  assertEquals(
+    container.querySelector('[data-testid="player-shell"]'),
+    null,
+  );
 });
 
-Deno.test("host preplay keeps the room code out of the live stage", async () => {
+Deno.test("host route uses the route room in the integrated player", async () => {
   setupDom();
   installMediaMocks();
   hostSourceStore.getState().commit({
@@ -124,8 +137,11 @@ Deno.test("host preplay keeps the room code out of the live stage", async () => 
     metadata: METADATA,
   });
   const container = await renderHost("abc23", "zzzzz");
-  assertEquals(container.textContent?.includes("abc23"), false);
-  assertEquals(container.textContent?.includes("The Matrix"), true);
+  assertEquals(container.textContent?.includes("Room abc23"), true);
+  assertEquals(
+    container.querySelector('[data-testid="chat-stream"]') !== null,
+    true,
+  );
 });
 
 Deno.test("host route switches to the live player shell after start watching", async () => {
