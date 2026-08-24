@@ -115,6 +115,11 @@ Deno.test("renders a video element and the control bar for a url source", async 
   assertEquals(video !== null, true);
   assertEquals(video?.getAttribute("src"), URL_MEDIA.url);
   assertEquals(bar(container) !== null, true);
+  assertEquals(stage(container).className.includes("is-minimized"), true);
+  assertEquals(
+    container.querySelector('[data-testid="chat-stream"]') !== null,
+    true,
+  );
   assertEquals(container.querySelector('[aria-label="Play"]') !== null, true);
   assertEquals(
     container.querySelector('[data-testid="seeker"]') !== null,
@@ -123,11 +128,11 @@ Deno.test("renders a video element and the control bar for a url source", async 
   await flush(60);
 });
 
-Deno.test("minimize control switches to the integrated sidebar layout", () => {
+Deno.test("maximize control switches from the integrated room layout", () => {
   setupDom();
   const { container } = shell({ me: host() });
   const minimize = container.querySelector(
-    '[aria-label="Minimize player"]',
+    '[aria-label="Maximize player"]',
   );
   if (!minimize) throw new Error("missing minimize control");
   click(minimize);
@@ -139,7 +144,7 @@ Deno.test("minimize control switches to the integrated sidebar layout", () => {
     container.querySelector('[data-testid="sidebar-scrim"]') === null,
     true,
   );
-  assertEquals(stage(container).className.includes("is-minimized"), true);
+  assertEquals(stage(container).className.includes("is-minimized"), false);
 });
 
 Deno.test("player uses the centered Vercel control composition", async () => {
@@ -265,7 +270,7 @@ Deno.test("the host gets enabled transport buttons", () => {
   return flush(15);
 });
 
-Deno.test("host presence stays visible in the top chrome without opening the room panel", () => {
+Deno.test("host presence stays visible in the top chrome", () => {
   setupDom();
   const { container } = shell({ idleMs: 10, me: host() });
   const pill = container.querySelector('[data-testid="presence-pill"]');

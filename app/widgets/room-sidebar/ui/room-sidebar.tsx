@@ -142,7 +142,7 @@ export default function RoomSidebar({
         aria-label="Room details"
         className={`fixed inset-x-0 bottom-0 z-40 flex max-h-[78vh] flex-col rounded-t-[28px] border-t border-line bg-surface-raised shadow-overlay transition-transform duration-300 motion-reduce:transition-none md:inset-x-auto md:bottom-md md:right-0 md:top-md md:max-h-[calc(100dvh-2rem)] md:w-[380px] md:rounded-[28px] md:border md:border-line ${
           integrated
-            ? "md:bottom-0 md:top-0 md:w-[380px] md:rounded-r-[24px] md:rounded-l-none md:border-y-0 md:border-r md:border-l"
+            ? "md:bottom-0 md:top-0 md:w-[clamp(320px,25vw,420px)] md:rounded-r-none md:rounded-l-none md:border-y-0 md:border-r md:border-l"
             : ""
         } ${
           open

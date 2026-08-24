@@ -97,11 +97,11 @@
   @media (min-width: 768px) {
     .player-stage.is-cinema.is-minimized {
       left: 0;
-      right: 380px;
+      right: clamp(320px, 25vw, 420px);
       width: auto;
       border-right: 0;
-      border-radius: 24px 0 0 24px;
-      box-shadow: 0 0 0 1px var(--line), 24px 0 48px rgba(0, 0, 0, 0.18);
+      border-radius: 0;
+      box-shadow: none;
     }
   }
 

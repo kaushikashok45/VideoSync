@@ -66,16 +66,20 @@ export default function UtilityControls({
         </output>
       </div>
       <IconButton
-        label={isMinimized ? "Restore full player" : "Minimize player"}
+        label="Share"
+        onClick={onShare}
+        className={BUTTON_CLASS}
+      >
+        <Share2 className="size-6" />
+      </IconButton>
+      <IconButton
+        label={isMinimized ? "Maximize player" : "Restore full player"}
         onClick={onToggleMinimize}
         className={BUTTON_CLASS}
       >
         {isMinimized
           ? <Maximize2 className="size-6" />
           : <Minimize2 className="size-6" />}
-      </IconButton>
-      <IconButton label="Share" onClick={onShare} className={BUTTON_CLASS}>
-        <Share2 className="size-6" />
       </IconButton>
     </div>
   );

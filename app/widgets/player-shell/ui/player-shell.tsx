@@ -108,9 +108,9 @@ export default function PlayerShell({
   const [volume, setVolume] = useState(1);
   const [hadRemoteStream, setHadRemoteStream] = useState(false);
   const [reactionOpen, setReactionOpen] = useState(false);
-  const [roomOpen, setRoomOpen] = useState(false);
+  const [roomOpen, setRoomOpen] = useState(true);
   const [roomTab, setRoomTab] = useState<"chat" | "members">("chat");
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(true);
   const src = useLocalFileSource(mode, file) ??
     ("mode" in media
       ? (media.mode === "url" ? media.url : undefined)
@@ -181,7 +181,7 @@ export default function PlayerShell({
       onPointerMove={reveal}
       onKeyDown={handleStageKeyDown}
       onClick={reveal}
-      className={`player-stage is-cinema relative min-h-0 max-w-none overflow-hidden bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-text focus-visible:ring-offset-2 focus-visible:ring-offset-bg ${
+      className={`player-stage is-cinema min-h-0 max-w-none overflow-hidden bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-text focus-visible:ring-offset-2 focus-visible:ring-offset-bg ${
         isMinimized ? "is-minimized" : ""
       }`}
     >
