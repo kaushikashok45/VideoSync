@@ -137,11 +137,12 @@ Deno.test("host route uses the route room in the integrated player", async () =>
     metadata: METADATA,
   });
   const container = await renderHost("abc23", "zzzzz");
-  assertEquals(container.textContent?.includes("Room abc23"), true);
   assertEquals(
     container.querySelector('[data-testid="chat-stream"]') !== null,
     true,
   );
+  click(container.querySelector('[aria-label="Maximize player"]') as Element);
+  assertEquals(container.textContent?.includes("Room abc23"), true);
 });
 
 Deno.test("host route switches to the live player shell after start watching", async () => {
@@ -168,8 +169,6 @@ Deno.test("live host playback resolves the route room id over stale session stat
     metadata: METADATA,
   });
   const container = await renderHost("abc23", "zzzzz", false);
-  click(
-    container.querySelector('[aria-label="Open room settings"]') as Element,
-  );
+  click(container.querySelector('[aria-label="Maximize player"]') as Element);
   assertEquals(container.textContent?.includes("abc23"), true);
 });

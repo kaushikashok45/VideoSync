@@ -16,6 +16,12 @@ export function handleStagePlaybackShortcut(
 ): void {
   if (event.target !== event.currentTarget || !canControlRoom(me)) return;
   const projected = store.getState().projectedAt(Date.now()) ?? snapshot;
+  if (event.key === " " || event.code === "Space") {
+    event.preventDefault();
+    if (projected?.status === "playing") store.getState().pause();
+    else store.getState().play();
+    return;
+  }
   if (event.key === "Home" || event.key === "End") {
     event.preventDefault();
     store.getState().seek(event.key === "Home" ? 0 : projected?.duration ?? 0);

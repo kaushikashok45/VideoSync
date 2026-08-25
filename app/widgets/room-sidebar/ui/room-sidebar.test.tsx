@@ -174,6 +174,52 @@ Deno.test("panel uses a fixed overlay so opening it does not resize the player s
   assertEquals(panel?.className.includes("md:right-0"), true);
 });
 
+function integratedSidebar(): HTMLElement {
+  const { container } = render(
+    <RoomSidebar
+      roomId="abc23"
+      connectionLabel="In sync"
+      me={ME}
+      membersStore={stubMembers()}
+      chatStore={createChatStore()}
+      reactionStore={createReactionStore()}
+      open
+      integrated
+      showToggle={false}
+    />,
+  );
+  return container;
+}
+
+Deno.test("integrated mode always shows chat and has no tab switcher", () => {
+  setupDom();
+  const container = integratedSidebar();
+  assertEquals(container.querySelector('[data-testid="chat-tab"]'), null);
+  assertEquals(container.querySelector('[data-testid="members-tab"]'), null);
+  assertEquals(
+    container.querySelector('[data-testid="chat-stream"]') !== null,
+    true,
+  );
+  assertEquals(
+    container.querySelector('[data-testid="room-sidebar"]')
+      ?.className.includes("fixed"),
+    false,
+  );
+});
+
+Deno.test("integrated mode's header is a plain Chat label with no room/status chrome or member toggle", () => {
+  setupDom();
+  const container = integratedSidebar();
+  const panel = container.querySelector('[data-testid="room-sidebar"]');
+  assertEquals(panel?.querySelector("header")?.textContent, "Chat");
+  assertEquals(panel?.textContent?.includes("abc23"), false);
+  assertEquals(panel?.textContent?.includes("In sync"), false);
+  assertEquals(
+    container.querySelector('[aria-label="Show member list"]'),
+    null,
+  );
+});
+
 Deno.test("chat and reaction actions use the active socket when one is provided", () => {
   setupDom();
   const socket = new FakeSocketClient();

@@ -136,46 +136,50 @@ export default function RoomSidebar({
         tabIndex={-1}
         inert={!open}
         aria-hidden={!open || undefined}
-        role="dialog"
-        aria-label="Room details"
-        className={`fixed inset-x-0 bottom-0 z-40 flex max-h-[78vh] flex-col rounded-t-[28px] border-t border-line bg-surface-raised shadow-overlay transition-transform duration-300 motion-reduce:transition-none md:inset-x-auto md:bottom-md md:right-0 md:top-md md:max-h-[calc(100dvh-2rem)] md:w-[380px] md:rounded-[28px] md:border md:border-line ${
-          integrated
-            ? "md:bottom-0 md:top-0 md:w-[clamp(320px,25vw,420px)] md:rounded-r-none md:rounded-l-none md:border-y-0 md:border-r md:border-l"
-            : ""
-        } ${
-          open
-            ? "translate-y-0 md:translate-x-0"
-            : "translate-y-full md:translate-y-0 md:translate-x-[calc(100%+1rem)]"
-        }`}
+        role={integrated ? undefined : "dialog"}
+        aria-label={integrated ? undefined : "Room details"}
+        className={integrated
+          ? "flex h-full min-h-0 w-full flex-col bg-surface"
+          : `fixed inset-x-0 bottom-0 z-40 flex max-h-[78vh] flex-col rounded-t-[28px] border-t border-line bg-surface-raised shadow-overlay transition-transform duration-300 motion-reduce:transition-none md:inset-x-auto md:bottom-md md:right-0 md:top-md md:max-h-[calc(100dvh-2rem)] md:w-[380px] md:rounded-[28px] md:border md:border-line ${
+            open
+              ? "translate-y-0 md:translate-x-0"
+              : "translate-y-full md:translate-y-0 md:translate-x-[calc(100%+1rem)]"
+          }`}
       >
         <header className="border-b border-line px-md py-md">
-          <div className="flex items-start justify-between gap-sm">
-            <div className="flex flex-col gap-xxs">
-              <p className="font-mono text-xs uppercase tracking-[0.24em] text-ink-faint">
-                Room {roomId}
+          {integrated
+            ? (
+              <p className="font-mono text-sm font-semibold text-ink">
+                Chat
               </p>
-              <p
-                role="status"
-                aria-live="polite"
-                className="font-mono text-sm text-ink-muted"
-              >
-                {connectionLabel}
-              </p>
-            </div>
-            {!integrated
-              ? (
-                <IconButton label="Close room panel" onClick={close}>
-                  <X className="size-4.5" />
-                </IconButton>
-              )
-              : null}
-          </div>
-          <div className="mt-sm flex items-center gap-sm text-ink-muted">
-            <span className="inline-flex items-center gap-xs font-mono text-xs">
-              <Users aria-hidden="true" className="size-3.5" />
-              {participantSummary}
-            </span>
-          </div>
+            )
+            : (
+              <>
+                <div className="flex items-start justify-between gap-sm">
+                  <div className="flex flex-col gap-xxs">
+                    <p className="font-mono text-xs uppercase tracking-[0.24em] text-ink-faint">
+                      Room {roomId}
+                    </p>
+                    <p
+                      role="status"
+                      aria-live="polite"
+                      className="font-mono text-sm text-ink-muted"
+                    >
+                      {connectionLabel}
+                    </p>
+                  </div>
+                  <IconButton label="Close room panel" onClick={close}>
+                    <X className="size-4.5" />
+                  </IconButton>
+                </div>
+                <div className="mt-sm flex items-center gap-sm text-ink-muted">
+                  <span className="inline-flex items-center gap-xs font-mono text-xs">
+                    <Users aria-hidden="true" className="size-3.5" />
+                    {participantSummary}
+                  </span>
+                </div>
+              </>
+            )}
         </header>
         {!integrated
           ? (
@@ -212,7 +216,7 @@ export default function RoomSidebar({
           )
           : null}
         <div className="flex min-h-0 flex-1 flex-col">
-          {tab === "chat"
+          {integrated || tab === "chat"
             ? (
               <>
                 <MessageStream messages={messages} />

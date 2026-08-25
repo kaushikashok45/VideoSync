@@ -117,11 +117,8 @@ Deno.test("renders a video element and the control bar for a url source", async 
   assertEquals(bar(container) !== null, true);
   assertEquals(stage(container).className.includes("is-minimized"), true);
   assertEquals(
-    container.querySelector('[data-testid="room-space-rail"]') !== null,
-    true,
-  );
-  assertEquals(
-    container.querySelector('[data-testid="room-channel-rail"]') !== null,
+    container.querySelector('[data-testid="minimized-stage-header"]') !==
+      null,
     true,
   );
   assertEquals(
@@ -154,7 +151,7 @@ Deno.test("maximize control switches from the integrated room layout", () => {
   );
   assertEquals(stage(container).className.includes("is-minimized"), false);
   assertEquals(
-    container.querySelector('[data-testid="room-space-rail"]'),
+    container.querySelector('[data-testid="minimized-stage-header"]'),
     null,
   );
 });
@@ -164,8 +161,9 @@ Deno.test("player uses the centered Vercel control composition", async () => {
   const { container } = shell({ idleMs: 50, me: host() });
   assertEquals(stage(container).className.includes("player-stage"), true);
   assertEquals(
-    container.querySelector('[data-testid="player-header"]')?.textContent
-      ?.includes("Sync Party"),
+    container.querySelector('[data-testid="minimized-stage-header"]')
+      ?.textContent
+      ?.includes("Sync"),
     true,
   );
   assertEquals(
@@ -347,4 +345,30 @@ Deno.test("keyboard seek uses the projected live position while playing", () => 
     Date.now = originalNow;
     HTMLMediaElement.prototype.play = originalPlay;
   }
+});
+
+function clickByLabel(container: HTMLElement, label: string): void {
+  const target = container.querySelector(`[aria-label="${label}"]`);
+  if (!target) throw new Error(`missing control labeled "${label}"`);
+  click(target);
+}
+
+// Minimized stage: leaving via the header's leave button unmounts the shell's
+// own video the same way maximized cinema mode's exit does — same `onExit`,
+// new location.
+Deno.test("minimized stage header exposes a leave control that calls onExit", () => {
+  setupDom();
+  let exited = 0;
+  const { container } = render(
+    <PlayerShell
+      mode="host"
+      media={URL_MEDIA}
+      me={host()}
+      onExit={() => {
+        exited += 1;
+      }}
+    />,
+  );
+  clickByLabel(container, "Leave watch party");
+  assertEquals(exited, 1);
 });

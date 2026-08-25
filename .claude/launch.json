@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "sync-party-prod",
+      "runtimeExecutable": "deno",
+      "runtimeArgs": ["task", "start"],
+      "port": 5173,
+      "autoPort": true
+    }
+  ]
+}

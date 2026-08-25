@@ -19,14 +19,11 @@ export default function PlayerHeader({
       data-testid="player-header"
       className="pointer-events-none absolute inset-x-0 top-0 z-30 flex min-h-12 items-center gap-3 border-b border-white/[0.06] bg-black px-4"
     >
-      <span className="sr-only">Sync Party</span>
       <div className="flex min-w-0 items-center gap-2">
-        <span
-          className="text-[22px] font-light text-white/35"
-          aria-hidden="true"
-        >
-          #
+        <span className="font-built text-sm font-semibold tracking-tight text-white/70">
+          Sync <span className="font-normal text-white/35">Party</span>
         </span>
+        <span className="text-white/25" aria-hidden="true">·</span>
         <strong className="truncate text-sm">watch-party</strong>
         <span className="hidden truncate text-sm text-white/35 sm:inline">
           · {roomId ? `Room ${roomId}` : "Friday night watch"}
